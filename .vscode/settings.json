@@ -1,0 +1,16 @@
+{
+    "files.associations": {
+        "wiremesh.h": "c",
+        "stdio.h": "c",
+        "vec2.h": "c",
+        "cmath": "c",
+        "cstdarg": "c",
+        "cstdio": "c",
+        "cstdlib": "c",
+        "type_traits": "c",
+        "limits": "c",
+        "*.tcc": "c",
+        "cstdint": "c",
+        "typeinfo": "c"
+    }
+}
