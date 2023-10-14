@@ -11,33 +11,33 @@
 // NOTE: Canno't handle quads,
 // - if output looks weird convert model(s) to triangles
 // TODO: Shrink these values as needed
-#define MAX_VERTS 100
-#define MAX_NORMS 100
-#define MAX_UVS 100
+#define MAX_VERTS 100000
+#define MAX_NORMS 100000
+#define MAX_UVS 1000000
 
-#define MAX_INDICES 50
+#define MAX_INDICES 10000
 
 typedef struct {
-    vec3 vertices[MAX_VERTS];
-    vec3 normals[MAX_NORMS];
-    vec2 uvs[MAX_UVS]; // AKA tex coord
+    vec3 vertices [MAX_VERTS];
+    vec3 normals  [MAX_NORMS];
+    vec2 uvs      [MAX_UVS]; // AKA tex coords
 
-    int vertex_index[MAX_INDICES];
-    int normal_index[MAX_INDICES];
-    int uv_index[MAX_INDICES];
+    int vertex_index [MAX_INDICES];
+    int normal_index [MAX_INDICES];
+    int uv_index     [MAX_INDICES];
 
     int index_count;
     int vert_count;
     int norm_count;
     int uv_count;
-} MeshData;
+} Model;
 
-MeshData* init_mesh_data() {
-    MeshData* mesh = malloc(sizeof(MeshData));
+Model *init_mesh_data() {
+    Model *mesh = malloc(sizeof(Model));
 
     // ERROR: Malloc failed for mesh data
     if (mesh == NULL) {
-        printf("Malloc failed: MeshData\n");
+        printf("ERROR: init_mesh_data() malloc failed\n");
         return NULL;
     }
 
@@ -48,19 +48,19 @@ MeshData* init_mesh_data() {
     return mesh;
 }
 
-void free_mesh_data(MeshData* mesh) {
+void free_mesh_data(Model *mesh) {
     free(mesh);
 }
 
-MeshData* load_obj_mesh(const char *filename) {
-    FILE* file = fopen(filename, "r");
+Model *load_obj_mesh(const char *filename) {
+    FILE *file = fopen(filename, "r");
     if (file == NULL) {
-        printf("Error opening file: %s\n", filename);
+        printf("ERROR: failed to open file: %s\n", filename);
         return NULL;
     }
 
     // Init data onto heap
-    MeshData* mesh = init_mesh_data();
+    Model *mesh = init_mesh_data();
     if (mesh == NULL) {
         return NULL;
     }
@@ -90,7 +90,7 @@ MeshData* load_obj_mesh(const char *filename) {
         } else if (line[0] == 'f' && line[1] == ' ') {
             int f, t, n;
             int offset;
-            char* ptr = line;
+            char *ptr = line;
             ptr += 2; // Skip 'f' and ' ' character
 
             // Assumes triangles, cannot do quads

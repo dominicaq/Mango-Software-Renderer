@@ -28,12 +28,17 @@ int main() {
     setTGAImageBackground(&frame_buffer, black);
 
     // Load OBJ file(s)
-    MeshData *cube_mesh = load_obj_mesh("models/rotated_cube.obj");
-    if (cube_mesh == NULL) {
+    Model *cube_model = load_obj_mesh("models/cube.obj");
+    if (cube_model == NULL) {
         return -1;
     }
 
-    draw_model(&frame_buffer, cube_mesh, white);
+    int *zbuffer = malloc(sizeof(int) * SCREEN_WIDTH * SCREEN_HEIGHT);
+    if (zbuffer == NULL) {
+        printf("ERROR: Failed to malloc zbuffer\n");
+        return -1;
+    }
+    draw_model(&frame_buffer, zbuffer, cube_model, white);
 
     // Create image file
     flipImageVertically(&frame_buffer);
@@ -41,5 +46,6 @@ int main() {
 
     // Cleanup
     free(frame_buffer.data);
+    free(zbuffer);
     return 0;
 }
