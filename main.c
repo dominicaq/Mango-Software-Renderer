@@ -2,11 +2,13 @@
 #include <stdlib.h>
 
 #include "tga.h"
-#include "shapes.h"
+#include "drawing.h"
 #include "obj_parser.h"
 
-const int SCREEN_WIDTH = 512;
-const int SCREEN_HEIGHT = 288;
+// const int SCREEN_WIDTH = 512;
+// const int SCREEN_HEIGHT = 288;
+const int SCREEN_WIDTH = 500;
+const int SCREEN_HEIGHT = 500;
 // 16:9 aspect ratio
 
 // Camera position
@@ -14,7 +16,7 @@ vec3 camera_pos = {0.0f, 0.0f, 0.0f};
 
 int main() {
     // Colors
-    float brightness = 0.7f;
+    float brightness = 1.0f;
     TGAColor white = createTGAColor(
         255 * brightness, // R
         255 * brightness, // G
@@ -28,7 +30,7 @@ int main() {
     setTGAImageBackground(&frame_buffer, black);
 
     // Load OBJ file(s)
-    Model *cube_model = load_obj_mesh("models/cube.obj");
+    Model *cube_model = load_obj_mesh("models/rotated_cube.obj");
     if (cube_model == NULL) {
         return -1;
     }

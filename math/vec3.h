@@ -9,14 +9,6 @@ typedef struct {
     float z;
 } vec3;
 
-// Vec3 only operations
-// -----------------------------------------------------------------------------
-vec3 cross(vec3 a, vec3 b) {
-    a.x = a.y * b.z - a.z * b.y;
-    a.y = a.z * b.x - a.x * b.z;
-    a.z = a.x * b.y - a.y * b.x;
-    return a;
-}
 
 // Vec2 and Vec3 math operations
 // -----------------------------------------------------------------------------
@@ -28,13 +20,13 @@ vec3 scale(float s, vec3 a) {
 }
 
 float magnitude(vec3 a) {
-    return sqrt(a.x + a.y + a.z);
+    return sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
 }
 
 vec3 add(vec3 a, vec3 b) {
     a.x = a.x + b.x;
     a.y = a.y + b.y;
-    a.y = a.z + b.z;
+    a.z = a.z + b.z;
     return a;
 }
 
@@ -57,4 +49,20 @@ void vec3_swap(vec3* v1, vec3* v2) {
     *v1 = temp;
 }
 
+// Vec3 only operations
+// -----------------------------------------------------------------------------
+vec3 cross(vec3 a, vec3 b) {
+    a.x = a.y * b.z - a.z * b.y;
+    a.y = a.z * b.x - a.x * b.z;
+    a.z = a.x * b.y - a.y * b.x;
+    return a;
+}
+
+vec3 normalize(vec3 a) {
+    float len = magnitude(a);
+    a.x = a.x / len;
+    a.y = a.y / len;
+    a.z = a.z / len;
+    return a;
+}
 #endif // VEC3_H
