@@ -23,19 +23,19 @@ int main() {
     );
     TGAColor black = createTGAColor(0, 0, 0, 255);
 
-    // Init image
-    TGAImage frame_buffer = createTGAImage(SCREEN_WIDTH, SCREEN_HEIGHT);
-    setTGAImageBackground(&frame_buffer, black);
-
     // Load OBJ file(s)
-    Model *cube_model = load_obj_mesh("models/cube.obj");
+    Model *cube_model = load_obj_mesh("models/rotated_cube.obj");
     if (cube_model == NULL) {
         return -1;
     }
 
     // Loop here
+    // Init image
+    TGAImage frame_buffer = createTGAImage(SCREEN_WIDTH, SCREEN_HEIGHT);
+    setTGAImageBackground(&frame_buffer, black);
+
     // Current frames zbuffer
-    int *zbuffer = init_zbuffer(&frame_buffer);
+    float *zbuffer = init_zbuffer(&frame_buffer);
     if (zbuffer == NULL) {
         printf("ERROR: Failed to malloc zbuffer\n");
         return -1;

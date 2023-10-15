@@ -8,8 +8,8 @@
 #include "math/vec2.h"
 #include "obj_parser.h"
 
-// Rasterization source:
-// https://github.com/ssloy/tinyrenderer/blob/68a5ae382135d679891423fb5285fdd582ca389d/main.cpp
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
 
 typedef struct {
     vec3 vertices[3];
@@ -19,21 +19,21 @@ typedef struct {
 
 // Helper functions
 // -----------------------------------------------------------------------------
-vec3 barycentric(vec3 p, vec3 a, vec3 b, vec3 c) {
-    vec3 v0 = vec3_sub(b, a);
-    vec3 v1 = vec3_sub(c, a);
-    vec3 v2 = vec3_sub(p, a);
-    float den = v0.x * v1.y - v1.x * v0.y;
+// Efficient barycentric coordinates
+// Source: https://gamedev.stackexchange.com/questions/23743/whats-the-most-efficient-way-to-find-barycentric-coordinates
+vec3 barycentric_coords(vec3 p, vec3 a, vec3 b, vec3 c) {
+    vec3 v0 = vec3_sub(b,a), v1 = vec3_sub(c,a), v2 = vec3_sub(p,a);
 
-    // Check for a degenerate triangle
-    vec3 result = {-1.0f, -1.0f, -1.0f};
-    if (fabsf(den) < 1) {
-        return result;
-    }
-
-    result.x = (v2.x * v1.y - v1.x * v2.y) / den; // U
-    result.y = (v0.x * v2.y - v2.x * v0.y) / den; // V
-    result.z = 1.0f - result.x - result.y;        // W
+    float d00 = dot(v0, v0);
+    float d01 = dot(v0, v1);
+    float d11 = dot(v1, v1);
+    float d20 = dot(v2, v0);
+    float d21 = dot(v2, v1);
+    float invDenom = 1.0f / (d00 * d11 - d01 * d01);
+    vec3 result;
+    result.x = (d11 * d20 - d01 * d21) * invDenom; // V
+    result.y = (d00 * d21 - d01 * d20) * invDenom; // W
+    result.z = 1.0f - result.x - result.y;         // U
     return result;
 }
 
@@ -56,18 +56,18 @@ void swap_ints(int *a, int *b) {
     *b = temp;
 }
 
-int min(int a, int b) {
-    if (a > b) {
-        return b;
+float *init_zbuffer(TGAImage *framebuffer) {
+    int buffer_size = framebuffer->width * framebuffer->height;
+    float *zbuffer = malloc(sizeof(float) * buffer_size);
+    if (zbuffer == NULL) {
+        return NULL;
     }
-    return a;
-}
 
-int max(int a, int b) {
-    if (a < b) {
-        return b;
+    // Init zbuffer to be "far away"
+    for (int i = 0; i < buffer_size; ++i) {
+        zbuffer[i] = -1.0f;
     }
-    return a;
+    return zbuffer;
 }
 
 // Wireframe mode
@@ -116,32 +116,34 @@ void wire_frame(TGAImage *framebuffer, vec3 verts[3], TGAColor color) {
     line(framebuffer, verts[2], verts[0], color);
 }
 
-// Triangle rasterization
+// Drawing
 // -----------------------------------------------------------------------------
-// Triangle rasterizer
 // Source: http://www.sunshine2k.de/coding/java/TriangleRasterization/TriangleRasterization.html
-void rasterize(TGAImage *framebuffer, int *zbuffer, vec3 verts[3], TGAColor color) {
+void rasterize(TGAImage *framebuffer, float *zbuffer, vec3 verts[3], TGAColor color) {
     vec3 v0 = verts[0];
     vec3 v1 = verts[1];
     vec3 v2 = verts[2];
 
     // Bounding box
-    int x_min = min(min(v0.x, v1.x), v2.x);
-    int y_min = min(min(v0.y, v1.y), v2.y);
-    int x_max = max(max(v0.x, v1.x), v2.x);
-    int y_max = max(max(v0.y, v1.y), v2.y);
+    int x_min = MAX(0, MIN(MIN(v0.x, v1.x), v2.x));
+    int y_min = MAX(0, MIN(MIN(v0.y, v1.y), v2.y));
+    int x_max = MIN(framebuffer->width - 1, MAX(MAX(v0.x, v1.x), v2.x));
+    int y_max = MIN(framebuffer->height - 1, MAX(MAX(v0.y, v1.y), v2.y));
 
+    // Loop through the bounding box
     for (int y = y_min; y <= y_max; ++y) {
         for (int x = x_min; x <= x_max; ++x) {
             vec3 P = {x, y, 0.0f};
-            vec3 bc_screen = barycentric(P, v0, v1, v2);
+            vec3 bc_screen = barycentric_coords(P, v0, v1, v2);
+            // Not within triangle
             if (bc_screen.x < 0 || bc_screen.y < 0 || bc_screen.z < 0) {
                 continue;
             }
 
-            for (int i = 0; i < 3; i++) {
-                P.z += verts[i].z * bc_screen.z;
-            }
+            // Calculate depth of polygon
+            P.z += verts[0].z * bc_screen.x;
+            P.z += verts[1].z * bc_screen.y;
+            P.z += verts[2].z * bc_screen.z;
 
             // Apply z-buffer
             int z_index = P.x + P.y * framebuffer->width;
@@ -153,9 +155,7 @@ void rasterize(TGAImage *framebuffer, int *zbuffer, vec3 verts[3], TGAColor colo
     }
 }
 
-// Drawing
-// -----------------------------------------------------------------------------
-void draw_triangle(TGAImage *framebuffer, int *zbuffer, Triangle *triangle, TGAColor color) {
+void draw_triangle(TGAImage *framebuffer, float *zbuffer, Triangle *triangle, TGAColor color) {
     vec3 screen_coords[3];
 
     for (int i = 0; i < 3; ++i) {
@@ -185,7 +185,7 @@ void draw_triangle(TGAImage *framebuffer, int *zbuffer, Triangle *triangle, TGAC
     // wire_frame(framebuffer, screen_coords, orange);
 }
 
-void draw_model(TGAImage *framebuffer, int *zbuffer, Model *mesh, TGAColor color) {
+void draw_model(TGAImage *framebuffer, float *zbuffer, Model *mesh, TGAColor color) {
     for (int i = 0; i < mesh->index_count; i += 3) {
         if (i + 2 > mesh->index_count) {
             break;
@@ -215,20 +215,6 @@ void draw_model(TGAImage *framebuffer, int *zbuffer, Model *mesh, TGAColor color
         // Rasterizer
         draw_triangle(framebuffer, zbuffer, &current_triangle, color);
     }
-}
-
-int *init_zbuffer(TGAImage *framebuffer) {
-    int size = framebuffer->width * framebuffer->height;
-    int *zbuffer = malloc(sizeof(int) * size);
-    if (zbuffer == NULL) {
-        return NULL;
-    }
-
-    // Init zbuffer to have int_min
-    for (int i = 0; i < size; ++i) {
-        zbuffer[i] = -INT_MAX;
-    }
-    return zbuffer;
 }
 
 #endif // DRAWING_H

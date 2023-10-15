@@ -90,7 +90,7 @@ Model *load_obj_mesh(const char *filename) {
             int f, t, n;
             int offset;
             char *ptr = line;
-            ptr += 2; // Skip 'f' and ' ' character
+            ptr += 2; // Skip initial 'f' and ' ' characters
 
             // Assumes triangles, cannot do quads
             while (sscanf(ptr, "%d/%d/%d%n", &f, &t, &n, &offset) == 3) {
