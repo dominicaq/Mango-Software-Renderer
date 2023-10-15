@@ -166,7 +166,7 @@ void draw_triangle(TGAImage *framebuffer, float *zbuffer, Triangle *triangle, TG
     }
 
     // Vertex shading
-    vec3 light_pos = {0.0f, 3.0f, 5.0f};
+    vec3 light_pos = {0.0f, 0.0f, 1.0f};
     float intensity = dot(normalize(light_pos), triangle->face_normal);
     TGAColor face_lighting = createTGAColor(
         color.r * intensity,
