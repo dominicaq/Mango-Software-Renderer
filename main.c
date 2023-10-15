@@ -11,12 +11,10 @@ const int SCREEN_WIDTH = 500;
 const int SCREEN_HEIGHT = 500;
 // 16:9 aspect ratio
 
-// Camera position
-vec3 camera_pos = {0.0f, 0.0f, 0.0f};
-
 int main() {
+    // vec3 camera_pos = {0.0f, 0.0f, 0.0f};
     // Colors
-    float brightness = 1.0f;
+    float brightness = 0.9f;
     TGAColor white = createTGAColor(
         255 * brightness, // R
         255 * brightness, // G
@@ -30,24 +28,31 @@ int main() {
     setTGAImageBackground(&frame_buffer, black);
 
     // Load OBJ file(s)
-    Model *cube_model = load_obj_mesh("models/rotated_cube.obj");
+    Model *cube_model = load_obj_mesh("models/cube.obj");
     if (cube_model == NULL) {
         return -1;
     }
 
-    int *zbuffer = malloc(sizeof(int) * SCREEN_WIDTH * SCREEN_HEIGHT);
+    // Loop here
+    // Current frames zbuffer
+    int *zbuffer = init_zbuffer(&frame_buffer);
     if (zbuffer == NULL) {
         printf("ERROR: Failed to malloc zbuffer\n");
         return -1;
     }
+
     draw_model(&frame_buffer, zbuffer, cube_model, white);
 
-    // Create image file
+    // Set (0,0) origin to top left
     flipImageVertically(&frame_buffer);
     writeTGAImageToFile(&frame_buffer, "output.tga");
 
+    // End of frame cleanup
+    free(zbuffer);
+    // End loop
+
     // Cleanup
     free(frame_buffer.data);
-    free(zbuffer);
+
     return 0;
 }

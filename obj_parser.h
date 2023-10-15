@@ -11,11 +11,11 @@
 // NOTE: Canno't handle quads,
 // - if output looks weird convert model(s) to triangles
 // TODO: Shrink these values as needed
-#define MAX_VERTS 100000
-#define MAX_NORMS 100000
-#define MAX_UVS 1000000
+#define MAX_VERTS 1000000
+#define MAX_NORMS 1000000
+#define MAX_UVS   1000000
 
-#define MAX_INDICES 10000
+#define MAX_INDICES 1000000
 
 typedef struct {
     vec3 vertices [MAX_VERTS];
@@ -83,7 +83,6 @@ Model *load_obj_mesh(const char *filename) {
         } else if (line[0] == 'v' && line[1] == 't') {
             vec2 uv;
             sscanf(line, "vt %f %f\n", &uv.x, &uv.y);
-            mesh->uv_count++;
             mesh->uvs[mesh->uv_count] = uv;
             ++(mesh->uv_count);
 

@@ -23,14 +23,14 @@ float magnitude(vec3 a) {
     return sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
 }
 
-vec3 add(vec3 a, vec3 b) {
+vec3 vec3_add(vec3 a, vec3 b) {
     a.x = a.x + b.x;
     a.y = a.y + b.y;
     a.z = a.z + b.z;
     return a;
 }
 
-vec3 sub(vec3 a, vec3 b) {
+vec3 vec3_sub(vec3 a, vec3 b) {
     a.x = a.x - b.x;
     a.y = a.y - b.y;
     a.z = a.z - b.z;
@@ -43,7 +43,7 @@ float dot(vec3 a, vec3 b) {
 
 // Helper Function(s)
 // -----------------------------------------------------------------------------
-void vec3_swap(vec3* v1, vec3* v2) {
+void vec3_swap(vec3 *v1, vec3 *v2) {
     vec3 temp = *v2;
     *v2 = *v1;
     *v1 = temp;
