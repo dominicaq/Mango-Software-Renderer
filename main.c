@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "tga.h"
+#include "framedata.h"
 #include "drawing.h"
 #include "obj_parser.h"
 
@@ -13,7 +13,7 @@ const int SCREEN_HEIGHT = 500;
 // 16:9 aspect ratio
 int main() {
     // vec3 camera_pos = {0.0f, 0.0f, 0.0f};
-    // Colors
+    // Colors pallete
     float brightness = 0.9f;
     TGAColor white = createTGAColor(
         255 * brightness, // R
@@ -29,29 +29,27 @@ int main() {
         return -1;
     }
 
-    int frame_count = 1; // Number of frames to render
-    for (int frame = 0; frame < frame_count; ++frame) {
-        // Init image
-        TGAImage frame_buffer = createTGAImage(SCREEN_WIDTH, SCREEN_HEIGHT);
-        setTGAImageBackground(&frame_buffer, black);
-
-        // Init frame buffer
-        float *zbuffer = init_zbuffer(&frame_buffer);
-        if (zbuffer == NULL) {
-            printf("ERROR: Failed to malloc zbuffer\n");
-            return -1;
-        }
-
-        draw_model(&frame_buffer, zbuffer, cube_model, white);
-
-        // Set (0,0) origin to top left
-        flipImageVertically(&frame_buffer);
-        writeTGAImageToFile(&frame_buffer, "output.tga");
-
-        // End of frame cleanup
-        free(zbuffer);
-        free(frame_buffer.data);
+    // Allocate space for frame data (don't malloc every frame)
+    Frame *frame = init_frame(SCREEN_WIDTH, SCREEN_HEIGHT);
+    if (frame == NULL) {
+        return -1;
     }
 
+    int frame_count = 1; // Number of frames to render (temp code)
+    for (int i = 0; i < frame_count; ++i) {
+        // Reset frame
+        setTGAImageBackground(frame->framebuffer, black);
+        reset_zbuffer(frame);
+
+        // Draw the scene
+        draw_model(frame, cube_model, white);
+
+        // Set (0,0) origin to top left
+        flipImageVertically(frame->framebuffer);
+        writeTGAImageToFile(frame->framebuffer, "output/output.tga");
+    }
+
+    // Free mallocs
+    free_frame(frame);
     return 0;
 }

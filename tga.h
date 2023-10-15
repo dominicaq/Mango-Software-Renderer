@@ -8,7 +8,7 @@
 #include <string.h>
 
 typedef struct {
-    unsigned char b, g, r, a;
+    unsigned char r, b, g, a;
 } TGAColor;
 
 typedef struct {
@@ -25,11 +25,16 @@ TGAColor createTGAColor(int r, int g, int b, int a) {
     return color;
 }
 
-TGAImage createTGAImage(int width, int height) {
-    TGAImage image;
-    image.width = width;
-    image.height = height;
-    image.data = (unsigned char *)malloc(width * height * 4);
+TGAImage *createTGAImage(int width, int height) {
+    TGAImage *image = malloc(sizeof(TGAImage));
+
+    image->width = width;
+    image->height = height;
+    image->data = malloc(width * height * 4);
+    if (image->data == NULL) {
+        printf("ERROR: Failed to malloc TGAimage\n");
+        return NULL;
+    }
     return image;
 }
 
@@ -50,7 +55,7 @@ void setPixel(TGAImage *image, int x, int y, TGAColor color) {
 
 void flipImageVertically(TGAImage *image) {
     int bytes_per_line = image->width * 4;
-    unsigned char *temp = (unsigned char *)malloc(bytes_per_line);
+    unsigned char *temp = malloc(bytes_per_line);
     for (int i = 0; i < image->height / 2; i++) {
         int line1 = i * bytes_per_line;
         int line2 = (image->height - 1 - i) * bytes_per_line;

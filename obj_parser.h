@@ -5,7 +5,6 @@
 #include <stdlib.h>
 
 #include "math/vec3.h"  // Model data
-#include "math/vec3i.h" // Indicies
 #include "math/vec2.h"  // Texture UV
 
 // NOTE: Canno't handle quads,
