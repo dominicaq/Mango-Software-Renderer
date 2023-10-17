@@ -6,21 +6,29 @@
 typedef struct {
     int width, height;
     TGAImage *framebuffer;
-    float *zBuffer;
+    int *zBuffer;
 } Frame;
 
-float *init_zbuffer(int width, int height) {
+int *init_zbuffer(int width, int height) {
     int buffer_size = width * height;
-    float *zbuffer = malloc(sizeof(float) * buffer_size);
+    int *zbuffer = malloc(sizeof(int) * buffer_size);
     if (zbuffer == NULL) {
         return NULL;
     }
 
     // Init zbuffer to be "far away"
     for (int i = 0; i < buffer_size; ++i) {
-        zbuffer[i] = -1.0f;
+        zbuffer[i] = INT_MIN;
     }
     return zbuffer;
+}
+
+void reset_zbuffer(Frame *frame) {
+    // Reset zbuffer to be "far away"
+    int buffer_size = frame->width * frame->height;
+    for (int i = 0; i < buffer_size; ++i) {
+        frame->zBuffer[i] = -1.0f;
+    }
 }
 
 Frame *init_frame(int width, int height) {
@@ -45,14 +53,6 @@ Frame *init_frame(int width, int height) {
     frame->width = width;
     frame->height = height;
     return frame;
-}
-
-void reset_zbuffer(Frame *frame) {
-    // Init zbuffer to be "far away"
-    int buffer_size = frame->width * frame->height;
-    for (int i = 0; i < buffer_size; ++i) {
-        frame->zBuffer[i] = -1.0f;
-    }
 }
 
 void free_frame(Frame *frame) {

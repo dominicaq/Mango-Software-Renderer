@@ -1,78 +1,65 @@
 #ifndef MAX4x4_H
 #define MAX4x4_H
 
-// Define the 4x4 matrix structure
 typedef struct {
-    float data[4][4];
-} mat4x4;
+    float elem[4][4];
+} Mat4x4;
 
-// Function to add two mat4x4 matrices
-static inline mat4x4 mat4x4_add(const mat4x4 a, const mat4x4 b) {
-    mat4x4 result;
+const Mat4x4 ZERO_MATRIX = {
+    {{0.0f, 0.0f, 0.0f, 0.0f},
+     {0.0f, 0.0f, 0.0f, 0.0f},
+     {0.0f, 0.0f, 0.0f, 0.0f},
+     {0.0f, 0.0f, 0.0f, 0.0f}}
+};
+
+const Mat4x4 IDENTITY = {
+    {{1.0f, 0.0f, 0.0f, 0.0f},
+     {0.0f, 1.0f, 0.0f, 0.0f},
+     {0.0f, 0.0f, 1.0f, 0.0f},
+     {0.0f, 0.0f, 0.0f, 1.0f}}
+};
+
+// Right to left
+Mat4x4 mat_mul(const Mat4x4 a, const Mat4x4 b) {
+    Mat4x4 result = ZERO_MATRIX;
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
-            result.data[i][j] = a.data[i][j] + b.data[i][j];
-        }
-    }
-    return result;
-}
-
-// Function to subtract two mat4x4 matrices
-static inline mat4x4 mat4x4_sub(const mat4x4 a, const mat4x4 b) {
-    mat4x4 result;
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 4; j++) {
-            result.data[i][j] = a.data[i][j] - b.data[i][j];
-        }
-    }
-    return result;
-}
-
-// Function to multiply two mat4x4 matrices
-static inline mat4x4 mat4x4_mul(const mat4x4 a, const mat4x4 b) {
-    mat4x4 result;
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 4; j++) {
-            result.data[i][j] = 0;
             for (int k = 0; k < 4; k++) {
-                result.data[i][j] += a.data[i][k] * b.data[k][j];
+                result.elem[i][j] += a.elem[i][k] * b.elem[k][j];
             }
         }
     }
     return result;
 }
 
-// Function to transpose a mat4x4 matrix
-static inline mat4x4 mat4x4_transpose(const mat4x4 mat) {
-    mat4x4 result;
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 4; j++) {
-            result.data[i][j] = mat.data[j][i];
-        }
-    }
-    return result;
+Mat4x4 mat_scale(Mat4x4 a, vec3 scale) {
+    Mat4x4 m = a;
+    m.elem[0][0] *= scale.x;
+    m.elem[1][1] *= scale.y;
+    m.elem[2][2] *= scale.z;
+    return m;
 }
 
-// Function to scale a mat4x4 matrix by a scalar value
-static inline mat4x4 mat4x4_scale(const mat4x4 mat, float scale) {
-    mat4x4 result;
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 4; j++) {
-            result.data[i][j] = scale * mat.data[i][j];
-        }
-    }
-    return result;
+Mat4x4 translate(Mat4x4 a, vec3 v) {
+    Mat4x4 m = a;
+    m.elem[0][3] = v.x;
+    m.elem[1][3] = v.y;
+    m.elem[2][3] = v.z;
+    return m;
 }
 
-// Function to create an identity mat4x4 matrix
-static inline mat4x4 mat4x4_identity() {
-    mat4x4 result;
+void print_matrix(const Mat4x4 m) {
     for (int i = 0; i < 4; i++) {
+        printf("[");
         for (int j = 0; j < 4; j++) {
-            result.data[i][j] = (i == j) ? 1.0f : 0.0f;
+            printf("%f", m.elem[i][j]);
+            if (j != 3) {
+                printf(", ");
+            }
         }
+        printf("]\n");
     }
-    return result;
+    printf("\n");
 }
 
 #endif // MAX4x4_H

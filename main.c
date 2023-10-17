@@ -5,14 +5,16 @@
 #include "drawing.h"
 #include "obj_parser.h"
 
+#include "gameobject/transform.h"
+#include "gameobject/camera.h"
+
 // const int SCREEN_WIDTH = 512;
 // const int SCREEN_HEIGHT = 288;
-const int SCREEN_WIDTH = 500;
-const int SCREEN_HEIGHT = 500;
+const int SCREEN_WIDTH = 1920;
+const int SCREEN_HEIGHT = 1080;
 
 // 16:9 aspect ratio
 int main() {
-    // vec3 camera_pos = {0.0f, 0.0f, 0.0f};
     // Colors pallete
     float brightness = 0.9f;
     TGAColor white = createTGAColor(
@@ -24,18 +26,20 @@ int main() {
     TGAColor black = createTGAColor(0, 0, 0, 255);
 
     // Load OBJ file(s)
-    Model *cube_model = load_obj_mesh("models/cube.obj");
+    //Transform cube_transform;
+    Model *cube_model = load_obj_mesh("models/diablo.obj");
     if (cube_model == NULL) {
         return -1;
     }
 
-    // Allocate space for frame data (don't malloc every frame)
+    // Allocate space for frame data
     Frame *frame = init_frame(SCREEN_WIDTH, SCREEN_HEIGHT);
     if (frame == NULL) {
         return -1;
     }
 
-    int frame_count = 1; // Number of frames to render (temp code)
+    // Update loop
+    int frame_count = 1;
     for (int i = 0; i < frame_count; ++i) {
         // Reset frame
         setTGAImageBackground(frame->framebuffer, black);

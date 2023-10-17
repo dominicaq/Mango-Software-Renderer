@@ -3,10 +3,16 @@
 
 #include <float.h>
 
-#include "framedata.h"
 #include "math/vec3.h"
-#include "math/linear_algebra.h"
+#include "math/vec4.h"
+#include "math/geometry.h"
+
+#include "framedata.h"
 #include "obj_parser.h"
+
+// Temp
+#include "gameobject/transform.h"
+#include "gameobject/camera.h"
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
@@ -14,7 +20,7 @@
 typedef struct {
     vec3 vertices[3];
     vec2 uvs[3];
-    vec3 face_normal;
+    vec3 normals[3];
 } Triangle;
 
 // Wireframe mode
@@ -22,10 +28,10 @@ typedef struct {
 // Bresenham’s Line Drawing Algorithm
 // Source: https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
 void line(Frame *frame, vec3 v0, vec3 v1, TGAColor color) {
-    int x0 = v0.x;
-    int x1 = v1.x;
-    int y0 = v0.y;
-    int y1 = v1.y;
+    int x0 = (int)v0.x;
+    int x1 = (int)v1.x;
+    int y0 = (int)v0.y;
+    int y1 = (int)v1.y;
 
     int steep = 0;
     if (abs(x0 - x1) < abs(y0 - y1)) {
@@ -88,14 +94,15 @@ void rasterize(Frame *frame, vec3 verts[3], TGAColor color) {
             }
 
             // Calculate depth of polygon
-            P.z += verts[0].z * bc_screen.x;
-            P.z += verts[1].z * bc_screen.y;
-            P.z += verts[2].z * bc_screen.z;
+            P.z += (verts[0].z * 0.5 + 0.5) * bc_screen.x;
+            P.z += (verts[1].z * 0.5 + 0.5) * bc_screen.y;
+            P.z += (verts[2].z * 0.5 + 0.5) * bc_screen.z;
+
 
             // Apply z-buffer
             int buffer_index = P.x + P.y * frame->width;
             if (frame->zBuffer[buffer_index] < P.z) {
-                frame->zBuffer[buffer_index] = P.z;
+                frame->zBuffer[buffer_index] = ceil(P.z);
                 setPixel(frame->framebuffer, P.x, P.y, color);
             }
         }
@@ -105,20 +112,61 @@ void rasterize(Frame *frame, vec3 verts[3], TGAColor color) {
 void draw_triangle(Frame *frame, Triangle *triangle, TGAColor color) {
     vec3 screen_coords[3];
 
+    // TODO: TEMP CODE PLACEMENT
+    // Camera properties
+    vec3 camera_pos = {0.0f, 0.0f, -5.0f};
+    vec3 cam_euler_angles = {0.0f, 0.0f, 0.0f};
+    Camera camera;
+    camera.transform.position = camera_pos;
+    camera.transform.eulerAngles = cam_euler_angles;
+    camera.fov = 90.0f;
+    camera.aspect = (float)(frame->width) / (float)(frame->height);
+    camera.zNear = 0.01f;
+    camera.zFar = 500.0f;
+
+    Transform model_transform;
+    vec3 model_pos = {0.0f, 0.0f, -5.0f};
+    vec3 model_euler = {0.0f, 0.0f, 0.0f};
+    vec3 model_scale = {6.0f, 6.0f, 6.0f};
+    model_transform.position = model_pos;
+    model_transform.eulerAngles = model_euler;
+    model_transform.scale = model_scale;
+
+    Mat4x4 model_matrix = create_model_matrix(model_transform);
+    Mat4x4 view_matrix = view(&camera);
+    Mat4x4 projection_matrix = perspective(&camera);
+
+    // MVP Matrix: projection * view * model
+    Mat4x4 mvp = mat_mul(projection_matrix, mat_mul(view_matrix, model_matrix));
+
+    // Apply transformations to each vertex
     for (int i = 0; i < 3; ++i) {
-        // TODO: Perspective matrix here
-        screen_coords[i] = world_to_screen(
+        vec4 homogenous_coords = vec3_to_homogenous(triangle->vertices[i], 1.0f);
+        vec4 new_pos_clip_space = mat_mul_vec4(mvp, homogenous_coords);
+
+        // Convert from clip space to NDC by performing perspective divide
+        vec3 new_pos_ndc = homogenous_to_vec3(new_pos_clip_space);
+        screen_coords[i] = ndc_to_screen(
             frame->width,
             frame->height,
-            triangle->vertices[i]
+            new_pos_ndc
         );
-        // TEMP: Shift the coords into camera for now
-        screen_coords[i].y += 250;
+
+        // Flat
+        // screen_coords[i] = world_to_screen(
+        //     frame->width,
+        //     frame->height,
+        //     triangle->vertices[i]
+        // );
     }
 
-    // Vertex shading
+    // Flat shading
     vec3 light_pos = {0.0f, 0.0f, 1.0f};
-    float intensity = dot(normalize(light_pos), triangle->face_normal);
+    vec3 face_normal = triangle->normals[0];
+    face_normal = vec3_add(face_normal, triangle->normals[1]);
+    face_normal = vec3_add(face_normal, triangle->normals[2]);
+    face_normal = normalize(face_normal);
+    float intensity = dot(normalize(light_pos), face_normal);
     TGAColor face_lighting = createTGAColor(
         color.r * intensity,
         color.g * intensity,
@@ -132,8 +180,8 @@ void draw_triangle(Frame *frame, Triangle *triangle, TGAColor color) {
     }
 
     // Wireframe
-    TGAColor orange = createTGAColor(255, 165, 0, 255);
-    wire_frame(frame, screen_coords, orange);
+    // TGAColor orange = createTGAColor(255, 165, 0, 255);
+    // wire_frame(frame, screen_coords, orange);
 }
 
 void draw_model(Frame *frame, Model *mesh, TGAColor color) {
@@ -143,28 +191,16 @@ void draw_model(Frame *frame, Model *mesh, TGAColor color) {
         }
 
         // Input assembly
-        Triangle current_triangle;
+        Triangle triangle;
+        for (int j = 0; j < 3; ++j) {
+            int index = i + j;
+            triangle.vertices[j] = mesh->vertices[mesh->vertex_index[index]];
+            triangle.normals[j]  = mesh->normals[mesh->normal_index[index]];
+            triangle.uvs[j]      = mesh->uvs[mesh->uv_index[index]];
+        }
 
-        // Vertex
-        current_triangle.vertices[0] = mesh->vertices[mesh->vertex_index[i]];
-        current_triangle.vertices[1] = mesh->vertices[mesh->vertex_index[i+1]];
-        current_triangle.vertices[2] = mesh->vertices[mesh->vertex_index[i+2]];
-
-        // Normals
-        vec3 face_normal = {0.0f, 0.0f, 0.0f};
-        face_normal = vec3_add(face_normal, mesh->normals[mesh->normal_index[i]]);
-        face_normal = vec3_add(face_normal, mesh->normals[mesh->normal_index[i+1]]);
-        face_normal = vec3_add(face_normal, mesh->normals[mesh->normal_index[i+2]]);
-        face_normal = normalize(face_normal);
-        current_triangle.face_normal = face_normal;
-
-        // UV
-        current_triangle.uvs[0] = mesh->uvs[mesh->uv_index[i]];
-        current_triangle.uvs[1] = mesh->uvs[mesh->uv_index[i+1]];
-        current_triangle.uvs[2] = mesh->uvs[mesh->uv_index[i+2]];
-
-        // Rasterizer
-        draw_triangle(frame, &current_triangle, color);
+        // Rasterize
+        draw_triangle(frame, &triangle, color);
     }
 }
 
