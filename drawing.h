@@ -64,31 +64,41 @@ void line(Frame *frame, vec3 v0, vec3 v1, TGAColor color) {
     }
 }
 
-void wire_frame(Frame *frame, vec3 verts[3], TGAColor color) {
-    line(frame, verts[0], verts[1], color);
-    line(frame, verts[1], verts[2], color);
-    line(frame, verts[2], verts[0], color);
+void wire_frame(Frame *frame, vec4 clip_space[3], TGAColor color) {
+    // NOTE: NDC will be used for backface culling
+    vec3 v[3];
+    vec3 ndc[3];
+    for (int i = 0; i < 3; ++i) {
+        ndc[i] = homogenous_to_vec3(clip_space[i]);
+        // Convert from clipspace -> NDC -> screen space
+        v[i] = ndc_to_screen(
+            frame->width,
+            frame->height,
+            ndc[i]
+        );
+    }
+
+    line(frame, v[0], v[1], color);
+    line(frame, v[1], v[2], color);
+    line(frame, v[2], v[0], color);
 }
 
 // Drawing
 // -----------------------------------------------------------------------------
 // Source: http://www.sunshine2k.de/coding/java/TriangleRasterization/TriangleRasterization.html
-void rasterize(Frame *frame, vec4 clip_space[3], TGAColor color, bool wireframe) {
+void rasterize(Frame *frame, vec4 clip_space[3], TGAColor color) {
     // NOTE: Fragment related code exist here
+    // NOTE: NDC will be used for backface culling
     vec3 v[3];
-    vec3 screen_space[3];
+    vec3 ndc[3];
     for (int i = 0; i < 3; ++i) {
-        // Convert from NDC to screen position
+        ndc[i] = homogenous_to_vec3(clip_space[i]);
+        // Convert from clipspace -> NDC -> screen space
         v[i] = ndc_to_screen(
             frame->width,
             frame->height,
-            homogenous_to_vec3(clip_space[i]) // NDC
+            ndc[i]
         );
-    }
-
-    if (wireframe == true) {
-        TGAColor orange = createTGAColor(255, 165, 0, 255);
-        wire_frame(frame, v, orange);
     }
 
     // Bounding box around triangle
@@ -122,7 +132,7 @@ void rasterize(Frame *frame, vec4 clip_space[3], TGAColor color, bool wireframe)
     }
 }
 
-void draw(Frame *frame, Triangle *triangle, Mat4x4 mvp, TGAColor color) {
+void draw(Frame *frame, Triangle *triangle, Mat4x4 mvp, TGAColor color, bool wireframe) {
     // NOTE: Vertex related code exist here
     // Apply transformations to each vertex
     vec4 clip_space[3];
@@ -132,7 +142,7 @@ void draw(Frame *frame, Triangle *triangle, Mat4x4 mvp, TGAColor color) {
     }
 
     // Flat shading
-    vec3 light_pos = {0.0f, 0.0f, 1.0f};
+    vec3 light_pos = {-1.0f, 0.0f, 5.0f};
     vec3 face_normal = triangle->normals[0];
     face_normal = vec3_add(face_normal, triangle->normals[1]);
     face_normal = vec3_add(face_normal, triangle->normals[2]);
@@ -146,15 +156,20 @@ void draw(Frame *frame, Triangle *triangle, Mat4x4 mvp, TGAColor color) {
     );
 
     // Albedo shading
-    // rasterize(frame, clip_space, color, false);
+    // rasterize(frame, clip_space, color);
+
+    if (wireframe == true) {
+        TGAColor orange = createTGAColor(255, 165, 0, 255);
+        wire_frame(frame, clip_space, orange);
+    }
 
     // Vertex lighting
     if (intensity > 0) {
-        rasterize(frame, clip_space, face_lighting, false);
+        rasterize(frame, clip_space, face_lighting);
     }
 }
 
-void draw_model(Frame *frame, Model *mesh, Mat4x4 mvp) {
+void draw_model(Frame *frame, Model *mesh, Mat4x4 mvp, bool wireframe) {
     for (int i = 0; i < mesh->index_count; i += 3) {
         if (i + 2 > mesh->index_count) {
             break;
@@ -170,7 +185,7 @@ void draw_model(Frame *frame, Model *mesh, Mat4x4 mvp) {
         }
 
         // Draw a single triangle
-        draw(frame, &triangle, mvp, mesh->color);
+        draw(frame, &triangle, mvp, mesh->color, wireframe);
     }
 }
 

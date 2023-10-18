@@ -31,9 +31,10 @@ Mat4x4 view(const Camera *cam) {
     vec3 y_axis = {0.0f, 1.0f, 0.0f};
     vec3 z_axis = {0.0f, 0.0f, 1.0f};
 
-    Mat4x4 rot_matrix = rotate(cam->transform.eulerAngles.x * DEG2RAD, x_axis);
-    rot_matrix = rotate(cam->transform.eulerAngles.y * DEG2RAD, y_axis);
-    rot_matrix = rotate(cam->transform.eulerAngles.z * DEG2RAD, z_axis);
+    Mat4x4 rot_matrix = IDENTITY;
+    rot_matrix = mat_mul(rot_matrix, rotate(cam->transform.eulerAngles.x * DEG2RAD, x_axis));
+    rot_matrix = mat_mul(rot_matrix, rotate(cam->transform.eulerAngles.y * DEG2RAD, y_axis));
+    rot_matrix = mat_mul(rot_matrix, rotate(cam->transform.eulerAngles.z * DEG2RAD, z_axis));
 
     Mat4x4 posMatrix = translate(IDENTITY, cam->transform.position);
     return mat_mul(rot_matrix, posMatrix);

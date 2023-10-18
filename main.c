@@ -8,15 +8,16 @@
 #include "gameobject/transform.h"
 #include "gameobject/camera.h"
 
-//const int SCREEN_WIDTH = 512;
-//const int SCREEN_HEIGHT = 288;
-const int SCREEN_WIDTH = 1920;
-const int SCREEN_HEIGHT = 1080;
+const int SCREEN_WIDTH = 512;
+const int SCREEN_HEIGHT = 288;
+const bool USE_WIREFRAME = false;
+// const int SCREEN_WIDTH = 1920;
+// const int SCREEN_HEIGHT = 1080;
 
 // 16:9 aspect ratio
 int main() {
     // Colors pallete
-    float brightness = 0.9f;
+    float brightness = 1.0f;
     TGAColor white = createTGAColor(
         255 * brightness, // R
         255 * brightness, // G
@@ -33,31 +34,26 @@ int main() {
 
     // Model(s) and gameobjects
     // -------------------------------------------------------------------------
-    Model *cube_model = load_obj_mesh("models/cube.obj");
+    Model *cube_model = load_obj_mesh("models/head.obj");
     if (cube_model == NULL) {
         return -1;
     }
     cube_model->color = white;
 
     Transform cube_transform;
-    vec3 model_pos = {0.0f, -6.0f, -5.0f};
-    vec3 model_euler = {0.0f, 0.0f, 0.0f};
-    vec3 model_scale = {10.0f, 10.0f, 10.0f};
-    cube_transform.position = model_pos;
-    cube_transform.eulerAngles = model_euler;
-    cube_transform.scale = model_scale;
+    cube_transform.position = (vec3){0.0f, 0.0f, 0.0f};
+    cube_transform.eulerAngles = (vec3){0.0f, -10.0f, 0.0f};
+    cube_transform.scale = (vec3){3.0f, 3.0f, 3.0f};
 
     // Camera properties
     // -------------------------------------------------------------------------
-    vec3 camera_pos = {0.0f, 5.0f, -20.0f};
-    vec3 cam_euler_angles = {0.0f, 0.0f, 0.0f};
     Camera camera;
-    camera.transform.position = camera_pos;
-    camera.transform.eulerAngles = cam_euler_angles;
+    camera.transform.position = (vec3){0.0f, 0.0f, -5.0f};
+    camera.transform.eulerAngles = (vec3){0.0f, 0.0f, 0.0f};
     camera.fov = 90.0f;
     camera.aspect = (float)(frame->width) / (float)(frame->height);
     camera.zNear = 0.1f;
-    camera.zFar = 100.0f;
+    camera.zFar = 1000.0f;
 
     // Update loop
     int frame_count = 1;
@@ -73,7 +69,7 @@ int main() {
         Mat4x4 mvp = mat_mul(projection_matrix, mat_mul(view_matrix, model_matrix));
 
         // Draw the scene
-        draw_model(frame, cube_model, mvp);
+        draw_model(frame, cube_model, mvp, USE_WIREFRAME);
 
         // Set (0,0) origin to top left
         flipImageVertically(frame->framebuffer);

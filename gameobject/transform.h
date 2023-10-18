@@ -42,9 +42,9 @@ Mat4x4 get_model_matrix(Transform transform) {
     vec3 z_axis = {0.0f, 0.0f, 1.0f};
 
     Mat4x4 rot_matrix = IDENTITY;
-    rot_matrix = rotate(transform.eulerAngles.x * DEG2RAD, x_axis);
-    rot_matrix = rotate(transform.eulerAngles.y * DEG2RAD, y_axis);
-    rot_matrix = rotate(transform.eulerAngles.z * DEG2RAD, z_axis);
+    rot_matrix = mat_mul(rot_matrix, rotate(transform.eulerAngles.x * DEG2RAD, x_axis));
+    rot_matrix = mat_mul(rot_matrix, rotate(transform.eulerAngles.y * DEG2RAD, y_axis));
+    rot_matrix = mat_mul(rot_matrix, rotate(transform.eulerAngles.z * DEG2RAD, z_axis));
 
     Mat4x4 scale_matrix = mat_scale(IDENTITY, transform.scale);
     Mat4x4 translation = translate(IDENTITY, transform.position);
