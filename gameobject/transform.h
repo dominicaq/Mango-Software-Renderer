@@ -35,7 +35,7 @@ Mat4x4 rotate(float angle, vec3 axis) {
     return result;
 }
 
-Mat4x4 create_model_matrix(Transform transform) {
+Mat4x4 get_model_matrix(Transform transform) {
     // Rotation axis
     vec3 x_axis = {1.0f, 0.0f, 0.0f};
     vec3 y_axis = {0.0f, 1.0f, 0.0f};

@@ -29,6 +29,8 @@ typedef struct {
     int vert_count;
     int norm_count;
     int uv_count;
+
+    TGAColor color;
 } Model;
 
 Model *init_mesh_data() {

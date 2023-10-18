@@ -28,11 +28,11 @@ vec3 barycentric_coords(vec3 p, vec3 a, vec3 b, vec3 c) {
     return result;
 }
 
-// Normalized device coordinates
+// Normalized device coordinates to screen coordinates
 vec3 ndc_to_screen(int screenWidth, int screenHeight, vec3 ndc_coords) {
     vec3 screen_coords;
-    screen_coords.x = (ndc_coords.x + 1.0f) / 2.0f * screenWidth;  // Convert x from [-1, 1] to [0, screenWidth]
-    screen_coords.y = (1.0f - ndc_coords.y) / 2.0f * screenHeight; // Convert y from [-1, 1] to [screenHeight, 0]
+    screen_coords.x = (ndc_coords.x + 1.0f) / 2.0f * screenWidth;
+    screen_coords.y = (-ndc_coords.y + 1.0f) / 2.0f * screenHeight;
     screen_coords.z = ndc_coords.z; // z-coordinate can be used for depth testing
     return screen_coords;
 }

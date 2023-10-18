@@ -2,32 +2,33 @@
 #define FRAME_DATA_H
 
 #include "tga.h"
+#include <float.h>
 
 typedef struct {
     int width, height;
     TGAImage *framebuffer;
-    int *zBuffer;
+    float *zBuffer;
 } Frame;
 
-int *init_zbuffer(int width, int height) {
-    int buffer_size = width * height;
-    int *zbuffer = malloc(sizeof(int) * buffer_size);
+float *init_zbuffer(int width, int height) {
+    int pixel_count = width * height;
+    float *zbuffer = malloc(sizeof(float) * pixel_count);
     if (zbuffer == NULL) {
         return NULL;
     }
 
     // Init zbuffer to be "far away"
-    for (int i = 0; i < buffer_size; ++i) {
-        zbuffer[i] = INT_MIN;
+    for (int i = 0; i < pixel_count; ++i) {
+        zbuffer[i] = 0.0f;
     }
     return zbuffer;
 }
 
 void reset_zbuffer(Frame *frame) {
     // Reset zbuffer to be "far away"
-    int buffer_size = frame->width * frame->height;
-    for (int i = 0; i < buffer_size; ++i) {
-        frame->zBuffer[i] = -1.0f;
+    int pixel_count = frame->width * frame->height;
+    for (int i = 0; i < pixel_count; ++i) {
+        frame->zBuffer[i] = 0.0f;
     }
 }
 
