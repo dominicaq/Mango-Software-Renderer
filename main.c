@@ -8,10 +8,10 @@
 #include "gameobject/transform.h"
 #include "gameobject/camera.h"
 
-const int SCREEN_WIDTH = 512;
-const int SCREEN_HEIGHT = 288;
-// const int SCREEN_WIDTH = 1920;
-// const int SCREEN_HEIGHT = 1080;
+//const int SCREEN_WIDTH = 512;
+//const int SCREEN_HEIGHT = 288;
+const int SCREEN_WIDTH = 1920;
+const int SCREEN_HEIGHT = 1080;
 
 // 16:9 aspect ratio
 int main() {
@@ -33,7 +33,7 @@ int main() {
 
     // Model(s) and gameobjects
     // -------------------------------------------------------------------------
-    Model *cube_model = load_obj_mesh("models/diablo.obj");
+    Model *cube_model = load_obj_mesh("models/cube.obj");
     if (cube_model == NULL) {
         return -1;
     }
@@ -42,7 +42,7 @@ int main() {
     Transform cube_transform;
     vec3 model_pos = {0.0f, -6.0f, -5.0f};
     vec3 model_euler = {0.0f, 0.0f, 0.0f};
-    vec3 model_scale = {6.0f, 6.0f, 6.0f};
+    vec3 model_scale = {10.0f, 10.0f, 10.0f};
     cube_transform.position = model_pos;
     cube_transform.eulerAngles = model_euler;
     cube_transform.scale = model_scale;
@@ -54,9 +54,9 @@ int main() {
     Camera camera;
     camera.transform.position = camera_pos;
     camera.transform.eulerAngles = cam_euler_angles;
-    camera.fov = 45.0f;
+    camera.fov = 90.0f;
     camera.aspect = (float)(frame->width) / (float)(frame->height);
-    camera.zNear = 0.01f;
+    camera.zNear = 0.1f;
     camera.zFar = 100.0f;
 
     // Update loop

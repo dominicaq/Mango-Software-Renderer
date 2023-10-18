@@ -19,7 +19,7 @@ float *init_zbuffer(int width, int height) {
 
     // Init zbuffer to be "far away"
     for (int i = 0; i < pixel_count; ++i) {
-        zbuffer[i] = 0.0f;
+        zbuffer[i] = 1.0f;
     }
     return zbuffer;
 }
@@ -28,7 +28,7 @@ void reset_zbuffer(Frame *frame) {
     // Reset zbuffer to be "far away"
     int pixel_count = frame->width * frame->height;
     for (int i = 0; i < pixel_count; ++i) {
-        frame->zBuffer[i] = 0.0f;
+        frame->zBuffer[i] = 1.0f;
     }
 }
 

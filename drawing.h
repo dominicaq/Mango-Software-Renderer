@@ -76,6 +76,7 @@ void wire_frame(Frame *frame, vec3 verts[3], TGAColor color) {
 void rasterize(Frame *frame, vec4 clip_space[3], TGAColor color, bool wireframe) {
     // NOTE: Fragment related code exist here
     vec3 v[3];
+    vec3 screen_space[3];
     for (int i = 0; i < 3; ++i) {
         // Convert from NDC to screen position
         v[i] = ndc_to_screen(
@@ -92,7 +93,7 @@ void rasterize(Frame *frame, vec4 clip_space[3], TGAColor color, bool wireframe)
 
     // Bounding box around triangle
     int x_min = MAX(0, MIN(MIN(v[0].x, v[1].x), v[2].x));
-    int y_min = MAX(0, MIN(MIN(v[0].x, v[1].y), v[2].y));
+    int y_min = MAX(0, MIN(MIN(v[0].y, v[1].y), v[2].y));
     int x_max = MIN(frame->width - 1, MAX(MAX(v[0].x, v[1].x), v[2].x));
     int y_max = MIN(frame->height - 1, MAX(MAX(v[0].x, v[1].y), v[2].y));
 
@@ -113,7 +114,7 @@ void rasterize(Frame *frame, vec4 clip_space[3], TGAColor color, bool wireframe)
 
             // Determine if triangle is on top
             int buffer_index = x + y * frame->width;
-            if (P.z > frame->zBuffer[buffer_index]) {
+            if (P.z < frame->zBuffer[buffer_index]) {
                 frame->zBuffer[buffer_index] = P.z;
                 setPixel(frame->framebuffer, P.x, P.y, color);
             }
@@ -144,7 +145,10 @@ void draw(Frame *frame, Triangle *triangle, Mat4x4 mvp, TGAColor color) {
         color.a
     );
 
-    // Draw triangle
+    // Albedo shading
+    // rasterize(frame, clip_space, color, false);
+
+    // Vertex lighting
     if (intensity > 0) {
         rasterize(frame, clip_space, face_lighting, false);
     }
@@ -165,7 +169,7 @@ void draw_model(Frame *frame, Model *mesh, Mat4x4 mvp) {
             triangle.uvs[j]      = mesh->uvs[mesh->uv_index[index]];
         }
 
-        // Rasterize
+        // Draw a single triangle
         draw(frame, &triangle, mvp, mesh->color);
     }
 }

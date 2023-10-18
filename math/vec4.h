@@ -41,4 +41,13 @@ vec3 homogenous_to_vec3(const vec4 v) {
     return result;
 }
 
+void print_vec4(const vec4 v) {
+    printf("x: %f, y: %f, z: %f, w: %f \n",
+        v.elem[0],
+        v.elem[1],
+        v.elem[2],
+        v.elem[0]
+    );
+}
+
 #endif
