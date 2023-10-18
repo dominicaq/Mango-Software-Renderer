@@ -8,11 +8,14 @@
 #include "gameobject/transform.h"
 #include "gameobject/camera.h"
 
-const int SCREEN_WIDTH = 512;
-const int SCREEN_HEIGHT = 288;
+// EMU Resolution:
+// const int SCREEN_WIDTH = 512;
+// const int SCREEN_HEIGHT = 288;
+
+// Debug resolution (clear to see issues)
+const int SCREEN_WIDTH = 1920;
+const int SCREEN_HEIGHT = 1080;
 const bool USE_WIREFRAME = false;
-// const int SCREEN_WIDTH = 1920;
-// const int SCREEN_HEIGHT = 1080;
 
 // 16:9 aspect ratio
 int main() {
@@ -34,25 +37,25 @@ int main() {
 
     // Model(s) and gameobjects
     // -------------------------------------------------------------------------
-    Model *cube_model = load_obj_mesh("models/head.obj");
+    Model *cube_model = load_obj_mesh("models/atlas.obj");
     if (cube_model == NULL) {
         return -1;
     }
     cube_model->color = white;
 
     Transform cube_transform;
-    cube_transform.position = (vec3){0.0f, 0.0f, 0.0f};
-    cube_transform.eulerAngles = (vec3){0.0f, -10.0f, 0.0f};
-    cube_transform.scale = (vec3){3.0f, 3.0f, 3.0f};
+    cube_transform.position = (vec3){0.0f, 0.0f, -3.0f};
+    cube_transform.eulerAngles = (vec3){0.0f, -20.0f, 0.0f};
+    cube_transform.scale = (vec3){1.0f, 1.0f, 1.0f};
 
     // Camera properties
     // -------------------------------------------------------------------------
     Camera camera;
-    camera.transform.position = (vec3){0.0f, 0.0f, -5.0f};
+    camera.transform.position = (vec3){0.0f, -5.0f, -12.5f};
     camera.transform.eulerAngles = (vec3){0.0f, 0.0f, 0.0f};
     camera.fov = 90.0f;
-    camera.aspect = (float)(frame->width) / (float)(frame->height);
-    camera.zNear = 0.1f;
+    camera.aspect = (float)(frame->width) / frame->height;
+    camera.zNear = 0.001f;
     camera.zFar = 1000.0f;
 
     // Update loop
