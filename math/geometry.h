@@ -2,10 +2,10 @@
 #define GEOMETRY_H
 
 #include <math.h>
+#include <stdbool.h>
 
 #include "vec3.h"
 #include "mat4x4.h"
-#include "../tga.h"
 
 const int DEPTH = 255;
 // Coordinate functions
@@ -32,8 +32,8 @@ vec3 barycentric_coords(vec3 p, vec3 a, vec3 b, vec3 c) {
 // Normalized device coordinates to screen coordinates
 vec3 ndc_to_screen(int screenWidth, int screenHeight, vec3 ndc_coords) {
     vec3 screen_coords;
-    screen_coords.x = (ndc_coords.x + 1.0f) / 2.0f * screenWidth;
-    screen_coords.y = (-ndc_coords.y + 1.0f) / 2.0f * screenHeight;
+    screen_coords.x = (ndc_coords.x + 1.0f) * 0.5f * screenWidth;
+    screen_coords.y = (-ndc_coords.y + 1.0f) * 0.5f * screenHeight;
     screen_coords.z = ndc_coords.z; // z-coordinate can be used for depth testing
     return screen_coords;
 }
@@ -52,6 +52,15 @@ vec3 world_to_screen(int width, int height, vec3 v) {
         v.z
     };
     return screen_coord;
+}
+
+// Backface culling
+bool is_backface(vec3 ndc[3]) {
+    // Source: https://gamedev.stackexchange.com/questions/203694/how-to-make-backface-culling-work-correctly-in-both-orthographic-and-perspective
+    vec3 ab = vec3_sub(ndc[0], ndc[1]);
+    vec3 ac = vec3_sub(ndc[0], ndc[2]);
+    float sign = ab.x * ac.y - ac.x * ab.y;
+    return sign < 0.0f;
 }
 
 // Misc

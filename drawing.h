@@ -69,13 +69,17 @@ void wire_frame(Frame *frame, vec4 clip_space[3], TGAColor color) {
     vec3 v[3];
     vec3 ndc[3];
     for (int i = 0; i < 3; ++i) {
-        ndc[i] = homogenous_to_vec3(clip_space[i]);
+        ndc[i] = homogenize_vec4(clip_space[i]);
         // Convert from clipspace -> NDC -> screen space
         v[i] = ndc_to_screen(
             frame->width,
             frame->height,
             ndc[i]
         );
+    }
+
+    if (is_backface(ndc) == true) {
+        return;
     }
 
     line(frame, v[0], v[1], color);
@@ -92,13 +96,18 @@ void rasterize(Frame *frame, vec4 clip_space[3], TGAColor color) {
     vec3 v[3];
     vec3 ndc[3];
     for (int i = 0; i < 3; ++i) {
-        ndc[i] = homogenous_to_vec3(clip_space[i]);
+        ndc[i] = homogenize_vec4(clip_space[i]);
         // Convert from clipspace -> NDC -> screen space
         v[i] = ndc_to_screen(
             frame->width,
             frame->height,
             ndc[i]
         );
+    }
+
+    // Backface culling
+    if (is_backface(ndc) == true) {
+        return;
     }
 
     // Bounding box around triangle
@@ -132,22 +141,25 @@ void rasterize(Frame *frame, vec4 clip_space[3], TGAColor color) {
     }
 }
 
-void draw(Frame *frame, Triangle *triangle, Mat4x4 mvp, TGAColor color, bool wireframe) {
+void draw(Frame *frame, Triangle *triangle, Mat4x4 mvp, Mat4x4 model_mat, TGAColor color, bool wireframe) {
     // NOTE: Vertex related code exist here
     // Apply transformations to each vertex
     vec4 clip_space[3];
     for (int i = 0; i < 3; ++i) {
-        vec4 a_pos = vec3_to_homogenous(triangle->vertices[i], 1.0f);
+        vec4 a_pos = vec3_to_vec4(triangle->vertices[i], 1.0f);
         clip_space[i] = mat_mul_vec4(mvp, a_pos);
+
+        vec4 a_norm = mat_mul_vec4(mvp, vec3_to_vec4(triangle->normals[i], 0.0f));
+        triangle->normals[i] = homogenize_vec4(a_norm);
     }
 
-    // Flat shading
-    vec3 light_pos = {-1.0f, 0.0f, 5.0f};
-    vec3 face_normal = triangle->normals[0];
-    face_normal = vec3_add(face_normal, triangle->normals[1]);
-    face_normal = vec3_add(face_normal, triangle->normals[2]);
-    face_normal = normalize(face_normal);
-    float intensity = dot(normalize(light_pos), face_normal);
+    // Flat shading (vertex lighting)
+    vec3 light_pos = {-1.0f, 2.0f, 5.0f};
+    vec3 norm_avg = triangle->normals[0];
+    norm_avg = vec3_add(norm_avg, triangle->normals[1]);
+    norm_avg = vec3_add(norm_avg, triangle->normals[2]);
+    norm_avg = normalize(norm_avg);
+    float intensity = dot(normalize(light_pos), norm_avg);
     TGAColor face_lighting = createTGAColor(
         color.r * intensity,
         color.g * intensity,
@@ -155,21 +167,17 @@ void draw(Frame *frame, Triangle *triangle, Mat4x4 mvp, TGAColor color, bool wir
         color.a
     );
 
-    // Albedo shading
-    // rasterize(frame, clip_space, color);
+    if (intensity > 0.0f) {
+        rasterize(frame, clip_space, face_lighting);
+    }
 
     if (wireframe == true) {
         TGAColor orange = createTGAColor(255, 165, 0, 255);
         wire_frame(frame, clip_space, orange);
     }
-
-    // Vertex lighting
-    if (intensity > 0) {
-        rasterize(frame, clip_space, face_lighting);
-    }
 }
 
-void draw_model(Frame *frame, Model *mesh, Mat4x4 mvp, bool wireframe) {
+void draw_model(Frame *frame, Model *mesh, Mat4x4 mvp, Mat4x4 model_mat, bool wireframe) {
     for (int i = 0; i < mesh->index_count; i += 3) {
         if (i + 2 > mesh->index_count) {
             break;
@@ -185,7 +193,7 @@ void draw_model(Frame *frame, Model *mesh, Mat4x4 mvp, bool wireframe) {
         }
 
         // Draw a single triangle
-        draw(frame, &triangle, mvp, mesh->color, wireframe);
+        draw(frame, &triangle, mvp, model_mat, mesh->color, wireframe);
     }
 }
 

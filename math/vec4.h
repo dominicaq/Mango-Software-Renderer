@@ -19,7 +19,7 @@ vec4 mat_mul_vec4(const Mat4x4 m, const vec4 v) {
     return ret;
 }
 
-vec4 vec3_to_homogenous(const vec3 v, float w) {
+vec4 vec3_to_vec4(const vec3 v, float w) {
     vec4 result;
     result.elem[0] = v.x;
     result.elem[1] = v.y;
@@ -28,7 +28,7 @@ vec4 vec3_to_homogenous(const vec3 v, float w) {
     return result;
 }
 
-vec3 homogenous_to_vec3(const vec4 v) {
+vec3 homogenize_vec4(const vec4 v) {
     if (v.elem[3] == 0.0f) {
         return (vec3){0.0f, 0.0f, 0.0f};
     }
