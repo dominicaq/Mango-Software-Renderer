@@ -141,7 +141,7 @@ void rasterize(Frame *frame, vec4 clip_space[3], TGAColor color) {
     }
 }
 
-void draw(Frame *frame, Triangle *triangle, Mat4x4 mvp, Mat4x4 model_mat, TGAColor color, bool wireframe) {
+void draw(Frame *frame, Triangle *triangle, Mat4x4 mvp, TGAColor color, bool wireframe) {
     // NOTE: Vertex related code exist here
     // Apply transformations to each vertex
     vec4 clip_space[3];
@@ -154,7 +154,7 @@ void draw(Frame *frame, Triangle *triangle, Mat4x4 mvp, Mat4x4 model_mat, TGACol
     }
 
     // Flat shading (vertex lighting)
-    vec3 light_pos = {-1.0f, 2.0f, 5.0f};
+    vec3 light_pos = {1.0f, 0.0f, 0.0f};
     vec3 norm_avg = triangle->normals[0];
     norm_avg = vec3_add(norm_avg, triangle->normals[1]);
     norm_avg = vec3_add(norm_avg, triangle->normals[2]);
@@ -167,9 +167,12 @@ void draw(Frame *frame, Triangle *triangle, Mat4x4 mvp, Mat4x4 model_mat, TGACol
         color.a
     );
 
-    if (intensity > 0.0f) {
-        rasterize(frame, clip_space, face_lighting);
+    if (intensity < 0.0f) {
+        face_lighting.r = 10;
+        face_lighting.b = 10;
+        face_lighting.g = 10;
     }
+    rasterize(frame, clip_space, face_lighting);
 
     if (wireframe == true) {
         TGAColor orange = createTGAColor(255, 165, 0, 255);
@@ -177,7 +180,7 @@ void draw(Frame *frame, Triangle *triangle, Mat4x4 mvp, Mat4x4 model_mat, TGACol
     }
 }
 
-void draw_model(Frame *frame, Model *mesh, Mat4x4 mvp, Mat4x4 model_mat, bool wireframe) {
+void draw_model(Frame *frame, Model *mesh, Mat4x4 mvp, bool wireframe) {
     for (int i = 0; i < mesh->index_count; i += 3) {
         if (i + 2 > mesh->index_count) {
             break;
@@ -193,7 +196,7 @@ void draw_model(Frame *frame, Model *mesh, Mat4x4 mvp, Mat4x4 model_mat, bool wi
         }
 
         // Draw a single triangle
-        draw(frame, &triangle, mvp, model_mat, mesh->color, wireframe);
+        draw(frame, &triangle, mvp, mesh->color, wireframe);
     }
 }
 

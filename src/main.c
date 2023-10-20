@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include "framedata.h"
 #include "drawing.h"
@@ -9,12 +10,12 @@
 #include "gameobject/camera.h"
 
 // EMU Resolution:
-const int SCREEN_WIDTH = 512;
-const int SCREEN_HEIGHT = 288;
+// const int SCREEN_WIDTH = 512;
+// const int SCREEN_HEIGHT = 288;
 
 // Debug resolution (clear to see issues)
-// const int SCREEN_WIDTH = 1920;
-// const int SCREEN_HEIGHT = 1080;
+const int SCREEN_WIDTH = 1920;
+const int SCREEN_HEIGHT = 1080;
 const bool USE_WIREFRAME = false;
 
 // 16:9 aspect ratio
@@ -37,16 +38,17 @@ int main() {
 
     // Model(s) and gameobjects
     // -------------------------------------------------------------------------
-    Model *cube_model = load_obj_mesh("models/Atlas.obj");
+    char *model_name = "models/head.obj";
+    Model *cube_model = load_obj_mesh(model_name);
     if (cube_model == NULL) {
         return -1;
     }
     cube_model->color = white;
 
     Transform cube_transform;
-    cube_transform.position = (vec3){0.0f, 0.0f, -15.0f};
+    cube_transform.position = (vec3){0.0f, -2.0f, -15.0f};
     cube_transform.eulerAngles = (vec3){0.0f, 0.0f, 0.0f};
-    cube_transform.scale = (vec3){1.0f, 1.0f, 1.0f};
+    cube_transform.scale = (vec3){15.0f, 15.0f, 15.0f};
 
     // Camera properties
     // -------------------------------------------------------------------------
@@ -58,8 +60,11 @@ int main() {
     camera.zNear = 0.001f;
     camera.zFar = 1000.0f;
 
+    clock_t tic = clock();
+
     // Update loop
-    int frame_count = 2000;
+    int frame_count = 60;
+    printf("Timing: %d frames with model: %s\n", frame_count, model_name);
     for (int i = 0; i < frame_count; ++i) {
         // Reset frame
         cube_transform.eulerAngles.y += sinf(frame_count);
@@ -73,12 +78,15 @@ int main() {
         Mat4x4 mvp = mat_mul(projection_matrix, mat_mul(view_matrix, model_matrix));
 
         // Draw the scene
-        draw_model(frame, cube_model, mvp, model_matrix, USE_WIREFRAME);
+        draw_model(frame, cube_model, mvp, USE_WIREFRAME);
 
         // Set (0,0) origin to top left
         flipImageVertically(frame->framebuffer);
         writeTGAImageToFile(frame->framebuffer, "output/output.tga");
     }
+
+    clock_t toc = clock();
+    printf("Elapsed: %f seconds\n", (double)(toc - tic) / CLOCKS_PER_SEC);
 
     // Free mallocs
     free_frame(frame);
