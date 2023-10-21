@@ -1,5 +1,7 @@
 #ifndef MAX4x4_H
 #define MAX4x4_H
+
+#include <stdio.h>
 #include "vec3.h"
 
 typedef struct {
@@ -18,6 +20,8 @@ Mat4x4 mat_mul(const Mat4x4 a, const Mat4x4 b);
 Mat4x4 mat_scale(Mat4x4 a, vec3 scale);
 
 Mat4x4 translate(Mat4x4 a, vec3 v);
+
+Mat4x4 transpose(Mat4x4 a);
 
 // Helper functions
 // -----------------------------------------------------------------------------

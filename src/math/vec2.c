@@ -1,6 +1,4 @@
-#include <stdio.h>
 #include "vec2.h"
-
 
 vec2 vec2_add(vec2 a, vec2 b) {
     a.x = a.x + b.x;

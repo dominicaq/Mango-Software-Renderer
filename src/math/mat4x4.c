@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include "mat4x4.h"
 
 const Mat4x4 ZERO_MATRIX = {
@@ -42,6 +41,32 @@ Mat4x4 translate(Mat4x4 a, vec3 v) {
     m.elem[1][3] = v.y;
     m.elem[2][3] = v.z;
     return m;
+}
+
+Mat4x4 transpose(Mat4x4 a) {
+    Mat4x4 result;
+
+    result.elem[0][0] = a.elem[0][0];
+    result.elem[0][1] = a.elem[1][0];
+    result.elem[0][2] = a.elem[2][0];
+    result.elem[0][3] = a.elem[3][0];
+
+    result.elem[1][0] = a.elem[0][1];
+    result.elem[1][1] = a.elem[1][1];
+    result.elem[1][2] = a.elem[2][1];
+    result.elem[1][3] = a.elem[3][1];
+
+    result.elem[2][0] = a.elem[0][2];
+    result.elem[2][1] = a.elem[1][2];
+    result.elem[2][2] = a.elem[2][2];
+    result.elem[2][3] = a.elem[3][2];
+
+    result.elem[3][0] = a.elem[0][3];
+    result.elem[3][1] = a.elem[1][3];
+    result.elem[3][2] = a.elem[2][3];
+    result.elem[3][3] = a.elem[3][3];
+
+    return result;
 }
 
 void print_matrix(const Mat4x4 m) {

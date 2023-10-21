@@ -1,6 +1,8 @@
 #ifndef VEC4_H
 #define VEC4_H
 
+#include <stdio.h>
+
 #include "mat4x4.h"
 #include "vec3.h"
 

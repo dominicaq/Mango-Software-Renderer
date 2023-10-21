@@ -39,7 +39,7 @@ int main() {
 
     // Model(s) and gameobjects
     // -------------------------------------------------------------------------
-    char *model_name = "./models/head.obj";
+    char *model_name = "../models/head.obj";
     Model *cube_model = load_obj_mesh(model_name);
     if (cube_model == NULL) {
         return -1;
@@ -47,15 +47,15 @@ int main() {
     cube_model->color = white;
 
     Transform cube_transform;
-    cube_transform.position = (vec3){0.0f, -2.0f, -15.0f};
+    cube_transform.position = (vec3){0.0f, -2.0f, 0.0f};
     cube_transform.eulerAngles = (vec3){0.0f, 0.0f, 0.0f};
-    cube_transform.scale = (vec3){15.0f, 15.0f, 15.0f};
+    cube_transform.scale = (vec3){3.0f, 3.0f, 3.0f};
 
     // Camera properties
     // -------------------------------------------------------------------------
     Camera camera;
-    camera.transform.position = (vec3){0.0f, -10.0f, -5.0f};
-    camera.transform.eulerAngles = (vec3){35.0f, 0.0f, 0.0f};
+    camera.transform.position = (vec3){0.0f, 0.0f, -6.0f};
+    camera.transform.eulerAngles = (vec3){-30.0f, 40.0f, 0.0f};
     camera.fov = 90.0f;
     camera.aspect = (float)(frame->width) / frame->height;
     camera.zNear = 0.001f;
@@ -83,7 +83,7 @@ int main() {
 
         // Set (0,0) origin to top left
         flipImageVertically(frame->framebuffer);
-        writeTGAImageToFile(frame->framebuffer, "output/output.tga");
+        writeTGAImageToFile(frame->framebuffer, "../output/output.tga");
     }
 
     clock_t toc = clock();

@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include "vec3.h"
 
 // Vector operations

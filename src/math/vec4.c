@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include"vec4.h"
 
 vec4 mat_mul_vec4(const Mat4x4 m, const vec4 v) {

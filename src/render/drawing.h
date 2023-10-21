@@ -1,6 +1,7 @@
 #ifndef DRAWING_H
 #define DRAWING_H
 
+#include <stdlib.h>
 #include <float.h>
 #include <stdbool.h>
 
