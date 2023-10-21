@@ -1,4 +1,6 @@
+#include <stdlib.h>
 #include "drawing.h"
+
 
 // Rasterizer
 // -----------------------------------------------------------------------------
@@ -110,6 +112,12 @@ void draw_model(Frame *frame, Model *mesh, Mat4x4 mvp, bool wireframe) {
         // Draw a single triangle
         draw(frame, &triangle, mvp, mesh->color, wireframe);
     }
+}
+
+void swap_ints(int *a, int *b) {
+    *a = *a ^ *b;
+    *b = *a ^ *b;
+    *a = *a ^ *b;
 }
 
 // Wireframe mode

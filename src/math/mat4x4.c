@@ -1,4 +1,19 @@
+#include <stdio.h>
 #include "mat4x4.h"
+
+const Mat4x4 ZERO_MATRIX = {
+    {{0.0f, 0.0f, 0.0f, 0.0f},
+     {0.0f, 0.0f, 0.0f, 0.0f},
+     {0.0f, 0.0f, 0.0f, 0.0f},
+     {0.0f, 0.0f, 0.0f, 0.0f}}
+};
+
+const Mat4x4 IDENTITY = {
+    {{1.0f, 0.0f, 0.0f, 0.0f},
+     {0.0f, 1.0f, 0.0f, 0.0f},
+     {0.0f, 0.0f, 1.0f, 0.0f},
+     {0.0f, 0.0f, 0.0f, 1.0f}}
+};
 
 // Right to left
 Mat4x4 mat_mul(const Mat4x4 a, const Mat4x4 b) {

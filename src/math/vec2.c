@@ -1,4 +1,6 @@
-#include <vec2.h>
+#include <stdio.h>
+#include "vec2.h"
+
 
 vec2 vec2_add(vec2 a, vec2 b) {
     a.x = a.x + b.x;
@@ -39,5 +41,5 @@ void vec2_swap(vec2* v1, vec2* v2) {
 }
 
 void print_vec2(vec2 v) {
-    printf("x: %f, y: %f \n", v.x, v.y;
+    printf("x: %f, y: %f \n", v.x, v.y);
 }

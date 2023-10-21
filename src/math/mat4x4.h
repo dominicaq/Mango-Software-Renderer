@@ -1,23 +1,14 @@
 #ifndef MAX4x4_H
 #define MAX4x4_H
+#include "vec3.h"
 
 typedef struct {
     float elem[4][4];
 } Mat4x4;
 
-const Mat4x4 ZERO_MATRIX = {
-    {{0.0f, 0.0f, 0.0f, 0.0f},
-     {0.0f, 0.0f, 0.0f, 0.0f},
-     {0.0f, 0.0f, 0.0f, 0.0f},
-     {0.0f, 0.0f, 0.0f, 0.0f}}
-};
+extern const Mat4x4 ZERO_MATRIX;
 
-const Mat4x4 IDENTITY = {
-    {{1.0f, 0.0f, 0.0f, 0.0f},
-     {0.0f, 1.0f, 0.0f, 0.0f},
-     {0.0f, 0.0f, 1.0f, 0.0f},
-     {0.0f, 0.0f, 0.0f, 1.0f}}
-};
+extern const Mat4x4 IDENTITY;
 
 // Matrix operations
 // -----------------------------------------------------------------------------

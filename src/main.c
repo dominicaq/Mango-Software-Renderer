@@ -39,7 +39,7 @@ int main() {
 
     // Model(s) and gameobjects
     // -------------------------------------------------------------------------
-    char *model_name = "models/head.obj";
+    char *model_name = "./models/head.obj";
     Model *cube_model = load_obj_mesh(model_name);
     if (cube_model == NULL) {
         return -1;
