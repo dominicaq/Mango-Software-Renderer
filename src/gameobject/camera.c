@@ -16,12 +16,9 @@ Mat4x4 perspective(const Camera *cam) {
 
 Mat4x4 view(const Camera *cam) {
     Mat4x4 rot_matrix = rotate(cam->transform.eulerAngles);
+    Mat4x4 pos_matrix = translate(IDENTITY, cam->transform.position);
 
-    // Invert the matrices
-    Mat4x4 invRotMatrix = transpose(rot_matrix);
-    Mat4x4 invPosMatrix = translate(IDENTITY, cam->transform.position);
-
-    return mat_mul(invPosMatrix, invRotMatrix);
+    return mat_mul(pos_matrix, rot_matrix);
 }
 
 Mat4x4 lookAt(const vec3 eye, const vec3 center, const vec3 up) {
