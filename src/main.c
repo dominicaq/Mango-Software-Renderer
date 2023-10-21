@@ -2,13 +2,14 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "framedata.h"
-#include "drawing.h"
-#include "obj_parser.h"
+#include "render/framedata.h"
+#include "render/drawing.h"
+#include "render/tga.h"
 
 #include "gameobject/transform.h"
 #include "gameobject/camera.h"
 
+#include "obj_parser.h"
 // EMU Resolution:
 // const int SCREEN_WIDTH = 512;
 // const int SCREEN_HEIGHT = 288;

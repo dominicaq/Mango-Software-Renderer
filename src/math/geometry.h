@@ -7,68 +7,60 @@
 #include "vec3.h"
 #include "mat4x4.h"
 
-const int DEPTH = 255;
-// Coordinate functions
-// -----------------------------------------------------------------------------
-// Efficient barycentric coordinates
-// Source: https://gamedev.stackexchange.com/questions/23743/whats-the-most-efficient-way-to-find-barycentric-coordinates
-vec3 barycentric_coords(vec3 p, vec3 a, vec3 b, vec3 c) {
-    vec3 v0 = vec3_sub(b,a);
-    vec3 v1 = vec3_sub(c,a);
-    vec3 v2 = vec3_sub(p,a);
+/*
+ * barycentric_coords - Calculate efficient barycentric coordinates
+ * @p: The point to calculate barycentric coordinates for
+ * @a: The first vertex of the triangle
+ * @b: The second vertex of the triangle
+ * @c: The third vertex of the triangle
+ *
+ * Calculate the efficient barycentric coordinates of a point @p within the
+ * triangle formed by vertices @a, @b, and @c.
+ *
+ * Source: https://gamedev.stackexchange.com/questions/23743/whats-the-most-efficient-way-to-find-barycentric-coordinates
+ *
+ * Return: The barycentric coordinates of point @p.
+ */
+vec3 barycentric_coords(vec3 p, vec3 a, vec3 b, vec3 c);
 
-    float d00 = dot(v0, v0);
-    float d01 = dot(v0, v1);
-    float d11 = dot(v1, v1);
-    float d20 = dot(v2, v0);
-    float d21 = dot(v2, v1);
-    float invDenom = 1.0f / (d00 * d11 - d01 * d01);
-    float v = (d11 * d20 - d01 * d21) * invDenom;
-    float w = (d00 * d21 - d01 * d20) * invDenom;
-    float u = 1.0f - v - w;
-    return (vec3){u,v,w};
-}
+/*
+ * ndc_to_screen - Convert NDC to screen coordinates
+ * @screenWidth: The width of the screen
+ * @screenHeight: The height of the screen
+ * @ndc_coords: The coordinates in Normalized Device Coordinates (NDC)
+ *
+ * Convert NDC (Normalized Device Coordinates) to screen coordinates based on
+ * the provided screen width and height.
+ *
+ * Return: The coordinates in screen space.
+ */
+vec3 ndc_to_screen(int screenWidth, int screenHeight, vec3 ndc_coords);
 
-// Normalized device coordinates to screen coordinates
-vec3 ndc_to_screen(int screenWidth, int screenHeight, vec3 ndc_coords) {
-    vec3 screen_coords;
-    screen_coords.x = (ndc_coords.x + 1.0f) * 0.5f * screenWidth;
-    screen_coords.y = (-ndc_coords.y + 1.0f) * 0.5f * screenHeight;
-    screen_coords.z = ndc_coords.z; // z-coordinate can be used for depth testing
-    return screen_coords;
-}
+/*
+ * world_to_screen - Convert world coordinates to screen coordinates
+ * @width: The width of the screen
+ * @height: The height of the screen
+ * @v: The world coordinates to be converted
+ *
+ * Convert world coordinates to screen coordinates based on the provided
+ * screen width and height.
+ *
+ * Return: The coordinates in screen space.
+ */
+vec3 world_to_screen(int width, int height, vec3 v);
 
-vec3 world_to_screen(int width, int height, vec3 v) {
-    // Preserve aspect ratio
-    float scaleX = width * 0.5f;
-    float scaleY = height;
-    if (width == height) {
-        scaleY = height * 0.5f;
-    }
+/*
+ * is_backface - Check if a triangle is a backface in NDC
+ * @ndc: An array of three vertices in Normalized Device Coordinates (NDC)
+ *
+ * Determine whether a triangle with vertices represented by NDC (Normalized
+ * Device Coordinates) is a backface or not.
+ *
+ * Source: https://gamedev.stackexchange.com/questions/203694/how-to-make-backface-culling-work-correctly-in-both-orthographic-and-perspective
+ *
+ * Return: 'true' if the triangle is a backface; 'false' otherwise.
+ */
+bool is_backface(vec3 ndc[3]);
 
-    vec3 screen_coord = {
-        (v.x + 1.0) * scaleX,
-        (1.0 - (v.y + 1.0)) * scaleY,
-        v.z
-    };
-    return screen_coord;
-}
-
-// Backface culling
-bool is_backface(vec3 ndc[3]) {
-    // Source: https://gamedev.stackexchange.com/questions/203694/how-to-make-backface-culling-work-correctly-in-both-orthographic-and-perspective
-    vec3 ab = vec3_sub(ndc[0], ndc[1]);
-    vec3 ac = vec3_sub(ndc[0], ndc[2]);
-    float sign = ab.x * ac.y - ac.x * ab.y;
-    return sign < 0.0f;
-}
-
-// Misc
-// -----------------------------------------------------------------------------
-void swap_ints(int *a, int *b) {
-    int temp = *a;
-    *a = *b;
-    *b = temp;
-}
 
 #endif
