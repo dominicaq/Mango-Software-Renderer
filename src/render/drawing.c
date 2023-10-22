@@ -4,9 +4,7 @@ const vec4 WIREFRAME_COLOR = (vec4){{255, 165, 0, 255}};
 
 // Rasterizer
 // -----------------------------------------------------------------------------
-void rasterize(Frame *frame, vec4 clip_space[3], vec4 color) {
-    // NOTE: Fragment related code exist here
-    // NOTE: NDC will be used for backface culling
+void rasterize(Frame *frame, vec4 clip_space[3], UBO *ubo) {
     vec3 v[3];
     vec3 ndc[3];
     for (int i = 0; i < 3; ++i) {
@@ -49,42 +47,34 @@ void rasterize(Frame *frame, vec4 clip_space[3], vec4 color) {
             int buffer_index = x + y * frame->width;
             if (P.z < frame->zBuffer[buffer_index]) {
                 frame->zBuffer[buffer_index] = P.z;
-                setPixel(frame->framebuffer, P.x, P.y, color);
+                fragment_shader();
+                setPixel(frame->framebuffer, P.x, P.y, ubo->v_color);
             }
         }
     }
 }
 
-void draw_triangle(Frame *frame, Triangle *triangle, vec4 color, bool wireframe) {
-    // NOTE: Vertex related code exist here
-    if (wireframe == true) {
-        wire_frame(frame, triangle->clip_space);
+void draw_triangle(Frame *frame, Triangle *triangle, UBO *ubo) {
+    // Apply vertex shader
+    vec4 clip_space[3];
+    for (int i = 0; i < 3; ++i) {
+        // vec4 a_norm = vec3_to_vec4(triangle->normals[i], 0.0f);
+        // vec4 transformedNormal = mat_mul_vec4(ubo->mvp, a_norm);
+        // ubo->normal = normalize(homogenize_vec4(transformedNormal));
+        ubo->normal = triangle->normals[i];
+
+        vec4 a_position = vec3_to_vec4(triangle->vertices[i], 1.0f);
+        vertex_shader(ubo, a_position);
+        clip_space[i] = ubo->gl_position;
     }
 
-    // Flat shading (vertex lighting)
-    vec3 light_pos = {1.0f, 0.0f, 0.0f};
-    vec3 norm_avg = triangle->normals[0];
-    norm_avg = vec3_add(norm_avg, triangle->normals[1]);
-    norm_avg = vec3_add(norm_avg, triangle->normals[2]);
-    norm_avg = normalize(norm_avg);
-    float intensity = dot(normalize(light_pos), norm_avg);
-    vec4 face_color = (vec4){{
-        color.elem[0] * intensity,
-        color.elem[1] * intensity,
-        color.elem[2] * intensity,
-        color.elem[3]
-    }};
-
-    if (intensity < 0.0f) {
-        face_color.elem[0] = 10;
-        face_color.elem[1] = 10;
-        face_color.elem[2] = 10;
+    if (ubo->u_wireframe == true) {
+        wire_frame(frame, clip_space);
     }
-
-    rasterize(frame, triangle->clip_space, face_color);
+    rasterize(frame, clip_space, ubo);
 }
 
-void draw_mesh(Frame *frame, Mesh *mesh, Mat4x4 mvp, bool wireframe) {
+void draw_mesh(Frame *frame, Mesh *mesh, UBO *ubo) {
     for (int i = 0; i < mesh->index_count; i += 3) {
         if (i + 2 > mesh->index_count) {
             break;
@@ -99,17 +89,7 @@ void draw_mesh(Frame *frame, Mesh *mesh, Mat4x4 mvp, bool wireframe) {
             triangle.uvs[j]      = mesh->uvs[mesh->uv_index[index]];
         }
 
-        // Apply transformations to triangle
-        for (int j = 0; j < 3; ++j) {
-            vec4 vert_vec4 = vec3_to_vec4(triangle.vertices[j], 1.0f);
-            triangle.clip_space[j] = mat_mul_vec4(mvp, vert_vec4);
-
-            vec4 norm_vec4 = vec3_to_vec4(triangle.normals[j], 0.0f);
-            vec4 transformedNormal = mat_mul_vec4(mvp, norm_vec4);
-            triangle.normals[j] = homogenize_vec4(transformedNormal);
-        }
-
-        draw_triangle(frame, &triangle, mesh->color, wireframe);
+        draw_triangle(frame, &triangle, ubo);
     }
 }
 

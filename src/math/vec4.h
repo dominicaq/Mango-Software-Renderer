@@ -18,6 +18,8 @@ vec4 vec3_to_vec4(const vec3 v, float w);
 
 vec3 homogenize_vec4(const vec4 v);
 
+vec4 color_scale(const float scale, const vec4 v);
+
 // Helper functions
 // -----------------------------------------------------------------------------
 void print_vec4(const vec4 v);

@@ -33,6 +33,14 @@ vec3 homogenize_vec4(const vec4 v) {
     return result;
 }
 
+vec4 color_scale(const float scale, const vec4 v) {
+    vec4 result = v;
+    result.elem[0] *= scale;
+    result.elem[1] *= scale;
+    result.elem[2] *= scale;
+    return result;
+}
+
 void print_vec4(const vec4 v) {
     printf("x: %f, y: %f, z: %f, w: %f \n",
         v.elem[0],

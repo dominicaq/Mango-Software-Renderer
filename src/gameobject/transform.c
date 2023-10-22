@@ -41,7 +41,7 @@ Mat4x4 rotate(vec3 angles) {
 }
 
 Mat4x4 get_model_matrix(Transform transform) {
-    Mat4x4 rot_matrix = rotate(transform.eulerAngles);
+    Mat4x4 rot_matrix = rotate(transform.euler_angles);
     Mat4x4 scale_matrix = mat_scale(IDENTITY, transform.scale);
     Mat4x4 translation = translate(IDENTITY, transform.position);
 
