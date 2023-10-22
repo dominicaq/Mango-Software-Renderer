@@ -16,6 +16,7 @@ typedef struct {
     // Uniform variables
     Mat4x4 u_mvp;
     Mat4x4 u_model_view;
+    vec4 u_color;
     bool u_wireframe;
 
     // Lighting

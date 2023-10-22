@@ -20,9 +20,10 @@ vec3 homogenize_vec4(const vec4 v);
 
 vec4 color_scale(const float scale, const vec4 v);
 
+vec4 add_vec4(const vec4 a, const vec4 b);
+
 // Helper functions
 // -----------------------------------------------------------------------------
 void print_vec4(const vec4 v);
-
 
 #endif

@@ -27,7 +27,6 @@ float magnitude(vec3 a) {
     return sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
 }
 
-
 float dot(vec3 a, vec3 b) {
     return a.x * b.x + a.y * b.y + a.z * b.z;
 }
@@ -41,10 +40,18 @@ vec3 cross(vec3 a, vec3 b) {
 
 vec3 normalize(vec3 a) {
     float len = magnitude(a);
+    if (len == 0.0f) {
+        return (vec3){0.0f,0.0f,0.0f};
+    }
+
     a.x = a.x / len;
     a.y = a.y / len;
     a.z = a.z / len;
     return a;
+}
+
+vec3 reflect(vec3 position, vec3 normal) {
+    return vec3_sub(position, scale(2.0f * dot(position, normal), normal));
 }
 
 // Helper Function(s)
@@ -56,5 +63,5 @@ void vec3_swap(vec3 *v1, vec3 *v2) {
 }
 
 void print_vec3(vec3 v) {
-    printf("x: %f, y: %f, z: %f \n", v.x, v.y, v.z);
+    printf("x: %.10f, y: %.10f, z: %.10f \n", v.x, v.y, v.z);
 }

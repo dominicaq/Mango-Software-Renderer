@@ -25,8 +25,8 @@ const bool USE_WIREFRAME = false;
 
 int main() {
     // Colors pallete
-    vec4 black = (vec4){{0, 0, 0, 255}};
-    vec4 white = (vec4){{255,255,255,255}};
+    vec4 black = (vec4){{0.0f, 0.0f, 0.0f,255.0f}};
+    vec4 white = (vec4){{1.0f,1.0f,1.0f,255.0f}};
 
     // Allocate space for frame data
     Frame *frame = init_frame(SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -87,8 +87,8 @@ int main() {
         ubo.u_model_view = model_view;
         ubo.u_wireframe = USE_WIREFRAME;
         ubo.u_light_position = (vec3){1.0f, 1.0f, 1.0f};
-        ubo.u_light_color = (vec4){{255,255,0,255}};
-        ubo.v_color = cube_model->color;
+        ubo.u_light_color = (vec4){{1.0f,1.0f,0.0f,1.0f}};
+        ubo.u_color = cube_model->color;
 
         // Draw the scene
         draw_mesh(frame, cube_model, &ubo);

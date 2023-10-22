@@ -26,6 +26,8 @@ vec3 cross(vec3 a, vec3 b);
 
 vec3 normalize(vec3 a);
 
+vec3 reflect(vec3 position, vec3 normal);
+
 // Helper Functions
 // -----------------------------------------------------------------------------
 void vec3_swap(vec3 *v1, vec3 *v2);
