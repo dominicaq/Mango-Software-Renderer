@@ -23,7 +23,7 @@ vec4 vec3_to_vec4(const vec3 v, float w) {
 vec3 homogenize_vec4(const vec4 v) {
     float epsilon = 1e-6;
     float w = v.elem[3];
-    if (abs(w) < epsilon) {
+    if (fabs(w) < epsilon) {
         return (vec3){0.0f, 0.0f, 0.0f};
     }
 

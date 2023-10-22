@@ -1,6 +1,7 @@
 build/
-output/
+*.tga
 .vscode/
 .cache/
 compile_commands.json
+
 

@@ -86,7 +86,7 @@ int main() {
         ubo.u_mvp = mvp;
         ubo.u_model_view = model_view;
         ubo.u_wireframe = USE_WIREFRAME;
-        ubo.u_light_position = (vec3){1.0f, 1.0f, 1.0f};
+        ubo.u_light_position = (vec3){10.0f, 10.0f, 10.0f};
         ubo.u_light_color = (vec4){{1.0f,1.0f,0.0f,1.0f}};
         ubo.u_color = cube_model->color;
 
@@ -99,7 +99,7 @@ int main() {
 
         // Set (0,0) origin to top left
         flipImageVertically(frame->framebuffer);
-        writeTGAImageToFile(frame->framebuffer, "../output/output.tga");
+        writeTGAImageToFile(frame->framebuffer, "../output.tga");
     }
 
     clock_t frame_rate_end = clock();

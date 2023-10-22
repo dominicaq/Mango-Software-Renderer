@@ -44,7 +44,7 @@ void flipImageVertically(TGAImage *image) {
 }
 
 void writeTGAImageToFile(TGAImage *image, const char *filename) {
-    FILE *file = fopen(filename, "wb");
+    FILE *file = fopen(filename, "wb+");
     if (!file) {
         perror("ERROR: Failed to write to TGA file");
         exit(1);
