@@ -17,7 +17,7 @@ extern const float DEG2RAD;
 
 /*
  * rotate - Calculate a rotation matrix based on Tait-Bryan (Euler) angles
- * @eulerAngles: The Euler angles (in radians) for rotation order Z X Y
+ * @eulerAngles: The Euler angles (in degrees) for rotation order Z X Y
  *
  * Calculate a 4x4 rotation matrix based on Tait-Bryan (Euler) angles.
  *

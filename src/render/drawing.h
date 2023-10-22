@@ -8,10 +8,9 @@
 #include "../math/vec3.h"
 #include "../math/vec4.h"
 #include "../math/geometry.h"
+#include "../mesh/mesh.h"
 
 #include "framedata.h"
-
-#include "../obj_parser.h"
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
@@ -20,7 +19,11 @@ typedef struct {
     vec3 vertices[3];
     vec2 uvs[3];
     vec3 normals[3];
+
+    vec4 clip_space[3];
 } Triangle;
+
+const extern vec4 WIREFRAME_COLOR;
 
 // Wireframe mode
 // -----------------------------------------------------------------------------
@@ -35,7 +38,7 @@ typedef struct {
  *
  * Source: https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
  */
-void line(Frame *frame, vec3 v0, vec3 v1, TGAColor color);
+void line(Frame *frame, vec3 v0, vec3 v1);
 
 /*
  * wire_frame - Draw wireframe triangle
@@ -45,7 +48,7 @@ void line(Frame *frame, vec3 v0, vec3 v1, TGAColor color);
  *
  * This function draws a wireframe triangle on the frame.
  */
-void wire_frame(Frame *frame, vec4 clip_space[3], TGAColor color);
+void wire_frame(Frame *frame, vec4 clip_space[3]);
 
 // Drawing
 // -----------------------------------------------------------------------------
@@ -59,7 +62,7 @@ void wire_frame(Frame *frame, vec4 clip_space[3], TGAColor color);
  *
  * Source: http://www.sunshine2k.de/coding/java/TriangleRasterization/TriangleRasterization.html
  */
-void rasterize(Frame *frame, vec4 clip_space[3], TGAColor color);
+void rasterize(Frame *frame, vec4 clip_space[3], vec4 color);
 
 /*
  * draw - Draw a triangle
@@ -69,7 +72,7 @@ void rasterize(Frame *frame, vec4 clip_space[3], TGAColor color);
  * @color: The color of the triangle
  * @wireframe: Boolean indicating whether to draw in wireframe mode
  */
-void draw(Frame *frame, Triangle *triangle, Mat4x4 mvp, TGAColor color, bool wireframe);
+void draw_triangle(Frame *frame, Triangle *triangle, vec4 color, bool wireframe);
 
 /*
  * draw_model - Draw a 3D model
@@ -78,6 +81,6 @@ void draw(Frame *frame, Triangle *triangle, Mat4x4 mvp, TGAColor color, bool wir
  * @mvp: The Model-View-Projection matrix
  * @wireframe: Boolean indicating whether to draw in wireframe mode
  */
-void draw_model(Frame *frame, Model *mesh, Mat4x4 mvp, bool wireframe);
+void draw_mesh(Frame *frame, Mesh *mesh, Mat4x4 mvp, bool wireframe);
 
 #endif // DRAWING_H

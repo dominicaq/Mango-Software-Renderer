@@ -1,12 +1,13 @@
-#ifndef OBJ_PARSER_H
-#define OBJ_PARSER_H
+#ifndef MESH_H
+#define MESH_H
 
-#include "math/vec3.h"  // Model data
-#include "math/vec2.h"  // Texture UV
-#include "render/tga.h"
+#include <stdio.h>
+#include <stdlib.h>
 
-// NOTE: Canno't handle quads,
-// - if output looks weird convert model(s) to triangles
+#include "../math/vec2.h"  // Texture UV
+#include "../math/vec3.h"  // Model data
+#include "../math/vec4.h" // Albedo
+
 // TODO: Shrink these values as needed
 #define MAX_VERTS 1000000
 #define MAX_NORMS 1000000
@@ -28,10 +29,11 @@ typedef struct {
     int norm_count;
     int uv_count;
 
-    TGAColor color;
-} Model;
+    vec4 color;
+} Mesh;
 
-Model *init_mesh_data();
+Mesh *init_mesh_data();
 
-Model *load_obj_mesh(const char *filename);
+void free_mesh_data(Mesh *mesh);
+
 #endif

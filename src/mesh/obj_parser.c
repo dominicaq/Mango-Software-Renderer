@@ -1,29 +1,6 @@
-#include <stdio.h>
-#include <stdlib.h>
+#include "obj_parser.h"
 
-#include "obj_parser.h"  // Model data
-
-Model *init_mesh_data() {
-    Model *mesh = (Model *)malloc(sizeof(Model));
-
-    // ERROR: Malloc failed for mesh data
-    if (mesh == NULL) {
-        printf("ERROR: init_mesh_data() malloc failed\n");
-        return NULL;
-    }
-
-    mesh->vert_count  = 0;
-    mesh->norm_count  = 0;
-    mesh->uv_count    = 0;
-    mesh->index_count = 0;
-    return mesh;
-}
-
-void free_mesh_data(Model *mesh) {
-    free(mesh);
-}
-
-Model *load_obj_mesh(const char *filename) {
+Mesh *load_obj_mesh(const char *filename) {
     FILE *file = fopen(filename, "r");
     if (file == NULL) {
         printf("ERROR: failed to open file: %s\n", filename);
@@ -31,7 +8,7 @@ Model *load_obj_mesh(const char *filename) {
     }
 
     // Init data onto heap
-    Model *mesh = init_mesh_data();
+    Mesh *mesh = init_mesh_data();
     if (mesh == NULL) {
         return NULL;
     }

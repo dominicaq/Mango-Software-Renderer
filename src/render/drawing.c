@@ -1,8 +1,10 @@
 #include "drawing.h"
 
+const vec4 WIREFRAME_COLOR = (vec4){{255, 165, 0, 255}};
+
 // Rasterizer
 // -----------------------------------------------------------------------------
-void rasterize(Frame *frame, vec4 clip_space[3], TGAColor color) {
+void rasterize(Frame *frame, vec4 clip_space[3], vec4 color) {
     // NOTE: Fragment related code exist here
     // NOTE: NDC will be used for backface culling
     vec3 v[3];
@@ -53,16 +55,10 @@ void rasterize(Frame *frame, vec4 clip_space[3], TGAColor color) {
     }
 }
 
-void draw(Frame *frame, Triangle *triangle, Mat4x4 mvp, TGAColor color, bool wireframe) {
+void draw_triangle(Frame *frame, Triangle *triangle, vec4 color, bool wireframe) {
     // NOTE: Vertex related code exist here
-    // Apply transformations to each vertex
-    vec4 clip_space[3];
-    for (int i = 0; i < 3; ++i) {
-        vec4 a_pos = vec3_to_vec4(triangle->vertices[i], 1.0f);
-        clip_space[i] = mat_mul_vec4(mvp, a_pos);
-
-        vec4 a_norm = mat_mul_vec4(mvp, vec3_to_vec4(triangle->normals[i], 0.0f));
-        triangle->normals[i] = homogenize_vec4(a_norm);
+    if (wireframe == true) {
+        wire_frame(frame, triangle->clip_space);
     }
 
     // Flat shading (vertex lighting)
@@ -72,27 +68,23 @@ void draw(Frame *frame, Triangle *triangle, Mat4x4 mvp, TGAColor color, bool wir
     norm_avg = vec3_add(norm_avg, triangle->normals[2]);
     norm_avg = normalize(norm_avg);
     float intensity = dot(normalize(light_pos), norm_avg);
-    TGAColor face_lighting = createTGAColor(
-        color.r * intensity,
-        color.g * intensity,
-        color.b * intensity,
-        color.a
-    );
+    vec4 face_color = (vec4){{
+        color.elem[0] * intensity,
+        color.elem[1] * intensity,
+        color.elem[2] * intensity,
+        color.elem[3]
+    }};
 
     if (intensity < 0.0f) {
-        face_lighting.r = 10;
-        face_lighting.b = 10;
-        face_lighting.g = 10;
+        face_color.elem[0] = 10;
+        face_color.elem[1] = 10;
+        face_color.elem[2] = 10;
     }
-    rasterize(frame, clip_space, face_lighting);
 
-    if (wireframe == true) {
-        TGAColor orange = createTGAColor(255, 165, 0, 255);
-        wire_frame(frame, clip_space, orange);
-    }
+    rasterize(frame, triangle->clip_space, face_color);
 }
 
-void draw_model(Frame *frame, Model *mesh, Mat4x4 mvp, bool wireframe) {
+void draw_mesh(Frame *frame, Mesh *mesh, Mat4x4 mvp, bool wireframe) {
     for (int i = 0; i < mesh->index_count; i += 3) {
         if (i + 2 > mesh->index_count) {
             break;
@@ -107,20 +99,29 @@ void draw_model(Frame *frame, Model *mesh, Mat4x4 mvp, bool wireframe) {
             triangle.uvs[j]      = mesh->uvs[mesh->uv_index[index]];
         }
 
-        // Draw a single triangle
-        draw(frame, &triangle, mvp, mesh->color, wireframe);
+        // Apply transformations to triangle
+        for (int j = 0; j < 3; ++j) {
+            vec4 vert_vec4 = vec3_to_vec4(triangle.vertices[j], 1.0f);
+            triangle.clip_space[j] = mat_mul_vec4(mvp, vert_vec4);
+
+            vec4 norm_vec4 = vec3_to_vec4(triangle.normals[j], 0.0f);
+            vec4 transformedNormal = mat_mul_vec4(mvp, norm_vec4);
+            triangle.normals[j] = homogenize_vec4(transformedNormal);
+        }
+
+        draw_triangle(frame, &triangle, mesh->color, wireframe);
     }
 }
 
+// Wireframe mode
+// -----------------------------------------------------------------------------
 void swap_ints(int *a, int *b) {
     *a = *a ^ *b;
     *b = *a ^ *b;
     *a = *a ^ *b;
 }
 
-// Wireframe mode
-// -----------------------------------------------------------------------------
-void line(Frame *frame, vec3 v0, vec3 v1, TGAColor color) {
+void line(Frame *frame, vec3 v0, vec3 v1) {
     int x0 = (int)v0.x;
     int x1 = (int)v1.x;
     int y0 = (int)v0.y;
@@ -144,9 +145,9 @@ void line(Frame *frame, vec3 v0, vec3 v1, TGAColor color) {
     int y = y0;
     for (int x = x0; x <= x1; x++) {
         if (steep) {
-            setPixel(frame->framebuffer, y, x, color);
+            setPixel(frame->framebuffer, y, x, WIREFRAME_COLOR);
         } else {
-            setPixel(frame->framebuffer, x, y, color);
+            setPixel(frame->framebuffer, x, y, WIREFRAME_COLOR);
         }
         error2 += derror2;
         if (error2 > dx) {
@@ -156,8 +157,7 @@ void line(Frame *frame, vec3 v0, vec3 v1, TGAColor color) {
     }
 }
 
-void wire_frame(Frame *frame, vec4 clip_space[3], TGAColor color) {
-    // NOTE: NDC will be used for backface culling
+void wire_frame(Frame *frame, vec4 clip_space[3]) {
     vec3 v[3];
     vec3 ndc[3];
     for (int i = 0; i < 3; ++i) {
@@ -174,7 +174,7 @@ void wire_frame(Frame *frame, vec4 clip_space[3], TGAColor color) {
         return;
     }
 
-    line(frame, v[0], v[1], color);
-    line(frame, v[1], v[2], color);
-    line(frame, v[2], v[0], color);
+    line(frame, v[0], v[1]);
+    line(frame, v[1], v[2]);
+    line(frame, v[2], v[0]);
 }
