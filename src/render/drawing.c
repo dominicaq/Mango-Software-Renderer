@@ -55,18 +55,33 @@ void rasterize(Frame *frame, vec4 clip_space[3], UBO *ubo) {
 }
 
 void draw_triangle(Frame *frame, Triangle *triangle, UBO *ubo) {
+    // Average normal
+   vec3 face_normal = (vec3){0.0f, 0.0f, 0.0f};
+    for (int i = 0; i < 3; ++i) {
+        face_normal = vec3_add(face_normal, triangle->normals[i]);
+    }
+    ubo->normal = normalize(face_normal);
+
     // Apply vertex shader
     vec4 clip_space[3];
+    vec4 vertex_colors[3];
     for (int i = 0; i < 3; ++i) {
-        // vec4 a_norm = vec3_to_vec4(triangle->normals[i], 0.0f);
-        // vec4 transformedNormal = mat_mul_vec4(ubo->mvp, a_norm);
-        // ubo->normal = normalize(homogenize_vec4(transformedNormal));
-        ubo->normal = triangle->normals[i];
-
         vec4 a_position = vec3_to_vec4(triangle->vertices[i], 1.0f);
         vertex_shader(ubo, a_position);
         clip_space[i] = ubo->gl_position;
+        vertex_colors[i] = ubo->v_color;
     }
+
+    // Average colors
+   vec4 new_color = (vec4){{0.0f, 0.0f, 0.0f, 0.0f}};
+    for (int i = 0; i < 3; ++i) {
+        new_color = vec4_add(new_color, vertex_colors[i]);
+    }
+    new_color.elem[0] = new_color.elem[0] / 3;
+    new_color.elem[1] = new_color.elem[1] / 3;
+    new_color.elem[2] = new_color.elem[2] / 3;
+    new_color.elem[3] = new_color.elem[3] / 3;
+    ubo->v_color = new_color;
 
     if (ubo->u_wireframe == true) {
         wire_frame(frame, clip_space);

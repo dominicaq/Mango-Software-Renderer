@@ -44,7 +44,7 @@ vec4 color_scale(const float scale, const vec4 v) {
     return result;
 }
 
-vec4 add_vec4(const vec4 a, const vec4 b) {
+vec4 vec4_add(const vec4 a, const vec4 b) {
     vec4 result;
     result.elem[0] = a.elem[0] + b.elem[0];
     result.elem[1] = a.elem[1] + b.elem[1];
