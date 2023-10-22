@@ -1,65 +1,30 @@
 #ifndef MAX4x4_H
 #define MAX4x4_H
 
+#include <stdio.h>
+#include "vec3.h"
+
 typedef struct {
     float elem[4][4];
 } Mat4x4;
 
-const Mat4x4 ZERO_MATRIX = {
-    {{0.0f, 0.0f, 0.0f, 0.0f},
-     {0.0f, 0.0f, 0.0f, 0.0f},
-     {0.0f, 0.0f, 0.0f, 0.0f},
-     {0.0f, 0.0f, 0.0f, 0.0f}}
-};
+extern const Mat4x4 ZERO_MATRIX;
 
-const Mat4x4 IDENTITY = {
-    {{1.0f, 0.0f, 0.0f, 0.0f},
-     {0.0f, 1.0f, 0.0f, 0.0f},
-     {0.0f, 0.0f, 1.0f, 0.0f},
-     {0.0f, 0.0f, 0.0f, 1.0f}}
-};
+extern const Mat4x4 IDENTITY;
 
-// Right to left
-Mat4x4 mat_mul(const Mat4x4 a, const Mat4x4 b) {
-    Mat4x4 result = ZERO_MATRIX;
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 4; j++) {
-            for (int k = 0; k < 4; k++) {
-                result.elem[i][j] += a.elem[i][k] * b.elem[k][j];
-            }
-        }
-    }
-    return result;
-}
+// Matrix operations
+// -----------------------------------------------------------------------------
+// Right to left multiplication
+Mat4x4 mat_mul(const Mat4x4 a, const Mat4x4 b);
 
-Mat4x4 mat_scale(Mat4x4 a, vec3 scale) {
-    Mat4x4 m = a;
-    m.elem[0][0] *= scale.x;
-    m.elem[1][1] *= scale.y;
-    m.elem[2][2] *= scale.z;
-    return m;
-}
+Mat4x4 mat_scale(Mat4x4 a, vec3 scale);
 
-Mat4x4 translate(Mat4x4 a, vec3 v) {
-    Mat4x4 m = a;
-    m.elem[0][3] = v.x;
-    m.elem[1][3] = v.y;
-    m.elem[2][3] = v.z;
-    return m;
-}
+Mat4x4 translate(Mat4x4 a, vec3 v);
 
-void print_matrix(const Mat4x4 m) {
-    for (int i = 0; i < 4; i++) {
-        printf("[");
-        for (int j = 0; j < 4; j++) {
-            printf("%f", m.elem[i][j]);
-            if (j != 3) {
-                printf(", ");
-            }
-        }
-        printf("]\n");
-    }
-    printf("\n");
-}
+Mat4x4 transpose(Mat4x4 a);
+
+// Helper functions
+// -----------------------------------------------------------------------------
+void print_matrix(const Mat4x4 m);
 
 #endif // MAX4x4_H

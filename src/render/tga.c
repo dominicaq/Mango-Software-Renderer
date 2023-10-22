@@ -1,29 +1,7 @@
-#ifndef TGA_H
-#define TGA_H
-
-// NOTE: This file is temporary, allows for writing to pixels at X,Y
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-typedef struct {
-    unsigned char r, b, g, a;
-} TGAColor;
-
-typedef struct {
-    int width, height;
-    unsigned char *data;
-} TGAImage;
-
-TGAColor createTGAColor(int r, int g, int b, int a) {
-    TGAColor color;
-    color.r = r;
-    color.g = g;
-    color.b = b;
-    color.a = a;
-    return color;
-}
+#include "tga.h"
 
 TGAImage *createTGAImage(int width, int height) {
     TGAImage *image = malloc(sizeof(TGAImage));
@@ -38,20 +16,19 @@ TGAImage *createTGAImage(int width, int height) {
     return image;
 }
 
-void setPixel(TGAImage *image, int x, int y, TGAColor color) {
+void setPixel(TGAImage *image, int x, int y, vec4 color) {
     if (image == NULL || x < 0 || x >= image->width || y < 0 || y >= image->height) {
         return;
     }
 
     int index = (x + y * image->width) * 4;
     if (index + 3 < image->width * image->height * 4) {
-        image->data[index + 0] = color.b;
-        image->data[index + 1] = color.g;
-        image->data[index + 2] = color.r;
-        image->data[index + 3] = color.a;
+        image->data[index + 0] = color.elem[1];
+        image->data[index + 1] = color.elem[2];
+        image->data[index + 2] = color.elem[0];
+        image->data[index + 3] = color.elem[3];
     }
 }
-
 
 void flipImageVertically(TGAImage *image) {
     int bytes_per_line = image->width * 4;
@@ -69,7 +46,7 @@ void flipImageVertically(TGAImage *image) {
 void writeTGAImageToFile(TGAImage *image, const char *filename) {
     FILE *file = fopen(filename, "wb");
     if (!file) {
-        perror("Unable to open file");
+        perror("ERROR: Failed to write to TGA file");
         exit(1);
     }
 
@@ -88,12 +65,10 @@ void writeTGAImageToFile(TGAImage *image, const char *filename) {
     fclose(file);
 }
 
-void setTGAImageBackground(TGAImage *image, TGAColor color) {
+void setTGAImageBackground(TGAImage *image, vec4 color) {
     for (int i = 0; i < image->width; ++i) {
         for (int j = 0; j < image->height; ++j) {
             setPixel(image, i, j, color);
         }
     }
 }
-
-#endif // TGA_H

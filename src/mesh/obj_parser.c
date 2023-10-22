@@ -1,59 +1,6 @@
-#ifndef OBJ_PARSER_H
-#define OBJ_PARSER_H
+#include "obj_parser.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-
-#include "math/vec3.h"  // Model data
-#include "math/vec2.h"  // Texture UV
-
-// NOTE: Canno't handle quads,
-// - if output looks weird convert model(s) to triangles
-// TODO: Shrink these values as needed
-#define MAX_VERTS 1000000
-#define MAX_NORMS 1000000
-#define MAX_UVS   1000000
-
-#define MAX_INDICES 1000000
-
-typedef struct {
-    vec3 vertices [MAX_VERTS];
-    vec3 normals  [MAX_NORMS];
-    vec2 uvs      [MAX_UVS]; // AKA tex coords
-
-    int vertex_index [MAX_INDICES];
-    int normal_index [MAX_INDICES];
-    int uv_index     [MAX_INDICES];
-
-    int index_count;
-    int vert_count;
-    int norm_count;
-    int uv_count;
-
-    TGAColor color;
-} Model;
-
-Model *init_mesh_data() {
-    Model *mesh = malloc(sizeof(Model));
-
-    // ERROR: Malloc failed for mesh data
-    if (mesh == NULL) {
-        printf("ERROR: init_mesh_data() malloc failed\n");
-        return NULL;
-    }
-
-    mesh->vert_count  = 0;
-    mesh->norm_count  = 0;
-    mesh->uv_count    = 0;
-    mesh->index_count = 0;
-    return mesh;
-}
-
-void free_mesh_data(Model *mesh) {
-    free(mesh);
-}
-
-Model *load_obj_mesh(const char *filename) {
+Mesh *load_obj_mesh(const char *filename) {
     FILE *file = fopen(filename, "r");
     if (file == NULL) {
         printf("ERROR: failed to open file: %s\n", filename);
@@ -61,7 +8,7 @@ Model *load_obj_mesh(const char *filename) {
     }
 
     // Init data onto heap
-    Model *mesh = init_mesh_data();
+    Mesh *mesh = init_mesh_data();
     if (mesh == NULL) {
         return NULL;
     }
@@ -109,5 +56,3 @@ Model *load_obj_mesh(const char *filename) {
     fclose(file);
     return mesh;
 }
-
-#endif // OBJ_PARSER_H

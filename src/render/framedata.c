@@ -1,14 +1,6 @@
-#ifndef FRAME_DATA_H
-#define FRAME_DATA_H
-
-#include "tga.h"
-#include <float.h>
-
-typedef struct {
-    int width, height;
-    TGAImage *framebuffer;
-    float *zBuffer;
-} Frame;
+#include <stdlib.h>
+#include <stdio.h>
+#include "framedata.h"
 
 float *init_zbuffer(int width, int height) {
     int pixel_count = width * height;
@@ -62,4 +54,3 @@ void free_frame(Frame *frame) {
     free(frame);
 }
 
-#endif // FRAME_DATA_H
