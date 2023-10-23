@@ -15,7 +15,7 @@ Mat4x4 perspective(const Camera *cam) {
 }
 
 Mat4x4 view(const Camera *cam) {
-    Mat4x4 rot_matrix = rotate(cam->transform.eulerAngles);
+    Mat4x4 rot_matrix = rotate(cam->transform.euler_angles);
     Mat4x4 pos_matrix = translate(IDENTITY, cam->transform.position);
 
     return mat_mul(pos_matrix, rot_matrix);

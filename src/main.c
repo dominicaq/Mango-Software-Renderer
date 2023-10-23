@@ -12,6 +12,8 @@
 #include "mesh/mesh.h"
 #include "mesh/obj_parser.h"
 
+#include "shaders/shader.h"
+
 // EMU Resolution:
 const int SCREEN_WIDTH = 512;
 const int SCREEN_HEIGHT = 288;
@@ -23,7 +25,8 @@ const bool USE_WIREFRAME = false;
 
 int main() {
     // Colors pallete
-    vec4 black = (vec4){{0, 0, 0, 255}};
+    vec3 black = (vec3){0.0f, 0.0f, 0.0f};
+    vec3 white = (vec3){1.0f,1.0f,1.0f};
 
     // Allocate space for frame data
     Frame *frame = init_frame(SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -34,55 +37,76 @@ int main() {
     // Scene setup
     // -------------------------------------------------------------------------
     // Model(s) and gameobjects
-    char *model_name = "../models/Atlas.obj";
+    char *model_name = "../models/head.obj";
     Mesh *cube_model = load_obj_mesh(model_name);
     if (cube_model == NULL) {
         return -1;
     }
-    cube_model->color = (vec4){{255,255,255,255}};
+    cube_model->color = white;
 
     Transform cube_transform;
-    cube_transform.position = (vec3){0.0f, -2.0f, -5.0f};
-    cube_transform.eulerAngles = (vec3){0.0f, 0.0f, 0.0f};
+    cube_transform.position = (vec3){-0.1f, -2.0f, -5.0f};
+    cube_transform.euler_angles = (vec3){0.0f, 0.0f, 0.0f};
     cube_transform.scale = (vec3){0.4f, 0.4f, 0.4f};
-
+    cube_transform.scale = (vec3){5.0f, 5.0f, 5.0f};
     // Camera properties
     Camera camera;
     camera.transform.position = (vec3){0.0f, 0.0f, -3.0f};
-    camera.transform.eulerAngles = (vec3){35.0f, 0.0f, 0.0f};
+    camera.transform.euler_angles = (vec3){35.0f, 0.0f, 0.0f};
     camera.fov = 90.0f;
     camera.aspect = (float)(frame->width) / frame->height;
     camera.zNear = 0.001f;
     camera.zFar = 1000.0f;
 
-    clock_t tic = clock();
+    clock_t frame_rate_start = clock();
 
     // Update loop
     // -------------------------------------------------------------------------
-    int frame_count = 60;
+    int frame_count = 1000;
+    float delta_time = 0.0f;
+    float dummy = 0;
     printf("Timing: %d frames with model: %s\n", frame_count, model_name);
     for (int i = 0; i < frame_count; ++i) {
+        clock_t start_frame = clock();
+
         // Reset frame
-        cube_transform.eulerAngles.y += sinf(frame_count * 5);
         setTGAImageBackground(frame->framebuffer, black);
         reset_zbuffer(frame);
+        dummy += sinf(delta_time * 50);
+        cube_transform.euler_angles.y = dummy;
 
         // Update MVP Matrix: projection * view * model (multiplication order)
         Mat4x4 projection_matrix = perspective(&camera);
         Mat4x4 view_matrix = view(&camera);
         Mat4x4 model_matrix = get_model_matrix(cube_transform);
-        Mat4x4 mvp = mat_mul(projection_matrix, mat_mul(view_matrix, model_matrix));
+        Mat4x4 model_view = mat_mul(view_matrix, model_matrix);
+        Mat4x4 mvp = mat_mul(projection_matrix, model_view);
+
+        // Create the uniform buffer object for shaders
+        UBO ubo;
+        ubo.u_mvp = mvp;
+        ubo.u_model_view = model_view;
+        ubo.u_wireframe = USE_WIREFRAME;
+        ubo.lights.u_light_position = (vec3){0.0f, 0.5f, 0.0f};
+        ubo.lights.u_light_color = (vec4){{1.0f,1.0f,0.0f,1.0f}};
+        ubo.u_color = cube_model->color;
 
         // Draw the scene
-        draw_mesh(frame, cube_model, mvp, USE_WIREFRAME);
+        draw_mesh(frame, cube_model, &ubo);
+
+        // Game clock
+        clock_t end_frame = clock();
+        delta_time = (float)(end_frame - start_frame) / CLOCKS_PER_SEC;
 
         // Set (0,0) origin to top left
         flipImageVertically(frame->framebuffer);
-        writeTGAImageToFile(frame->framebuffer, "../output/output.tga");
+        writeTGAImageToFile(frame->framebuffer, "../output.tga");
     }
 
-    clock_t toc = clock();
-    printf("Elapsed: %f seconds\n", (double)(toc - tic) / CLOCKS_PER_SEC);
+    clock_t frame_rate_end = clock();
+    printf("Elapsed: %f seconds\n",
+        (float)(frame_rate_end - frame_rate_start) / CLOCKS_PER_SEC
+    );
 
     // Free mallocs
     free_frame(frame);

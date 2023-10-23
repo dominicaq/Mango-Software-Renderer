@@ -18,9 +18,12 @@ vec4 vec3_to_vec4(const vec3 v, float w);
 
 vec3 homogenize_vec4(const vec4 v);
 
+vec3 vec4_to_vec3(const vec4 v);
+
+vec4 vec4_add(const vec4 a, const vec4 b);
+
 // Helper functions
 // -----------------------------------------------------------------------------
 void print_vec4(const vec4 v);
-
 
 #endif

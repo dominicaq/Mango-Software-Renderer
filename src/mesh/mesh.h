@@ -6,7 +6,6 @@
 
 #include "../math/vec2.h"  // Texture UV
 #include "../math/vec3.h"  // Model data
-#include "../math/vec4.h" // Albedo
 
 // TODO: Shrink these values as needed
 #define MAX_VERTS 1000000
@@ -29,7 +28,7 @@ typedef struct {
     int norm_count;
     int uv_count;
 
-    vec4 color;
+    vec3 color;
 } Mesh;
 
 Mesh *init_mesh_data();

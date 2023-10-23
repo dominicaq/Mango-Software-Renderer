@@ -19,6 +19,17 @@ vec3 barycentric_coords(vec3 p, vec3 a, vec3 b, vec3 c) {
     return (vec3){u,v,w};
 }
 
+vec3 lerp_barycentric_coords(vec3 bc_coords, vec3 normals[3]) {
+    // Interpolate the color using barycentric coordinates
+    vec3 scale_x = scale(bc_coords.x, normals[0]);
+    vec3 scale_y = scale(bc_coords.y, normals[1]);
+    vec3 scale_z = scale(bc_coords.z, normals[2]);
+
+    vec3 color = vec3_add(scale_x, scale_y);
+    color = vec3_add(color, scale_z);
+    return color;
+}
+
 // Normalized device coordinates to screen coordinates
 vec3 ndc_to_screen(int screenWidth, int screenHeight, vec3 ndc_coords) {
     vec3 screen_coords;

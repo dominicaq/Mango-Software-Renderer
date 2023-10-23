@@ -9,7 +9,7 @@
 
 typedef struct {
     vec3 position;
-    vec3 eulerAngles;
+    vec3 euler_angles;
     vec3 scale;
 } Transform;
 
@@ -25,7 +25,7 @@ extern const float DEG2RAD;
  *
  * Return: The rotation matrix.
  */
-Mat4x4 rotate(vec3 eulerAngles);
+Mat4x4 rotate(vec3 angles);
 
 /*
  * get_model_matrix - Calculate the model matrix based on a transform

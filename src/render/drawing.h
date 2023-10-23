@@ -10,6 +10,7 @@
 #include "../math/geometry.h"
 #include "../mesh/mesh.h"
 
+#include "../shaders/shader.h"
 #include "framedata.h"
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
@@ -19,8 +20,6 @@ typedef struct {
     vec3 vertices[3];
     vec2 uvs[3];
     vec3 normals[3];
-
-    vec4 clip_space[3];
 } Triangle;
 
 const extern vec4 WIREFRAME_COLOR;
@@ -62,7 +61,7 @@ void wire_frame(Frame *frame, vec4 clip_space[3]);
  *
  * Source: http://www.sunshine2k.de/coding/java/TriangleRasterization/TriangleRasterization.html
  */
-void rasterize(Frame *frame, vec4 clip_space[3], vec4 color);
+void rasterize(Frame *frame, vec4 clip_space[3], vec3 normals[3], UBO *ubo);
 
 /*
  * draw - Draw a triangle
@@ -72,7 +71,7 @@ void rasterize(Frame *frame, vec4 clip_space[3], vec4 color);
  * @color: The color of the triangle
  * @wireframe: Boolean indicating whether to draw in wireframe mode
  */
-void draw_triangle(Frame *frame, Triangle *triangle, vec4 color, bool wireframe);
+void draw_triangle(Frame *frame, Triangle *triangle, UBO *ubo);
 
 /*
  * draw_model - Draw a 3D model
@@ -81,6 +80,6 @@ void draw_triangle(Frame *frame, Triangle *triangle, vec4 color, bool wireframe)
  * @mvp: The Model-View-Projection matrix
  * @wireframe: Boolean indicating whether to draw in wireframe mode
  */
-void draw_mesh(Frame *frame, Mesh *mesh, Mat4x4 mvp, bool wireframe);
+void draw_mesh(Frame *frame, Mesh *mesh, UBO *ubo);
 
 #endif // DRAWING_H

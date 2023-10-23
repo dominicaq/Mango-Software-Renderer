@@ -44,7 +44,7 @@ void flipImageVertically(TGAImage *image) {
 }
 
 void writeTGAImageToFile(TGAImage *image, const char *filename) {
-    FILE *file = fopen(filename, "wb");
+    FILE *file = fopen(filename, "wb+");
     if (!file) {
         perror("ERROR: Failed to write to TGA file");
         exit(1);
@@ -65,10 +65,11 @@ void writeTGAImageToFile(TGAImage *image, const char *filename) {
     fclose(file);
 }
 
-void setTGAImageBackground(TGAImage *image, vec4 color) {
+void setTGAImageBackground(TGAImage *image, vec3 color) {
+    vec4 tga_color = vec3_to_vec4(color, 255);
     for (int i = 0; i < image->width; ++i) {
         for (int j = 0; j < image->height; ++j) {
-            setPixel(image, i, j, color);
+            setPixel(image, i, j, tga_color);
         }
     }
 }

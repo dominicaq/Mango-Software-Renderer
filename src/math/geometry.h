@@ -23,6 +23,8 @@
  */
 vec3 barycentric_coords(vec3 p, vec3 a, vec3 b, vec3 c);
 
+vec3 lerp_barycentric_coords(vec3 bc_coords, vec3 normals[3]);
+
 /*
  * ndc_to_screen - Convert NDC to screen coordinates
  * @screenWidth: The width of the screen
