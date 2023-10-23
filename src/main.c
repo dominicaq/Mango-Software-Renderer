@@ -15,18 +15,18 @@
 #include "shaders/shader.h"
 
 // EMU Resolution:
-// const int SCREEN_WIDTH = 512;
-// const int SCREEN_HEIGHT = 288;
+const int SCREEN_WIDTH = 512;
+const int SCREEN_HEIGHT = 288;
 
 // Debug resolution (clear to see issues)
-const int SCREEN_WIDTH = 1920;
-const int SCREEN_HEIGHT = 1080;
+// const int SCREEN_WIDTH = 1920;
+// const int SCREEN_HEIGHT = 1080;
 const bool USE_WIREFRAME = false;
 
 int main() {
     // Colors pallete
-    vec4 black = (vec4){{0.0f, 0.0f, 0.0f,255.0f}};
-    vec4 white = (vec4){{1.0f,1.0f,1.0f,255.0f}};
+    vec3 black = (vec3){0.0f, 0.0f, 0.0f};
+    vec3 white = (vec3){1.0f,1.0f,1.0f};
 
     // Allocate space for frame data
     Frame *frame = init_frame(SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -45,7 +45,7 @@ int main() {
     cube_model->color = white;
 
     Transform cube_transform;
-    cube_transform.position = (vec3){0.0f, -2.0f, -5.0f};
+    cube_transform.position = (vec3){-0.1f, -2.0f, -5.0f};
     cube_transform.euler_angles = (vec3){0.0f, 0.0f, 0.0f};
     cube_transform.scale = (vec3){0.4f, 0.4f, 0.4f};
     cube_transform.scale = (vec3){5.0f, 5.0f, 5.0f};
@@ -64,6 +64,7 @@ int main() {
     // -------------------------------------------------------------------------
     int frame_count = 1000;
     float delta_time = 0.0f;
+    float dummy = 0;
     printf("Timing: %d frames with model: %s\n", frame_count, model_name);
     for (int i = 0; i < frame_count; ++i) {
         clock_t start_frame = clock();
@@ -71,8 +72,8 @@ int main() {
         // Reset frame
         setTGAImageBackground(frame->framebuffer, black);
         reset_zbuffer(frame);
-
-        cube_transform.euler_angles.y += sinf(delta_time * 50);
+        dummy += sinf(delta_time * 50);
+        cube_transform.euler_angles.y = dummy;
 
         // Update MVP Matrix: projection * view * model (multiplication order)
         Mat4x4 projection_matrix = perspective(&camera);
@@ -86,8 +87,8 @@ int main() {
         ubo.u_mvp = mvp;
         ubo.u_model_view = model_view;
         ubo.u_wireframe = USE_WIREFRAME;
-        ubo.u_light_position = (vec3){-10.0f, 9.5f, -15.0f};
-        ubo.u_light_color = (vec4){{1.0f,1.0f,0.0f,1.0f}};
+        ubo.lights.u_light_position = (vec3){0.0f, 0.5f, 0.0f};
+        ubo.lights.u_light_color = (vec4){{1.0f,1.0f,0.0f,1.0f}};
         ubo.u_color = cube_model->color;
 
         // Draw the scene

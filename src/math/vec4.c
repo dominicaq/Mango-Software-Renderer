@@ -35,13 +35,8 @@ vec3 homogenize_vec4(const vec4 v) {
     return result;
 }
 
-vec4 color_scale(const float scale, const vec4 v) {
-    vec4 result;
-    result.elem[0] = v.elem[0] * scale;
-    result.elem[1] = v.elem[1] * scale;
-    result.elem[2] = v.elem[2] * scale;
-    result.elem[3] = v.elem[3];
-    return result;
+vec3 vec4_to_vec3(const vec4 v) {
+    return (vec3){v.elem[0], v.elem[1], v.elem[2]};
 }
 
 vec4 vec4_add(const vec4 a, const vec4 b) {

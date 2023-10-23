@@ -61,7 +61,7 @@ void wire_frame(Frame *frame, vec4 clip_space[3]);
  *
  * Source: http://www.sunshine2k.de/coding/java/TriangleRasterization/TriangleRasterization.html
  */
-void rasterize(Frame *frame, vec4 clip_space[3], UBO *ubo);
+void rasterize(Frame *frame, vec4 clip_space[3], vec3 normals[3], UBO *ubo);
 
 /*
  * draw - Draw a triangle

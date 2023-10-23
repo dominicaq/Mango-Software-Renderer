@@ -4,7 +4,7 @@ const vec4 WIREFRAME_COLOR = (vec4){{255, 165, 0, 255}};
 
 // Rasterizer
 // -----------------------------------------------------------------------------
-void rasterize(Frame *frame, vec4 clip_space[3], UBO *ubo) {
+void rasterize(Frame *frame, vec4 clip_space[3], vec3 normals[3], UBO *ubo) {
     vec3 v[3];
     vec3 ndc[3];
     for (int i = 0; i < 3; ++i) {
@@ -47,46 +47,34 @@ void rasterize(Frame *frame, vec4 clip_space[3], UBO *ubo) {
             int buffer_index = x + y * frame->width;
             if (P.z < frame->zBuffer[buffer_index]) {
                 frame->zBuffer[buffer_index] = P.z;
-                fragment_shader();
-                setPixel(frame->framebuffer, P.x, P.y, ubo->v_color);
+                ubo->gl_normal = lerp_barycentric_coords(bc_coords, normals);
+                fragment_shader(ubo, P);
+                setPixel(frame->framebuffer, P.x, P.y, ubo->gl_frag_color);
             }
         }
     }
 }
 
 void draw_triangle(Frame *frame, Triangle *triangle, UBO *ubo) {
-    // Average normal
-   vec3 face_normal = (vec3){0.0f, 0.0f, 0.0f};
-    for (int i = 0; i < 3; ++i) {
-        face_normal = vec3_add(face_normal, triangle->normals[i]);
-    }
-    ubo->normal = normalize(face_normal);
-
     // Apply vertex shader
     vec4 clip_space[3];
-    vec4 vertex_colors[3];
+    vec3 normals[3];
     for (int i = 0; i < 3; ++i) {
+        // Passed into shader
         vec4 a_position = vec3_to_vec4(triangle->vertices[i], 1.0f);
-        vertex_shader(ubo, a_position);
-        clip_space[i] = ubo->gl_position;
-        vertex_colors[i] = ubo->v_color;
-    }
+        ubo->v_normal = triangle->normals[i];
 
-    // Average colors
-   vec4 new_color = (vec4){{0.0f, 0.0f, 0.0f, 0.0f}};
-    for (int i = 0; i < 3; ++i) {
-        new_color = vec4_add(new_color, vertex_colors[i]);
+        vertex_shader(ubo, a_position);
+
+        // Shader output
+        clip_space[i] = ubo->gl_position;
+        normals[i] = ubo->v_normal;
     }
-    new_color.elem[0] = new_color.elem[0] / 3;
-    new_color.elem[1] = new_color.elem[1] / 3;
-    new_color.elem[2] = new_color.elem[2] / 3;
-    new_color.elem[3] = new_color.elem[3] / 3;
-    ubo->v_color = new_color;
 
     if (ubo->u_wireframe == true) {
         wire_frame(frame, clip_space);
     }
-    rasterize(frame, clip_space, ubo);
+    rasterize(frame, clip_space, normals, ubo);
 }
 
 void draw_mesh(Frame *frame, Mesh *mesh, UBO *ubo) {

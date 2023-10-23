@@ -18,5 +18,5 @@ void flipImageVertically(TGAImage *image);
 
 void writeTGAImageToFile(TGAImage *image, const char *filename);
 
-void setTGAImageBackground(TGAImage *image, vec4 color);
+void setTGAImageBackground(TGAImage *image, vec3 color);
 #endif // TGA_H
