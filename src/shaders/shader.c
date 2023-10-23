@@ -17,6 +17,9 @@ void vertex_shader(UBO *ubo, vec4 a_position) {
         vec3_to_vec4(ubo->v_normal, 0.0f)
     );
 
+    vec4 world_space = mat_mul_vec4(ubo->u_model, a_position);
+    ubo->frag_pos = vec4_to_vec3(world_space);
+
 #ifdef FLAT_SHADING
     vec3 N = normalize(homogenize_vec4(mv_normal));
     print_vec3(N);
@@ -47,14 +50,21 @@ void vertex_shader(UBO *ubo, vec4 a_position) {
 }
 
 void fragment_shader(UBO *ubo, vec3 frag_coord) {
-    vec3 N = normalize(ubo->gl_normal);
-    vec3 light_vec = vec3_sub(ubo->lights.u_light_position, frag_coord);
-    vec3 L = normalize(light_vec);
+    vec3 light_pos = ubo->lights.u_light_position;
+    vec3 light_vec = vec3_sub(light_pos, ubo->frag_pos);
+    vec3 view_vec = vec3_sub(ubo->u_cam_pos, ubo->frag_pos);
 
-    float diffuse_factor = fmax(dot(N, L), 0.0f);
-    vec3 diffuse_color = scale(diffuse_factor, ubo->u_color);
+    vec3 N = normalize(ubo->gl_normal);
+    vec3 L = normalize(light_vec);
+    vec3 V = normalize(view_vec);
+
+    vec3 reflect_dir = reflect(scale(1.0f, L), N);
+    float diffuse = fmax(dot(N, L), 0.0f);
+    float spec = pow(fmax(dot(V, reflect_dir), 0.0), 256);
+
+    vec3 diffuse_color = scale(diffuse + spec, ubo->u_color);
 
     // Scale to RGB to TGA format
-    diffuse_color = scale(255.0f, diffuse_color);
+    diffuse_color = scale(125.0f, diffuse_color);
     ubo->gl_frag_color = vec3_to_vec4(diffuse_color, 255.0f); // TGA RGBA
 }

@@ -47,7 +47,7 @@ int main() {
     Transform cube_transform;
     cube_transform.position = (vec3){-0.1f, -2.0f, -5.0f};
     cube_transform.euler_angles = (vec3){0.0f, 0.0f, 0.0f};
-    cube_transform.scale = (vec3){0.4f, 0.4f, 0.4f};
+    // cube_transform.scale = (vec3){0.4f, 0.4f, 0.4f};
     cube_transform.scale = (vec3){5.0f, 5.0f, 5.0f};
     // Camera properties
     Camera camera;
@@ -63,18 +63,19 @@ int main() {
     // Update loop
     // -------------------------------------------------------------------------
     int frame_count = 1000;
+    float light_radus = 10.0f;
+    vec3 light_pos = (vec3){0,0,0};
     float delta_time = 0.0f;
-    float dummy = 0;
     printf("Timing: %d frames with model: %s\n", frame_count, model_name);
     for (int i = 0; i < frame_count; ++i) {
-        clock_t start_frame = clock();
-
         // Reset frame
         setTGAImageBackground(frame->framebuffer, black);
         reset_zbuffer(frame);
-        dummy += sinf(delta_time * 50);
-        cube_transform.euler_angles.y = dummy;
-
+        cube_transform.euler_angles.y += sinf(delta_time);
+        light_pos.x = light_radus * sinf(delta_time);
+        light_pos.z = light_radus * cosf(delta_time);
+        light_pos.y = light_radus * sinf(delta_time);
+        // print_vec3(light_pos);
         // Update MVP Matrix: projection * view * model (multiplication order)
         Mat4x4 projection_matrix = perspective(&camera);
         Mat4x4 view_matrix = view(&camera);
@@ -85,18 +86,17 @@ int main() {
         // Create the uniform buffer object for shaders
         UBO ubo;
         ubo.u_mvp = mvp;
+        ubo.u_model = model_matrix;
         ubo.u_model_view = model_view;
         ubo.u_wireframe = USE_WIREFRAME;
-        ubo.lights.u_light_position = (vec3){0.0f, 0.5f, 0.0f};
+        ubo.lights.u_light_position = light_pos;
         ubo.lights.u_light_color = (vec4){{1.0f,1.0f,0.0f,1.0f}};
         ubo.u_color = cube_model->color;
+        ubo.u_cam_pos = camera.transform.position;
 
         // Draw the scene
         draw_mesh(frame, cube_model, &ubo);
-
-        // Game clock
-        clock_t end_frame = clock();
-        delta_time = (float)(end_frame - start_frame) / CLOCKS_PER_SEC;
+        delta_time += 0.05f;
 
         // Set (0,0) origin to top left
         flipImageVertically(frame->framebuffer);

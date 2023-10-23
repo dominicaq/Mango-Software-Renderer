@@ -20,12 +20,17 @@ typedef struct {
 typedef struct {
     // Uniform variables
     Mat4x4 u_mvp;
+    Mat4x4 u_model;
     Mat4x4 u_model_view;
+    vec3 u_cam_pos;
     vec3 u_color;
     bool u_wireframe;
 
     // Lighting
     Light lights;
+
+    // Fragment data
+    vec3 frag_pos;
 
     // Vertex data
     vec3 v_position;
