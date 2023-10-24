@@ -34,12 +34,13 @@ void fragment_shader(UBO *ubo, vec3 frag_coord) {
     vec3 total_diffuse = (vec3){0.0f, 0.0f, 0.0f};
     vec3 total_specular = (vec3){0.0f, 0.0f, 0.0f};
 	for (int i = 0; i < MAX_LIGHTS; i++){
-        vec3 light_pos = ubo->lights[i].u_light_position;
-        vec3 light_color = vec4_to_vec3(ubo->lights[i].u_light_color);
+        vec3 light_pos = ubo->lights[i].u_position;
+        vec3 light_color = vec4_to_vec3(ubo->lights[i].u_color);
         vec3 light_vec = vec3_sub(light_pos, ubo->frag_pos);
+        float light_radius = ubo->lights[i].u_radius;
 
         vec3 L = normalize(light_vec);
-		float attenuation = 1.0f / dot(light_vec, light_vec);
+		float attenuation = light_radius / dot(light_vec, light_vec);
 
 		// Diffuse
 		float angle = fmax(dot(N, L), 0.0f);

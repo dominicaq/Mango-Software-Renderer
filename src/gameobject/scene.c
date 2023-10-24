@@ -38,41 +38,50 @@ int init_scene(Scene *scene, UBO *ubo, int frame_width, int frame_height) {
     head_object.mesh = head_mesh;
     add_object_to_scene(scene, head_object);
 
-    GameObject plane_object;
-    plane_object.transform.position = (vec3){-3.0f, -1.0f, -6.0f};
-    plane_object.transform.euler_angles = (vec3){0.0f, 40.0f, 0.0f};
-    plane_object.transform.scale = (vec3){0.3f, 0.3f, 0.3f};
-    Mesh *plane_model = load_obj_mesh("../models/Atlas.obj");
-    if (plane_model == NULL) {
+    // GameObject plane_object;
+    // plane_object.transform.position = (vec3){-3.0f, -1.0f, -9.0f};
+    // plane_object.transform.euler_angles = (vec3){0.0f, 40.0f, 0.0f};
+    // plane_object.transform.scale = (vec3){6.0f, 6.0f, 6.0f};
+    // Mesh *plane_model = load_obj_mesh("../models/head.obj");
+    // if (plane_model == NULL) {
+    //     printf("ERROR: Failed to plane mesh\n");
+    //     return -1;
+    // }
+    // plane_model->color = white;
+    // plane_object.mesh = plane_model;
+    // add_object_to_scene(scene, plane_object);
+
+    GameObject diablo_object;
+    diablo_object.transform.position = (vec3){-5.0f, -3.0f, -8.0f};
+    diablo_object.transform.euler_angles = (vec3){0.0f, 70.0f, 0.0f};
+    diablo_object.transform.scale = (vec3){6.0f, 6.0f, 6.0f};
+    Mesh *diablo_model = load_obj_mesh("../models/diablo.obj");
+    if (diablo_model == NULL) {
         printf("ERROR: Failed to plane mesh\n");
         return -1;
     }
-    plane_model->color = white;
-    plane_object.mesh = plane_model;
-    add_object_to_scene(scene, plane_object);
+    diablo_model->color = white;
+    diablo_object.mesh = diablo_model;
+    add_object_to_scene(scene, diablo_object);
 
-    float light_radius = 5.0f;
-    float angle_increment = 2.0f * M_PI / MAX_LIGHTS;
+    // Init light data
+    float light_radius = 3.0f;
     for (int i = 0; i < MAX_LIGHTS; ++i) {
-        float angle = angle_increment * i;
-        float x = light_radius * cosf(angle);
-        float z = light_radius * sinf(angle);
-
-        ubo->lights[i].u_light_position = (vec3){x, 0.0f, z};
-        ubo->lights[i].u_light_color = vec3_to_vec4(COLLOR_PALLETE[i], 1.0f);
+        ubo->lights[i].u_color = vec3_to_vec4(COLLOR_PALLETE[i], 1.0f);
+        ubo->lights[i].u_radius = light_radius;
     }
 
     return 0;
 }
 
 void scene_update(Scene *scene, UBO *ubo, float delta_time) {
-    float light_radius = 5.0f;
+    float circle_radius = 5.5f;
     float angle_increment = 2.0f * M_PI / MAX_LIGHTS;
     for (int i = 0; i < MAX_LIGHTS; ++i) {
         float angle = angle_increment * i + delta_time;
-        float x = light_radius * cosf(angle);
-        float z = light_radius * sinf(angle);
-        ubo->lights[i].u_light_position = (vec3){x, 0.0f, z};
+        float x = circle_radius * cosf(angle);
+        float z = circle_radius * sinf(angle);
+        ubo->lights[i].u_position = (vec3){x, 0.0f, z};
     }
 
     ubo->u_cam_pos = scene->camera.transform.position;

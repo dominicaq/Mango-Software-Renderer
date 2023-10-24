@@ -26,7 +26,7 @@ int main() {
         return -1;
     }
 
-    // Light data
+    // Scene data
     UBO ubo;
     Scene scene;
     scene.num_objects = 0;
@@ -49,6 +49,7 @@ int main() {
         reset_zbuffer(frame);
 
         scene_update(&scene, &ubo, delta_time);
+        ubo.u_time = delta_time;
 
         // Update MVP Matrix: projection * view * model (multiplication order)
         Mat4x4 projection_matrix = perspective(&scene.camera);
