@@ -4,7 +4,7 @@ const vec4 WIREFRAME_COLOR = (vec4){{255, 165, 0, 255}};
 
 // Rasterizer
 // -----------------------------------------------------------------------------
-void rasterize(Frame *frame, vec4 clip_space[3], vec3 normals[3], UBO *ubo) {
+void rasterize(Frame *frame, vec4 clip_space[3], vec3 world_space[3], vec3 normals[3], UBO *ubo) {
     vec3 v[3];
     vec3 ndc[3];
     for (int i = 0; i < 3; ++i) {
@@ -22,7 +22,7 @@ void rasterize(Frame *frame, vec4 clip_space[3], vec3 normals[3], UBO *ubo) {
         return;
     }
 
-    // Bounding box around triangle
+    // Bounding box around triangle (in screen space)
     int x_min = MAX(0, MIN(MIN(v[0].x, v[1].x), v[2].x));
     int y_min = MAX(0, MIN(MIN(v[0].y, v[1].y), v[2].y));
     int x_max = MIN(frame->width - 1, MAX(MAX(v[0].x, v[1].x), v[2].x));
@@ -48,6 +48,7 @@ void rasterize(Frame *frame, vec4 clip_space[3], vec3 normals[3], UBO *ubo) {
             if (P.z < frame->zBuffer[buffer_index]) {
                 frame->zBuffer[buffer_index] = P.z;
                 ubo->gl_normal = lerp_barycentric_coords(bc_coords, normals);
+                ubo->frag_pos = lerp_barycentric_coords(bc_coords, world_space);
                 fragment_shader(ubo, P);
                 setPixel(frame->framebuffer, P.x, P.y, ubo->gl_frag_color);
             }
@@ -59,22 +60,23 @@ void draw_triangle(Frame *frame, Triangle *triangle, UBO *ubo) {
     // Apply vertex shader
     vec4 clip_space[3];
     vec3 normals[3];
+    vec3 world_space[3];
     for (int i = 0; i < 3; ++i) {
         // Passed into shader
         vec4 a_position = vec3_to_vec4(triangle->vertices[i], 1.0f);
         ubo->v_normal = triangle->normals[i];
-
         vertex_shader(ubo, a_position);
 
         // Shader output
         clip_space[i] = ubo->gl_position;
+        world_space[i] = ubo->frag_pos;
         normals[i] = ubo->v_normal;
     }
 
     if (ubo->u_wireframe == true) {
         wire_frame(frame, clip_space);
     }
-    rasterize(frame, clip_space, normals, ubo);
+    rasterize(frame, clip_space, world_space, normals, ubo);
 }
 
 void draw_mesh(Frame *frame, Mesh *mesh, UBO *ubo) {
