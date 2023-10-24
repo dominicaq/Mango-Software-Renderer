@@ -70,7 +70,7 @@ void fragment_shader(UBO *ubo, vec3 frag_coord) {
 
     // Scale to RGB to TGA format
     vec3 lighting = vec3_add(total_diffuse, total_specular);
-    lighting = scale(200.0f, lighting);
+    lighting = scale(255.0f / MAX_LIGHTS, lighting);
     if (lighting.x > 255.0f) {
         lighting.x = 255.0f;
     }

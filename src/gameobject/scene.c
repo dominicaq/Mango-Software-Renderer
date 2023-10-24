@@ -65,7 +65,7 @@ int init_scene(Scene *scene, UBO *ubo, int frame_width, int frame_height) {
     add_object_to_scene(scene, diablo_object);
 
     // Init light data
-    float light_radius = 3.0f;
+    float light_radius = 6.0f;
     for (int i = 0; i < MAX_LIGHTS; ++i) {
         ubo->lights[i].u_color = vec3_to_vec4(COLLOR_PALLETE[i], 1.0f);
         ubo->lights[i].u_radius = light_radius;
