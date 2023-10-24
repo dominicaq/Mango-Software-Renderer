@@ -7,6 +7,8 @@
 #include "../math/vec3.h"
 #include "../math/mat4x4.h"
 
+#define MAX_LIGHTS 7
+
 const extern bool FLAT_SHADING;
 const extern bool SMOOTH_SHADING;
 const extern bool PHONG_SHADING;
@@ -27,7 +29,7 @@ typedef struct {
     bool u_wireframe;
 
     // Lighting
-    Light lights;
+    Light lights[MAX_LIGHTS];
 
     // Fragment data
     vec3 frag_pos;

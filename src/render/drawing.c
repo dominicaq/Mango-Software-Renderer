@@ -22,7 +22,7 @@ void rasterize(Frame *frame, vec4 clip_space[3], vec3 world_space[3], vec3 norma
         return;
     }
 
-    // Bounding box around triangle
+    // Bounding box around triangle (in screen space)
     int x_min = MAX(0, MIN(MIN(v[0].x, v[1].x), v[2].x));
     int y_min = MAX(0, MIN(MIN(v[0].y, v[1].y), v[2].y));
     int x_max = MIN(frame->width - 1, MAX(MAX(v[0].x, v[1].x), v[2].x));
