@@ -14,8 +14,9 @@ const extern bool SMOOTH_SHADING;
 const extern bool PHONG_SHADING;
 
 typedef struct {
-    vec3 u_light_position;
-    vec4 u_light_color;
+    float u_radius;
+    vec3 u_position;
+    vec4 u_color;
 } Light;
 
 // Uniform buffer object
@@ -27,6 +28,7 @@ typedef struct {
     vec3 u_cam_pos;
     vec3 u_color;
     bool u_wireframe;
+    float u_time;
 
     // Lighting
     Light lights[MAX_LIGHTS];
