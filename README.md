@@ -5,12 +5,12 @@ the rendering pipeline typically abstracted by graphics APIs like OpenGL, Vulkan
 etc. This project expands further and implements features that you would
 typically do in a computer graphics course.
 
-This renderer is **not** designed for real-world use because it is CPU bound.
-A typical rendering API will use the GPU.
-
 <p align="center">
   <img width="640" height="360" src="https://github.com/dominicaq/PureC-Software-renderer/blob/clip_bug/images/showcase.png">
 </p>
+
+This renderer is **not** designed for real-world use because it is CPU bound.
+A typical rendering API will use the GPU.
 
 # Features
 - Rendering of 3D GameObjects
