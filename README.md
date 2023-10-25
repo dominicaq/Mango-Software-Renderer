@@ -9,7 +9,7 @@ This renderer is **not** designed for real-world use because it is CPU bound.
 A typical rendering API will use the GPU.
 
 <p align="center">
-  <img width="640" height="360" src="???">
+  <img width="640" height="360" src="https://github.com/dominicaq/PureC-Software-renderer/blob/clip_bug/images/showcase.png">
 </p>
 
 # Features
