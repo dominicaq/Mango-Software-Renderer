@@ -8,12 +8,17 @@ typically do in a computer graphics course.
 This renderer is **not** designed for real-world use because it is CPU bound.
 A typical rendering API will use the GPU.
 
+<p align="center">
+  <img width="640" height="360" src="???">
+</p>
+
 # Features
 - Rendering of 3D GameObjects
 - Loading triangulated OBJ files
 - Vertex / Fragment Shader pipeline
 - Model View Perspective transformations (MVP)
 - Blinn-Phong shader for realistic lighting
+- Multi-light fragment shader
 
 # Prerequisites
 - **CMake 3.27.7** A cross-platform build system. You can download it [here.](https://cmake.org/download/)
