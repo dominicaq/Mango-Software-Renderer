@@ -18,7 +18,7 @@ Mat4x4 view(const Camera *cam) {
     Mat4x4 rot_matrix = rotate(cam->transform.euler_angles);
     Mat4x4 pos_matrix = translate(IDENTITY, cam->transform.position);
 
-    return mat_mul(pos_matrix, rot_matrix);
+    return mat_mul(rot_matrix, pos_matrix);
 }
 
 Mat4x4 lookAt(const vec3 eye, const vec3 center, const vec3 up) {

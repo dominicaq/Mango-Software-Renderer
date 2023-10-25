@@ -1,17 +1,19 @@
-# c_software_renderer
-A software renderer written from scratch in C.
+# Software renderer
+A software renderer written from scratch in pure C. Inside the project showcases
+a simple scene of GameObjects, lights, and a multi light Blinn-Phong shader.
 
 # Prerequisites
 - CMake 3.27
 
 # Build
 ```console
-cd c_software_renderer
+cd software_renderer
 mkdir build
 cd build
 cmake ..
 ```
+
 # Run
 ```console
-.\c_software_renderer
+.\software_renderer
 ```

@@ -39,7 +39,7 @@ int main() {
     // -------------------------------------------------------------------------
     vec3 black = (vec3){0.0f, 0.0f, 0.0f};
 
-    int frame_count = 60;
+    int frame_count = 9999;
     float delta_time = 0.0f;
     clock_t frame_rate_start = clock();
     printf("Rendering %d frames...\n", frame_count);

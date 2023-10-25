@@ -8,11 +8,11 @@
 #include "../math/vec3.h"  // Model data
 
 // TODO: Shrink these values as needed
-#define MAX_VERTS 1000000
-#define MAX_NORMS 1000000
-#define MAX_UVS   1000000
+#define MAX_VERTS 99999
+#define MAX_NORMS 99999
+#define MAX_UVS   99999
 
-#define MAX_INDICES 1000000
+#define MAX_INDICES 99999
 
 typedef struct {
     vec3 vertices [MAX_VERTS];

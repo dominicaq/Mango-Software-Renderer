@@ -31,54 +31,51 @@ void fragment_shader(UBO *ubo, vec3 frag_coord) {
     vec3 V = normalize(view_vec);
 
     // Multiple lights
-    vec3 total_diffuse = (vec3){0.0f, 0.0f, 0.0f};
+    vec3 total_diffuse = ubo->u_color;
     vec3 total_specular = (vec3){0.0f, 0.0f, 0.0f};
-	for (int i = 0; i < MAX_LIGHTS; i++){
+    for (int i = 0; i < MAX_LIGHTS; i++){
         vec3 light_pos = ubo->lights[i].u_position;
         vec3 light_color = vec4_to_vec3(ubo->lights[i].u_color);
         vec3 light_vec = vec3_sub(light_pos, ubo->frag_pos);
         float light_radius = ubo->lights[i].u_radius;
 
         vec3 L = normalize(light_vec);
-		float attenuation = light_radius / dot(light_vec, light_vec);
+        float dist_squared = dot(light_vec, light_vec);
+        float attenuation = light_radius / dist_squared;
 
-		// Diffuse
-		float angle = fmax(dot(N, L), 0.0f);
-		vec3 intensity = vec3_add(light_color, ubo->u_color);
+        // Diffuse
+        float angle = fmax(dot(N, L), 0.0f);
+        vec3 intensity = vec3_add(light_color, ubo->u_color);
         intensity = scale(attenuation, intensity);
 
-		// Specular
-		vec3 half_angle = normalize(vec3_add(L, V));
-		float blinn = dot(N, half_angle);
-
-        // Clamp
-        if (blinn < 0.0f) {
-            blinn = 0.0f;
-        } else if (blinn > 1.0f) {
-            blinn = 1.0f;
-        }
-		blinn = pow(blinn, 512.0f);
+        // Specular
+        vec3 half_angle = normalize(vec3_add(L, V));
+        float blinn = clamp(dot(N, half_angle), 0.0f, 1.0f);
+        blinn = pow(blinn, 512.0f);
 
         vec3 specular = scale(blinn, intensity);
         specular.x *= light_color.x;
         specular.y *= light_color.y;
         specular.z *= light_color.z;
 
-		total_specular = vec3_add(total_specular, specular);
+        total_specular = vec3_add(total_specular, specular);
         total_diffuse = vec3_add(total_diffuse, scale(angle, intensity));
 	}
 
     // Scale to RGB to TGA format
     vec3 lighting = vec3_add(total_diffuse, total_specular);
     lighting = scale(255.0f / MAX_LIGHTS, lighting);
-    if (lighting.x > 255.0f) {
-        lighting.x = 255.0f;
-    }
-    if (lighting.y > 255.0f) {
-        lighting.y = 255.0f;
-    }
-    if (lighting.z > 255.0f) {
-        lighting.z = 255.0f;
-    }
+    lighting.x = clamp(lighting.x, 0.0f, 255.0f);
+    lighting.y = clamp(lighting.y, 0.0f, 255.0f);
+    lighting.z = clamp(lighting.z, 0.0f, 255.0f);
     ubo->gl_frag_color = vec3_to_vec4(lighting, 255.0f); // TGA RGBA
+}
+
+float clamp(float value, float min, float max) {
+    if (value > max) {
+        return max;
+    } else if (value < min) {
+        return min;
+    }
+    return value;
 }
