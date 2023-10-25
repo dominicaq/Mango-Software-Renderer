@@ -13,9 +13,9 @@ const vec3 COLLOR_PALLETE[7] = {
 int init_scene(Scene *scene, UBO *ubo, int frame_width, int frame_height) {
     // Camera properties
     Camera camera;
-    camera.transform.position = (vec3){0.0f, -5.0f, -5.0f};
-    camera.transform.euler_angles = (vec3){25.0f, 0.0f, 0.0f};
-    camera.fov = 90.0f;
+    camera.transform.position = (vec3){0.0f, 2.0f, -10.0f};
+    camera.transform.euler_angles = (vec3){0.0f, 0.0f, 0.0f};
+    camera.fov = 45.0f;
     camera.aspect = (float)(frame_width) / frame_height;
     camera.zNear = 0.1f;
     camera.zFar = 1000.0f;
@@ -54,13 +54,6 @@ int init_scene(Scene *scene, UBO *ubo, int frame_width, int frame_height) {
     box_object.mesh = box_model;
     add_object_to_scene(scene, box_object);
 
-
-    for (int i = 0; i <   box_object.mesh->vert_count; ++i) {
-        print_vec3(box_object.mesh->vertices[i]);
-    }
-    for (int i = 0; i <   box_object.mesh->index_count; ++i) {
-        printf("%d\n", box_object.mesh->vertex_index[i]);
-    }
     GameObject diablo_object;
     diablo_object.transform.position = (vec3){-5.0f, -3.0f, -10.0f};
     diablo_object.transform.euler_angles = (vec3){0.0f, 70.0f, 0.0f};

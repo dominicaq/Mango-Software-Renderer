@@ -11,12 +11,12 @@
 #include "shaders/shader.h"
 
 // EMU Resolution:
-const int SCREEN_WIDTH = 512;
-const int SCREEN_HEIGHT = 288;
+// const int SCREEN_WIDTH = 512;
+// const int SCREEN_HEIGHT = 288;
 
 // Debug resolution (clear to see issues)
-// const int SCREEN_WIDTH = 1920;
-// const int SCREEN_HEIGHT = 1080;
+const int SCREEN_WIDTH = 1920;
+const int SCREEN_HEIGHT = 1080;
 const bool USE_WIREFRAME = false;
 
 int main() {
@@ -39,7 +39,7 @@ int main() {
     // -------------------------------------------------------------------------
     vec3 black = (vec3){0.0f, 0.0f, 0.0f};
 
-    int frame_count = 9999;
+    int frame_count = 1000;
     float delta_time = 0.0f;
     clock_t frame_rate_start = clock();
     printf("Rendering %d frames...\n", frame_count);

@@ -34,7 +34,7 @@ vec3 lerp_barycentric_coords(vec3 bc_coords, vec3 normals[3]) {
 vec3 ndc_to_screen(int screenWidth, int screenHeight, vec3 ndc_coords) {
     vec3 screen_coords;
     screen_coords.x = (ndc_coords.x + 1.0f) * 0.5f * screenWidth;
-    screen_coords.y = (-ndc_coords.y + 1.0f) * 0.5f * screenHeight;
+    screen_coords.y = (1.0f - ndc_coords.y) * 0.5f * screenHeight;
     // Preserve z-coordinate for depth testing
     screen_coords.z = ndc_coords.z;
     return screen_coords;
