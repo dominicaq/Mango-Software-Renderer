@@ -9,8 +9,9 @@ typically do in a computer graphics course.
   <img width="640" height="360" src="https://github.com/dominicaq/PureC-Software-renderer/blob/clip_bug/images/showcase.png">
 </p>
 
-This renderer is **not** designed for real-world use because it is CPU bound.
-A typical rendering API will use the GPU.
+# Disclaimer
+This software renderer is **not** intended for real-world use due to its
+CPU-bound nature. In contrast, modern rendering APIs leverage the GPU for high-performance computations.
 
 # Features
 - Rendering of 3D GameObjects
