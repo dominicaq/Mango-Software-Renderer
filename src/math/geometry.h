@@ -65,5 +65,6 @@ vec3 world_to_screen(int width, int height, vec3 v);
  */
 bool is_backface(vec3 ndc[3]);
 
+float clamp(float value, float min, float max);
 
 #endif

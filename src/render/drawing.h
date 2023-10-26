@@ -47,7 +47,7 @@ void line(Frame *frame, vec3 v0, vec3 v1);
  *
  * This function draws a wireframe triangle on the frame.
  */
-void wire_frame(Frame *frame, vec4 clip_space[3]);
+void wire_frame(Frame *frame, vec3 screen_space[3]);
 
 // Drawing
 // -----------------------------------------------------------------------------
@@ -61,7 +61,7 @@ void wire_frame(Frame *frame, vec4 clip_space[3]);
  *
  * Source: http://www.sunshine2k.de/coding/java/TriangleRasterization/TriangleRasterization.html
  */
-void rasterize(Frame *frame, vec4 clip_space[3], vec3 world_space[3], vec3 normals[3], UBO *ubo);
+void rasterize(Frame *frame, vec3 ss[3], vec3 world_space[3], vec3 normals[3], UBO *ubo);
 
 /*
  * draw - Draw a triangle

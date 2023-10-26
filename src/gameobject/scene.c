@@ -2,10 +2,10 @@
 
 const vec3 COLLOR_PALLETE[7] = {
     {1.0f, 0.0f, 0.0f},  // Red
-    {0.0f, 0.0f, 0.0f},  // White
-    {1.0f, 1.0f, 0.0f},  // Yellow
     {0.0f, 1.0f, 0.0f},  // Green
     {0.0f, 0.0f, 1.0f},  // Blue
+    {1.0f, 1.0f, 0.0f},  // Yellow
+    {0.0f, 0.0f, 0.0f},  // White
     {0.3f, 0.0f, 0.5f},  // Indigo
     {0.5f, 0.0f, 0.5f}   // Violet
 };
@@ -13,22 +13,25 @@ const vec3 COLLOR_PALLETE[7] = {
 int init_scene(Scene *scene, UBO *ubo, int frame_width, int frame_height) {
     // Camera properties
     Camera camera;
-    camera.transform.position = (vec3){0.0f, -1.0f, -2.0f};
-    camera.transform.euler_angles = (vec3){35.0f, 0.0f, 0.0f};
-    camera.fov = 90.0f;
+    camera.transform.position = (vec3){0.0f, 2.0f, -10.0f};
+    camera.transform.euler_angles = (vec3){0.0f, 0.0f, 0.0f};
+    camera.fov = 45.0f;
     camera.aspect = (float)(frame_width) / frame_height;
-    camera.zNear = 0.001f;
+    camera.zNear = 0.1f;
     camera.zFar = 1000.0f;
     scene->camera = camera;
 
     // Color pallete
     vec3 white = (vec3){1.0f,1.0f,1.0f};
+    vec3 red = (vec3){0.0f,1.0f,0.5f};
+    vec3 ambience = (vec3){0.4f,0.4f,0.4f};
+    ubo->u_ambient = ambience;
 
     // Objects
     GameObject head_object;
     head_object.transform.position = (vec3){6.0f, -3.0f, -8.0f};
     head_object.transform.euler_angles = (vec3){0.0f, -20.0f, 0.0f};
-    head_object.transform.scale = (vec3){6.0f, 6.0f, 6.0f};
+    head_object.transform.scale = (vec3){5.0f, 5.0f, 5.0f};
     Mesh *head_mesh = load_obj_mesh("../models/head.obj");
     if (head_mesh == NULL) {
         printf("ERROR: Failed to load head mesh\n");
@@ -38,26 +41,26 @@ int init_scene(Scene *scene, UBO *ubo, int frame_width, int frame_height) {
     head_object.mesh = head_mesh;
     add_object_to_scene(scene, head_object);
 
-    // GameObject plane_object;
-    // plane_object.transform.position = (vec3){-3.0f, -1.0f, -9.0f};
-    // plane_object.transform.euler_angles = (vec3){0.0f, 40.0f, 0.0f};
-    // plane_object.transform.scale = (vec3){6.0f, 6.0f, 6.0f};
-    // Mesh *plane_model = load_obj_mesh("../models/head.obj");
-    // if (plane_model == NULL) {
-    //     printf("ERROR: Failed to plane mesh\n");
-    //     return -1;
-    // }
-    // plane_model->color = white;
-    // plane_object.mesh = plane_model;
-    // add_object_to_scene(scene, plane_object);
+    GameObject box_object;
+    box_object.transform.position = (vec3){0.0f, 6.0f, -10.0f};
+    box_object.transform.euler_angles = (vec3){180.0f, 90.0f, 90.0f};
+    box_object.transform.scale = (vec3){1.0f, 1.0f, 1.0f};
+    Mesh *box_model = load_obj_mesh("../models/light_box.obj");
+    if (box_model == NULL) {
+        printf("ERROR: Failed to loead plane mesh\n");
+        return -1;
+    }
+    box_model->color = red;
+    box_object.mesh = box_model;
+    add_object_to_scene(scene, box_object);
 
     GameObject diablo_object;
-    diablo_object.transform.position = (vec3){-5.0f, -3.0f, -8.0f};
+    diablo_object.transform.position = (vec3){-5.0f, -3.0f, -10.0f};
     diablo_object.transform.euler_angles = (vec3){0.0f, 70.0f, 0.0f};
     diablo_object.transform.scale = (vec3){6.0f, 6.0f, 6.0f};
-    Mesh *diablo_model = load_obj_mesh("../models/diablo.obj");
+    Mesh *diablo_model = load_obj_mesh("../models/head.obj");
     if (diablo_model == NULL) {
-        printf("ERROR: Failed to plane mesh\n");
+        printf("ERROR: Failed to load diablo mesh\n");
         return -1;
     }
     diablo_model->color = white;
@@ -65,7 +68,7 @@ int init_scene(Scene *scene, UBO *ubo, int frame_width, int frame_height) {
     add_object_to_scene(scene, diablo_object);
 
     // Init light data
-    float light_radius = 6.0f;
+    float light_radius = 20.0f;
     for (int i = 0; i < MAX_LIGHTS; ++i) {
         ubo->lights[i].u_color = vec3_to_vec4(COLLOR_PALLETE[i], 1.0f);
         ubo->lights[i].u_radius = light_radius;
@@ -75,7 +78,7 @@ int init_scene(Scene *scene, UBO *ubo, int frame_width, int frame_height) {
 }
 
 void scene_update(Scene *scene, UBO *ubo, float delta_time) {
-    float circle_radius = 5.5f;
+    float circle_radius = 4.0f;
     float angle_increment = 2.0f * M_PI / MAX_LIGHTS;
     for (int i = 0; i < MAX_LIGHTS; ++i) {
         float angle = angle_increment * i + delta_time;

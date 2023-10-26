@@ -6,8 +6,9 @@
 #include "../math/vec4.h"
 #include "../math/vec3.h"
 #include "../math/mat4x4.h"
+#include "../math/geometry.h"
 
-#define MAX_LIGHTS 7
+#define MAX_LIGHTS 3
 
 const extern bool FLAT_SHADING;
 const extern bool SMOOTH_SHADING;
@@ -27,6 +28,7 @@ typedef struct {
     Mat4x4 u_model_view;
     vec3 u_cam_pos;
     vec3 u_color;
+    vec3 u_ambient;
     bool u_wireframe;
     float u_time;
 
@@ -51,5 +53,8 @@ typedef struct {
 void vertex_shader(UBO *ubo, vec4 a_position);
 
 void fragment_shader(UBO *ubo, vec3 frag_coord);
+
+// Common shader helpers
+float clamp(float value, float min, float max);
 
 #endif // SHADER_H
