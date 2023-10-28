@@ -56,3 +56,18 @@ void print_vec4(const vec4 v) {
         v.elem[3]
     );
 }
+
+vec4 *mul(vec4 *a, const vec4 *b) {
+
+  float qax = a->x, qay = a->y, qaz = a->z, qaw = a->w;
+  float qbx = b->x, qby = b->y, qbz = b->z, qbw = b->w;
+
+
+  a->x = qax * qbw + qaw * qbx + qay * qbz - qaz * qby;
+  a->y = qay * qbw + qaw * qby + qaz * qbx - qax * qbz;
+  a->z = qaz * qbw + qaw * qbz + qax * qby - qay * qbx;
+  a->w = qaw * qbw - qax * qbx - qay * qby - qaz * qbz;
+
+  return a;
+}
+

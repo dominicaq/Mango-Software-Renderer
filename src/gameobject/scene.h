@@ -15,25 +15,21 @@
 
 const extern vec3 COLLOR_PALLETE[7];
 
-typedef struct {
+typedef struct GameObject {
     Transform transform;
     Mesh *mesh;
+    int num_children;
+    struct GameObject *children;
 } GameObject;
 
 typedef struct {
-    GameObject game_objects[MAX_SCENE_OBJECTS];
+    GameObject *objects;
     int num_objects;
 
     // Lights and camera dont count as objects
     Camera camera;
-    Light lights[MAX_LIGHTS];
-    vec3 light_colors[MAX_LIGHTS];
 } Scene;
 
-int init_scene(Scene *scene, UBO *ubo, int frame_width, int frame_height);
-
 void scene_update(Scene *scene, UBO *ubo, float delta_time);
-
-void add_object_to_scene(Scene *scene, GameObject object);
 
 #endif

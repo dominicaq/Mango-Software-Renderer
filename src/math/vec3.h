@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <math.h>
+#define EPSILON 1.0e-6
 
 typedef struct {
     float x;

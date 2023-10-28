@@ -39,6 +39,17 @@ void rasterize(Frame *frame, vec3 ss[3], vec3 world_space[3], vec3 normals[3], U
     }
 }
 
+
+bool in_frustum(vec3 ndc[3]) {
+  float *floats = (float *)ndc;
+  for (int i = 2; i < 9; i += 3) {
+    if (fabsf(floats[i]) > 1.0f) {
+      return false;
+    }
+  }
+  return true;
+}
+
 void draw_triangle(Frame *frame, Triangle *triangle, UBO *ubo) {
     // Apply vertex shader
     vec3 ndc[3];
@@ -53,7 +64,16 @@ void draw_triangle(Frame *frame, Triangle *triangle, UBO *ubo) {
 
         // Shader output
         // ndc[i] = clip_space
+
         ndc[i] = homogenize_vec4(ubo->gl_position);
+        /*
+        if (fabsf(ndc[i].y) > 10.0f) {
+          printf("----------\n");
+          print_vec4(a_position);
+          print_vec4(ubo->gl_position);
+          print_vec3(ndc[i]);
+        }
+        */
         world_space[i] = ubo->frag_pos;
         normals[i] = ubo->v_normal;
         screen_space[i] = ndc_to_screen(
@@ -61,6 +81,9 @@ void draw_triangle(Frame *frame, Triangle *triangle, UBO *ubo) {
             frame->height,
             ndc[i]
         );
+    }
+    if (!in_frustum(ndc)) {
+      return;
     }
 
     // Backface culling
@@ -75,8 +98,8 @@ void draw_triangle(Frame *frame, Triangle *triangle, UBO *ubo) {
 }
 
 void draw_mesh(Frame *frame, Mesh *mesh, UBO *ubo) {
-    for (int i = 0; i < mesh->index_count; i += 3) {
-        if (i + 2 > mesh->index_count) {
+    for (int i = 0; i < mesh->ind_count; i += 3) {
+        if (i + 2 > mesh->ind_count) {
             break;
         }
 
@@ -84,11 +107,10 @@ void draw_mesh(Frame *frame, Mesh *mesh, UBO *ubo) {
         Triangle triangle;
         for (int j = 0; j < 3; ++j) {
             int index = i + j;
-            triangle.vertices[j] = mesh->vertices[mesh->vertex_index[index]];
-            triangle.normals[j]  = mesh->normals[mesh->normal_index[index]];
-            triangle.uvs[j]      = mesh->uvs[mesh->uv_index[index]];
+            triangle.vertices[j] = mesh->verts[mesh->vert_inds[index]];
+            triangle.normals[j]  = mesh->norms[mesh->norm_inds[index]];
+            triangle.uvs[j]      = mesh->uvs[mesh->uv_inds[index]];
         }
-
         draw_triangle(frame, &triangle, ubo);
     }
 }

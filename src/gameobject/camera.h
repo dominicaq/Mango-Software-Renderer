@@ -24,6 +24,7 @@ typedef struct {
  * Return: The perspective projection matrix.
  */
 Mat4x4 perspective(const Camera *cam);
+Mat4x4 orthographic(const Camera *cam);
 
 /*
  * view - Calculate a view matrix

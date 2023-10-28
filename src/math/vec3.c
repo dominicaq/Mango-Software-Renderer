@@ -39,14 +39,16 @@ vec3 cross(vec3 a, vec3 b) {
 }
 
 vec3 normalize(vec3 a) {
+    // float len = q_rsqrt(dot(a, a));
     float len = magnitude(a);
     if (len == 0.0f) {
         return (vec3){0.0f,0.0f,0.0f};
     }
+    float inv_len = 1.0f / len;
 
-    a.x = a.x / len;
-    a.y = a.y / len;
-    a.z = a.z / len;
+    a.x *= inv_len;
+    a.y *= inv_len;
+    a.z *= inv_len;
     return a;
 }
 

@@ -8,8 +8,6 @@
 #include "../math/mat4x4.h"
 #include "../math/geometry.h"
 
-#define MAX_LIGHTS 3
-
 const extern bool FLAT_SHADING;
 const extern bool SMOOTH_SHADING;
 const extern bool PHONG_SHADING;
@@ -33,7 +31,8 @@ typedef struct {
     float u_time;
 
     // Lighting
-    Light lights[MAX_LIGHTS];
+    Light *lights;
+    int num_lights;
 
     // Fragment data
     vec3 frag_pos;

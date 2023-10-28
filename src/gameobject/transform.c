@@ -6,29 +6,32 @@ Mat4x4 rotate(vec3 angles) {
     // Z = Roll
     // X = Pitch
     // Y = Yaw
-    float alpha = angles.z * DEG2RAD;
-    float beta  = angles.x * DEG2RAD;
-    float gamma = angles.y * DEG2RAD;
+    float x = angles.x * DEG2RAD;
+    float y  = angles.y * DEG2RAD;
+    float z = angles.z * DEG2RAD;
 
-    float c1 = cosf(alpha);
-    float c2 = cosf(beta);
-    float c3 = cosf(gamma);
+    float a = cosf(x);
+    float b = sinf(x);
 
-    float s1 = sinf(alpha);
-    float s2 = sinf(beta);
-    float s3 = sinf(gamma);
+    float c = cosf(y);
+    float d = sinf(y);
 
-    float m1 = c1 * c3 - s1 * s2 * s3;
-    float m2 = -c2 * s1;
-    float m3 = c1 * s3 + c3 * s1 * s2;
+    float e = cosf(z);
+    float f = sinf(z);
 
-    float m4 = c3 * s1 + c1 * s2 * s3;
-    float m5 = c1 * c2;
-    float m6 = s1 * s3 - c1 * c3 * s2;
+    float ae = a * e, af = a * f, be = b * e, bf = b * f;
 
-    float m7 = -c2 * s3;
-    float m8 = s2;
-    float m9 = c2 * c3;
+    float m1 = c * e;
+    float m2 = - c * f;
+    float m3 = d;
+
+    float m4 = af + be * d;
+    float m5 = ae - bf * d;
+    float m6 = - b * c;
+
+    float m7 = bf - ae * d;
+    float m8 = be + af * d;
+    float m9 = a * c;
 
     Mat4x4 result = {
         {{m1, m2, m3, 0.0f},
@@ -40,10 +43,9 @@ Mat4x4 rotate(vec3 angles) {
     return result;
 }
 
-Mat4x4 get_model_matrix(Transform transform) {
-    Mat4x4 rot_matrix = rotate(transform.euler_angles);
-    Mat4x4 scale_matrix = mat_scale(IDENTITY, transform.scale);
-    Mat4x4 translation = translate(IDENTITY, transform.position);
+Mat4x4 transform_to_mat(Transform transform) {
+    Mat4x4 rot = rotate(transform.euler_angles);
+    Mat4x4 trans = translate(IDENTITY, transform.position);
 
-    return mat_mul(mat_mul(translation, rot_matrix), scale_matrix);
+    return mat_mul(trans, mat_mul(rot, mat_scale(IDENTITY, transform.scale)));
 }

@@ -1,7 +1,10 @@
 build/
-*.tga
+output.*
 .vscode/
 .cache/
+node_modules/
 compile_commands.json
+src/models/
+*.DS_Store
 
 

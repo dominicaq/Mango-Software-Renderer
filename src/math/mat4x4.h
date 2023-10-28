@@ -27,4 +27,6 @@ Mat4x4 transpose(Mat4x4 a);
 // -----------------------------------------------------------------------------
 void print_matrix(const Mat4x4 m);
 
+Mat4x4 mat_invert(Mat4x4 const *m);
+
 #endif // MAX4x4_H

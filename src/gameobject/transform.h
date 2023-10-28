@@ -37,6 +37,6 @@ Mat4x4 rotate(vec3 angles);
  *
  * Return: The model matrix.
  */
-Mat4x4 get_model_matrix(Transform transform);
+Mat4x4 transform_to_mat(Transform transform);
 
 #endif
