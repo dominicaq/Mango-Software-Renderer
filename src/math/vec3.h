@@ -5,6 +5,7 @@
 #include <math.h>
 #define EPSILON 1.0e-6
 
+
 typedef struct {
     float x;
     float y;
@@ -16,6 +17,8 @@ typedef struct {
 vec3 vec3_add(vec3 a, vec3 b);
 
 vec3 vec3_sub(vec3 a, vec3 b);
+
+vec3 *vec3_lerp(vec3 *a, const vec3 *b, float alpha);
 
 vec3 scale(float s, vec3 a);
 

@@ -17,7 +17,7 @@
 // Debug resolution (clear to see issues)
 const int SCREEN_WIDTH = 720;
 const int SCREEN_HEIGHT = 440;
-const bool USE_WIREFRAME = true;
+const bool USE_WIREFRAME = false;
 
 void init_camera(Scene* scene, int frame_width, int frame_height) {
     // Camera properties
@@ -146,8 +146,10 @@ int main() {
             Mat4x4 model_matrix = transform_to_mat(render_target.transform);
             Mat4x4 model_view_matrix = mat_mul(view_matrix, model_matrix);
             Mat4x4 mvp = mat_mul(projection_matrix, model_view_matrix);
+            Mat4x4 vp = mat_mul(projection_matrix, view_matrix);
 
             ubo.u_mvp = mvp;
+            ubo.u_vp_inv = mat_invert(&vp);
             ubo.u_model = model_matrix;
             ubo.u_model_view = model_view_matrix;
             ubo.u_wireframe = USE_WIREFRAME;

@@ -49,20 +49,6 @@ void line(Frame *frame, vec3 v0, vec3 v1);
  */
 void wire_frame(Frame *frame, vec3 screen_space[3]);
 
-// Drawing
-// -----------------------------------------------------------------------------
-/*
- * rasterize - Rasterize a triangle
- * @frame: The frame to rasterize the triangle on
- * @clip_space: An array of three 4D clip space coordinates
- * @color: The color of the rasterized triangle
- *
- * This function rasterizes a filled triangle on the frame.
- *
- * Source: http://www.sunshine2k.de/coding/java/TriangleRasterization/TriangleRasterization.html
- */
-void rasterize(Frame *frame, vec3 ss[3], vec3 world_space[3], vec3 normals[3], UBO *ubo);
-
 /*
  * draw - Draw a triangle
  * @frame: The frame to draw the triangle on

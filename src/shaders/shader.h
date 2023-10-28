@@ -22,6 +22,7 @@ typedef struct {
 typedef struct {
     // Uniform variables
     Mat4x4 u_mvp;
+    Mat4x4 u_vp_inv;
     Mat4x4 u_model;
     Mat4x4 u_model_view;
     vec3 u_cam_pos;

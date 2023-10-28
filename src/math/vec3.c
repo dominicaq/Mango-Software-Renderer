@@ -16,6 +16,15 @@ vec3 vec3_sub(vec3 a, vec3 b) {
     return a;
 }
 
+vec3 *vec3_lerp(vec3 *a, const vec3 *b, float alpha) {
+
+  a->x += ( b->x - a->x ) * alpha;
+  a->y += ( b->y - a->y ) * alpha;
+  a->z += ( b->z - a->z ) * alpha;
+
+  return a;
+}
+
 vec3 scale(float s, vec3 a) {
     a.x = s * a.x;
     a.y = s * a.y;
