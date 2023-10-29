@@ -81,7 +81,7 @@ int alloc_objects(Scene *scene) {
     objects[3].transform.euler_angles = (Vec3){{0.0f, 0.0f, 0.0f}};
     objects[3].transform.scale = (Vec3){{2.0f, 2.0f, 2.0f}};
     spider001_mesh.color = white;
-    // objects[3].mesh = &spider001_mesh;
+    objects[3].mesh = &spider001_mesh;
 
     return 0;
 }

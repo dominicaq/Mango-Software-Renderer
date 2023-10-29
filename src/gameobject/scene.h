@@ -21,6 +21,7 @@ typedef struct GameObject {
     struct GameObject *children;
 } GameObject;
 
+
 typedef struct {
     GameObject *objects;
     int num_objects;
