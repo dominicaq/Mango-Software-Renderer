@@ -20,8 +20,8 @@ const bool USE_WIREFRAME = false;
 
 void init_camera(Scene *scene, int frame_width, int frame_height) {
     // Camera properties
-    scene->camera.transform.position = (Vec3){{0.0f, 2.0f, 10.0f}};
-    scene->camera.transform.euler_angles = (Vec3){{0.0f, 0.0f, 0.0f}};
+    scene->camera.transform.position = (Vec3){{0.0f, 2.0f, 40.0f}};
+    scene->camera.transform.quaternion = (Vec4){{0.0f, 0.0f, 0.0f, 1.0f}};
     scene->camera.transform.scale = (Vec3){{1.0f, 1.0f, 1.0f}};
     scene->camera.fov = 45.0f;
     scene->camera.aspect = (float)(frame_width) / frame_height;
@@ -41,8 +41,8 @@ int alloc_objects(Scene *scene) {
     }
     scene->objects = objects;
 
+    objects[0].transform = transform_default();
     objects[0].transform.position = (Vec3){{6.0f, -3.0f, -8.0f}};
-    objects[0].transform.euler_angles = (Vec3){{0.0f, -20.0f, 0.0f}};
     objects[0].transform.scale = (Vec3){{5.0f, 5.0f, 5.0f}};
     Mesh *head_mesh = load_obj_mesh("../models/head.obj");
     if (head_mesh == NULL) {
@@ -53,9 +53,9 @@ int alloc_objects(Scene *scene) {
     head_mesh->color = white;
     objects[0].mesh = head_mesh;
 
+    objects[1].transform = transform_default();
+    objects[1].transform.quaternion = quat_from_units(UNIT_X, UNIT_Z);
     objects[1].transform.position = (Vec3){{0.0f, 6.0f, -10.0f}};
-    objects[1].transform.euler_angles = (Vec3){{90.0f, 90.0f, 90.0f}};
-    objects[1].transform.scale = (Vec3){{1.0f, 1.0f, 1.0f}};
     Mesh *box_model = load_obj_mesh("../models/light_box.obj");
     if (box_model == NULL) {
         printf("ERROR: Failed to loead plane mesh\n");
@@ -65,8 +65,8 @@ int alloc_objects(Scene *scene) {
     box_model->color = red;
     objects[1].mesh = box_model;
 
+    objects[2].transform = transform_default();
     objects[2].transform.position = (Vec3){{-5.0f, -3.0f, -10.0f}};
-    objects[2].transform.euler_angles = (Vec3){{0.0f, 70.0f, 0.0f}};
     objects[2].transform.scale = (Vec3){{6.0f, 6.0f, 6.0f}};
     Mesh *diablo_model = load_obj_mesh("../models/head.obj");
     if (diablo_model == NULL) {
@@ -77,11 +77,10 @@ int alloc_objects(Scene *scene) {
     diablo_model->color = white;
     objects[2].mesh = diablo_model;
 
+    objects[3].transform = transform_default();
     objects[3].transform.position = (Vec3){{0.0f, -3.0f, 0.0f}};
-    objects[3].transform.euler_angles = (Vec3){{0.0f, 0.0f, 0.0f}};
-    objects[3].transform.scale = (Vec3){{2.0f, 2.0f, 2.0f}};
     spider001_mesh.color = white;
-    // objects[3].mesh = &spider001_mesh;
+    objects[3].mesh = &spider001_mesh;
 
     return 0;
 }
@@ -122,6 +121,7 @@ int main() {
     int frame_count = 1000;
     float delta_time = 0.0f;
     clock_t frame_rate_start = clock();
+    Vec4 slight_right = quat_from_axis(UNIT_Y, 0.1);
     for (int i = 0; i < frame_count; ++i) {
         // Reset frame
         setTGAImageBackground(frame->framebuffer, black);
@@ -131,11 +131,10 @@ int main() {
         ubo.u_time = delta_time;
 
         // Update MVP Matrix: projection * view * model (multiplication order)
-        scene.camera.transform.euler_angles.y += 1;
         Mat4 projection_matrix = perspective(&scene.camera);
         Mat4 cam_matrix = transform_to_mat(scene.camera.transform);
         Mat4 view_matrix = mat4_invert(cam_matrix);
-        // scene.objects[3].transform.euler_angles.y += 1;
+        quat_mul(&scene.objects[3].transform.quaternion, &slight_right);
         for (int i = 0; i < scene.num_objects; ++i) {
             GameObject render_target = scene.objects[i];
             if (render_target.mesh == NULL) {

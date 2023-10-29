@@ -25,9 +25,15 @@ Vec3 vec4_to_vec3(Vec4 v);
 
 Vec4 vec4_add(Vec4 a, Vec4 b);
 
+float vec4_magnitude(Vec4 a);
+
+Vec4 vec4_normalize(Vec4 a);
+
 Vec4 quat_from_units(Vec3 from, Vec3 to);
 
-Vec4 quat_mul(Vec4, Vec4);
+Vec4 *quat_mul(Vec4 *, const Vec4 *);
+
+Vec4 quat_from_axis(Vec3 axis, float angle);
 
 // Helper functions
 // -----------------------------------------------------------------------------
