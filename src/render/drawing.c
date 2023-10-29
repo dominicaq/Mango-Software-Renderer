@@ -99,7 +99,6 @@ void clip_two_verts(Frame *frame, Vec3 cs[3], Vec3 norms[3], UBO *ubo) {
 void draw_triangle(Frame *frame, Triangle *triangle, UBO *ubo) {
     // Apply vertex shader
     Vec3 clip_space[3];
-    Vec3 world_space[3];
     Vec3 normals[3];
     for (int i = 0; i < 3; ++i) {
         // Passed into shader
@@ -110,7 +109,6 @@ void draw_triangle(Frame *frame, Triangle *triangle, UBO *ubo) {
         // Shader output
         // ndc[i] = clip_space
         clip_space[i] = vec4_homogenize(ubo->gl_position);
-        world_space[i] = ubo->frag_pos;
         normals[i] = ubo->v_normal;
     }
 

@@ -35,9 +35,9 @@ Mesh *load_obj_mesh(const char *filename) {
 
         } else if (line[0] == 'v' && line[1] == 'n') {
             Vec3 normal;
-            if (mesh->vert_count && mesh->vert_count % alloc_amt == 0) {
-                verts = realloc(verts,
-                                (mesh->vert_count + alloc_amt) * sizeof(Vec3));
+            if (mesh->norm_count && mesh->norm_count % alloc_amt == 0) {
+                norms = realloc(norms,
+                                (mesh->norm_count + alloc_amt) * sizeof(Vec3));
             }
             sscanf(line, "vn %f %f %f\n", &normal.x, &normal.y, &normal.z);
             norms[mesh->norm_count] = normal;
