@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.0)
+
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_CXX_STANDARD 20)
 
@@ -15,10 +16,12 @@ file(GLOB_RECURSE SOURCES
     src/*/*.c
     src/*/*.h
 )
-option(BUILD_APP1 "Build app1" ON)
+option(BUILD_MODEL_LOADER "Build Model loader" OFF)
 
 add_executable(c_software_renderer src/main.c ${SOURCES})
-add_executable(model_loader src/loader.cc ${SOURCES})
+if (BUILD_MODEL_LOADER)
+    add_executable(model_loader src/loader.cc ${SOURCES})
+endif(BUILD_MODEL_LOADER)
 
 # Link Math
 target_link_libraries(${PROJECT_NAME} m)
