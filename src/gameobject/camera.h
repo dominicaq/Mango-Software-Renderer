@@ -1,6 +1,8 @@
 #ifndef CAMERA_h
 #define CAMERA_h
 
+#include <stdbool.h>
+
 #include "../math/mat4.h"
 #include "../math/vec3.h"
 #include "transform.h"
@@ -26,6 +28,7 @@ typedef struct {
  * Return: The perspective projection matrix.
  */
 Mat4 perspective(const Camera *cam);
+
 Mat4 orthographic(const Camera *cam);
 
 /*

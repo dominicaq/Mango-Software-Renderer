@@ -122,7 +122,7 @@ int main() {
     int frame_count = 1000;
     float delta_time = 0.0f;
     clock_t frame_rate_start = clock();
-    Vec4 slight_right = quat_from_axis(UNIT_Y, 0.1);
+    Vec4 slight_right = quat_from_axis(UNIT_Y, 0.1f);
     for (int i = 0; i < frame_count; ++i) {
         // Reset frame
         setTGAImageBackground(frame->framebuffer, black);
@@ -136,6 +136,9 @@ int main() {
         Mat4 cam_matrix = transform_to_mat(scene.camera.transform);
         Mat4 view_matrix = mat4_inverse(cam_matrix);
         quat_mul(&scene.objects[3].transform.quaternion, &slight_right);
+        // Rotate camera
+        // quat_mul(&scene.camera.transform.quaternion, &slight_right);
+
         for (int i = 0; i < scene.num_objects; ++i) {
             GameObject render_target = scene.objects[i];
             if (render_target.mesh == NULL) {

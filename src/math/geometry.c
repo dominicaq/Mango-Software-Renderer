@@ -61,3 +61,9 @@ bool is_backface(Vec3 ndc[3]) {
     float sign = ab.x * ac.y - ac.x * ab.y;
     return sign < 0.0f;
 }
+
+bool is_point_in_frustum(const Vec3* ndc_point) {
+    return (ndc_point->x >= -1.0f && ndc_point->x <= 1.0f) &&
+           (ndc_point->y >= -1.0f && ndc_point->y <= 1.0f) &&
+           (ndc_point->z >= -1.0f && ndc_point->z <= 1.0f);
+}

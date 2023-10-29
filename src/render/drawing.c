@@ -39,15 +39,16 @@ void rasterize(Frame *frame, Vec3 ss[3], Vec3 model_space[3], Vec3 normals[3],
 
                 fragment_shader(ubo, P);
 
-                setPixel(frame->framebuffer, P.x, P.y, ubo->f_data.gl_frag_color);
+                setPixel(frame->framebuffer, P.x, P.y,
+                    ubo->f_data.gl_frag_color);
             }
         }
     }
 }
 
-void draw_triangle(Frame *frame, Vec3 clip_space[3], Vec3 normals[3], UBO *ubo) {
+void draw_triangle(Frame *frame, Vec3 ndc[3], Vec3 normals[3], UBO *ubo) {
     // Backface culling
-    if (is_backface(clip_space) == true) {
+    if (is_backface(ndc) == true) {
         return;
     }
 
@@ -58,11 +59,11 @@ void draw_triangle(Frame *frame, Vec3 clip_space[3], Vec3 normals[3], UBO *ubo) 
         screen_space[i] = ndc_to_screen(
             frame->width,
             frame->height,
-            clip_space[i]
+            ndc[i]
         );
 
-        Vec4 clip_space_vec4 = vec3_to_vec4(clip_space[i], 1.0f);
-        Vec4 view_space = mat_mul_vec4(ubo->u_vp_inv, clip_space_vec4);
+        Vec4 ndc_vec4 = vec3_to_vec4(ndc[i], 1.0f);
+        Vec4 view_space = mat_mul_vec4(ubo->u_vp_inv, ndc_vec4);
         model_space[i] = vec4_homogenize(view_space);
     }
 
@@ -75,11 +76,11 @@ void draw_triangle(Frame *frame, Vec3 clip_space[3], Vec3 normals[3], UBO *ubo) 
     }
 }
 
-void clip_one_vert(Frame *frame, Vec3 cs1[3], Vec3 norms1[3], UBO *ubo) {
-    Vec3 cs2[3] = {
-        cs1[0],
-        cs1[1],
-        cs1[2],
+void clip_one_vert(Frame *frame, Vec3 ndc1[3], Vec3 norms1[3], UBO *ubo) {
+    Vec3 ndc2[3] = {
+        ndc1[0],
+        ndc1[1],
+        ndc1[2],
     };
     Vec3 norms2[3] = {
         norms1[0],
@@ -87,32 +88,33 @@ void clip_one_vert(Frame *frame, Vec3 cs1[3], Vec3 norms1[3], UBO *ubo) {
         norms1[2],
     };
 
-    float alpha1 = -cs1[0].z / (cs1[1].z - cs1[0].z);
-    float alpha2 = -cs2[0].z / (cs2[2].z - cs2[0].z);
-    cs1[0] = vec3_lerp(cs1[0], cs1[1], alpha1);
+    float alpha1 = -ndc1[0].z / (ndc1[1].z - ndc1[0].z);
+    float alpha2 = -ndc2[0].z / (ndc2[2].z - ndc2[0].z);
+    ndc1[0] = vec3_lerp(ndc1[0], ndc1[1], alpha1);
     norms1[0] = vec3_lerp(norms1[0], norms1[1], alpha1);
-    cs2[0] = vec3_lerp(cs2[0], cs2[2], alpha2);
+    ndc2[0] = vec3_lerp(ndc2[0], ndc2[2], alpha2);
     norms2[0] = vec3_lerp(norms2[0], norms2[2], alpha2);
 
-    draw_triangle(frame, cs1, norms1, ubo);
-    draw_triangle(frame, cs2, norms2, ubo);
+    draw_triangle(frame, ndc1, norms1, ubo);
+    draw_triangle(frame, ndc2, norms2, ubo);
 }
 
-void clip_two_verts(Frame *frame, Vec3 cs[3], Vec3 norms[3], UBO *ubo) {
-    float alpha0 = -cs[0].z / (cs[2].z - cs[0].z);
-    float alpha1 = -cs[1].z / (cs[2].z - cs[1].z);
-    cs[0] = vec3_lerp(cs[0], cs[2], alpha0);
-    cs[1] = vec3_lerp(cs[1], cs[2], alpha1);
+void clip_two_verts(Frame *frame, Vec3 ndc[3], Vec3 norms[3], UBO *ubo) {
+    float alpha0 = -ndc[0].z / (ndc[2].z - ndc[0].z);
+    float alpha1 = -ndc[1].z / (ndc[2].z - ndc[1].z);
+    ndc[0] = vec3_lerp(ndc[0], ndc[2], alpha0);
+    ndc[1] = vec3_lerp(ndc[1], ndc[2], alpha1);
     norms[0] = vec3_lerp(norms[0], norms[2], alpha0);
     norms[1] = vec3_lerp(norms[1], norms[2], alpha1);
 
-    draw_triangle(frame, cs, norms, ubo);
+    draw_triangle(frame, ndc, norms, ubo);
 }
 
 void transform_triangle(Frame *frame, Vertex *verts, UBO *ubo) {
     // Transform triangle data
+    Vec3 ndc[3];
     Vec3 normals[3];
-    Vec3 clip_space[3];
+    bool triangle_in_frustum = false;
     for (int i = 0; i < 3; ++i) {
         // Passed into shader
         Vertex current_vertex = verts[i];
@@ -122,42 +124,52 @@ void transform_triangle(Frame *frame, Vertex *verts, UBO *ubo) {
         // Apply vertex shader
         vertex_shader(ubo, a_position);
 
-        // gl_position means NDC
+        Vec4 clip_space = ubo->v_data.gl_position;
         // Perspective divide
-        clip_space[i] = vec4_homogenize(ubo->v_data.gl_position);
+        ndc[i] = vec4_homogenize(clip_space);
         normals[i] = ubo->v_data.out_normal;
+
+        // Check if the current vertex is in the frustum
+        if (triangle_in_frustum == false) {
+            triangle_in_frustum = is_point_in_frustum(&ndc[i]);
+        }
+    }
+
+    // None of the vertices are in the frustum
+    if (triangle_in_frustum == false) {
+        return;
     }
 
     // Vertex clipping (nasty)
-    if (clip_space[0].z > 1.0f) {
-        if (clip_space[1].z > 1.0f) {
-            if (clip_space[2].z > 1.0f) {
+    if (ndc[0].z > 1.0f) {
+        if (ndc[1].z > 1.0f) {
+            if (ndc[2].z > 1.0f) {
                 return;
             }
-            clip_two_verts(frame, clip_space, normals, ubo);
-        } else if (clip_space[2].z > 1.0f) {
-            Vec3 cs[3] = {clip_space[2], clip_space[0], clip_space[1]};
+            clip_two_verts(frame, ndc, normals, ubo);
+        } else if (ndc[2].z > 1.0f) {
+            Vec3 ndc_reorder[3] = {ndc[2], ndc[0], ndc[1]};
             Vec3 norms[3] = {normals[2], normals[0], normals[1]};
-            clip_two_verts(frame, cs, norms, ubo);
+            clip_two_verts(frame, ndc_reorder, norms, ubo);
         } else {
-            clip_one_vert(frame, clip_space, normals, ubo);
+            clip_one_vert(frame, ndc, normals, ubo);
         }
-    } else if (clip_space[1].z > 1.0f) {
-        if (clip_space[2].z > 1.0f) {
-            Vec3 cs[3] = {clip_space[1], clip_space[2], clip_space[0]};
+    } else if (ndc[1].z > 1.0f) {
+        if (ndc[2].z > 1.0f) {
+            Vec3 ndc_reorder[3] = {ndc[1], ndc[2], ndc[0]};
             Vec3 norms[3] = {normals[1], normals[2], normals[0]};
-            clip_two_verts(frame, cs, norms, ubo);
+            clip_two_verts(frame, ndc_reorder, norms, ubo);
         } else {
-            Vec3 cs[3] = {clip_space[1], clip_space[2], clip_space[0]};
+            Vec3 ndc_reorder[3] = {ndc[1], ndc[2], ndc[0]};
             Vec3 norms[3] = {normals[1], normals[2], normals[0]};
-            clip_one_vert(frame, cs, norms, ubo);
+            clip_one_vert(frame, ndc_reorder, norms, ubo);
         }
-    } else if (clip_space[2].z > 1.0f) {
-        Vec3 cs[3] = {clip_space[2], clip_space[0], clip_space[1]};
+    } else if (ndc[2].z > 1.0f) {
+        Vec3 ndc_reorder[3] = {ndc[2], ndc[0], ndc[1]};
         Vec3 norms[3] = {normals[2], normals[0], normals[1]};
-        clip_one_vert(frame, cs, norms, ubo);
+        clip_one_vert(frame, ndc_reorder, norms, ubo);
     } else {
-        draw_triangle(frame, clip_space, normals, ubo);
+        draw_triangle(frame, ndc, normals, ubo);
     }
 }
 

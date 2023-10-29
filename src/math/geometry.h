@@ -71,6 +71,15 @@ Vec3 world_to_screen(int width, int height, Vec3 v);
 bool is_backface(Vec3 ndc[3]);
 
 /**
+ * Check if a point is within the normalized device coordinates (NDC) range of [-1, 1].
+ *
+ * @param ndc_point The 3D point represented in NDC.
+ * @return true if the point is within the NDC range of [-1, 1] in all
+ * dimensions, false otherwise.
+ */
+bool is_point_in_frustum(const Vec3* ndc_point);
+
+/**
  * Clamp a value within a specified range.
  *
  * This function clamps a value to be within the specified minimum and maximum range.
