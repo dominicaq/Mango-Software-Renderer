@@ -50,7 +50,8 @@ Vec3 vec4_homogenize(Vec4 v);
 /**
  * Convert a 4D vector to a 3D vector by discarding the 'w' component.
  *
- * This function converts a 4D vector into a 3D vector by removing the 'w' component.
+ * This function converts a 4D vector into a 3D vector by removing the 'w'
+ * component.
  *
  * @param v The 4D vector to convert.
  * @return The resulting 3D vector.
@@ -60,7 +61,8 @@ Vec3 vec4_to_vec3(Vec4 v);
 /**
  * Add two 4D vectors element-wise.
  *
- * This function adds two 4D vectors `a` and `b` element-wise, producing a new 4D vector.
+ * This function adds two 4D vectors `a` and `b` element-wise, producing a new
+ * 4D vector.
  *
  * @param a The first 4D vector.
  * @param b The second 4D vector.
@@ -81,7 +83,8 @@ float vec4_magnitude(Vec4 a);
 /**
  * Normalize a 4D vector, making it a unit vector.
  *
- * This function normalizes a 4D vector, making it a unit vector (having a magnitude of 1).
+ * This function normalizes a 4D vector, making it a unit vector (having a
+ * magnitude of 1).
  *
  * @param a The 4D vector to normalize.
  * @return The normalized (unit) vector.
@@ -91,7 +94,8 @@ Vec4 vec4_normalize(Vec4 a);
 /**
  * Create a quaternion from two 3D vectors representing rotation.
  *
- * This function creates a quaternion that represents the rotation from the 'from' vector to the 'to' vector.
+ * This function creates a quaternion that represents the rotation from the
+ * 'from' vector to the 'to' vector.
  *
  * @param from The starting 3D vector.
  * @param to The target 3D vector.
@@ -107,21 +111,41 @@ Vec4 quat_from_units(Vec3 from, Vec3 to);
  * @param q1 The first quaternion.
  * @param q2 The second quaternion.
  * @return The result of quaternion multiplication.
- * @source http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/code/index.htm
+ * @source
+ * http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/code/index.htm
  */
 Vec4 *quat_mul(Vec4 *q1, const Vec4 *q2);
 
 /**
  * Create a quaternion from an axis and an angle.
  *
- * This function creates a quaternion that represents a rotation around the specified axis by the given angle.
+ * This function creates a quaternion that represents a rotation around the
+ * specified axis by the given angle.
  *
  * @param axis The rotation axis.
  * @param angle The rotation angle (in radians).
  * @return The quaternion representing the rotation.
- * @source http://www.euclideanspace.com/maths/geometry/rotations/conversions/angleToQuaternion/index.htm
+ * @source
+ * http://www.euclideanspace.com/maths/geometry/rotations/conversions/angleToQuaternion/index.htm
  */
 Vec4 quat_from_axis(Vec3 axis, float angle);
+
+/**
+ * Create a quaternion from an euler.
+ *
+ * This function creates a quaternion from euler angle
+ *
+ * @param euler Euler angle in XYZ order.
+ * @return The quaternion representing the rotation.
+ * @source
+ * http://www.euclideanspace.com/maths/geometry/rotations/conversions/angleToQuaternion/index.htm
+ * http://www.mathworks.com/matlabcentral/fileexchange/20696-function-to-convert-between-dcm-euler-angles-quaternions-and-euler-vectors/content/SpinCalc.m
+ *
+ */
+Vec4 quat_from_euler(Vec3 euler);
+
+// Helper functions
+// -----------------------------------------------------------------------------
 
 /**
  * Print the components of a 4D vector to the standard output.

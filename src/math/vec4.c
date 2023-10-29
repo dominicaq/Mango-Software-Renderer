@@ -134,3 +134,28 @@ void vec4_print(const Vec4 v) {
     printf("x: %.10f, y: %.10f, z: %.10f, w: %.10f \n", v.elem[0], v.elem[1],
            v.elem[2], v.elem[3]);
 }
+
+Vec4 quat_from_euler(Vec3 euler) {
+    float x = euler.x, y = euler.y, z = euler.z;
+
+    // http://www.mathworks.com/matlabcentral/fileexchange/
+    // 	20696-function-to-convert-between-dcm-euler-angles-quaternions-and-euler-vectors/
+    //	content/SpinCalc.m
+
+    float c1 = cosf(x / 2);
+    float c2 = cosf(y / 2);
+    float c3 = cosf(z / 2);
+
+    float s1 = sinf(x / 2);
+    float s2 = sinf(y / 2);
+    float s3 = sinf(z / 2);
+
+    // always XYZ order
+    Vec4 quat;
+    quat.x = s1 * c2 * c3 + c1 * s2 * s3;
+    quat.y = c1 * s2 * c3 - s1 * c2 * s3;
+    quat.z = c1 * c2 * s3 + s1 * s2 * c3;
+    quat.w = c1 * c2 * c3 - s1 * s2 * s3;
+
+    return quat;
+}

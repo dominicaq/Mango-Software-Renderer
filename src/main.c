@@ -3,6 +3,7 @@
 #include <time.h>
 
 #include "gameobject/scene.h"
+#include "math/vec4.h"
 #include "models/spider.h"
 #include "render/drawing.h"
 #include "render/framedata.h"
@@ -43,6 +44,8 @@ int alloc_objects(Scene *scene) {
     scene->objects = objects;
 
     objects[0].transform = transform_default();
+    objects[0].transform.quaternion =
+        quat_from_euler((Vec3){{0.0f, 70.0f, 30.0f}});
     objects[0].transform.position = (Vec3){{6.0f, -3.0f, -8.0f}};
     objects[0].transform.scale = (Vec3){{5.0f, 5.0f, 5.0f}};
     Mesh *head_mesh = load_obj_mesh("../models/head.obj");
