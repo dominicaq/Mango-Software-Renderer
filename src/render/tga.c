@@ -17,7 +17,7 @@ TGAImage *createTGAImage(int width, int height) {
     return image;
 }
 
-void setPixel(TGAImage *image, int x, int y, vec4 color) {
+void setPixel(TGAImage *image, int x, int y, Vec4 color) {
     if (image == NULL || x < 0 || x >= image->width || y < 0 ||
         y >= image->height) {
         return;
@@ -67,8 +67,8 @@ void writeTGAImageToFile(TGAImage *image, const char *filename) {
     fclose(file);
 }
 
-void setTGAImageBackground(TGAImage *image, vec3 color) {
-    vec4 tga_color = vec3_to_vec4(color, 255);
+void setTGAImageBackground(TGAImage *image, Vec3 color) {
+    Vec4 tga_color = vec3_to_vec4(color, 255);
     for (int i = 0; i < image->width; ++i) {
         for (int j = 0; j < image->height; ++j) {
             setPixel(image, i, j, tga_color);

@@ -15,11 +15,11 @@ typedef struct {
     int norm_count;
     int uv_count;
 
-    vec3 color;
+    Vec3 color;
 
-    vec3 *verts;
-    vec3 *norms;
-    vec2 *uvs;
+    Vec3 *verts;
+    Vec3 *norms;
+    Vec2 *uvs;
 
     int *vert_inds;
     int *norm_inds;

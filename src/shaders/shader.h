@@ -14,8 +14,8 @@ const extern bool PHONG_SHADING;
 
 typedef struct {
     float u_radius;
-    vec3 u_position;
-    vec4 u_color;
+    Vec3 u_position;
+    Vec4 u_color;
 } Light;
 
 // Uniform buffer object
@@ -24,9 +24,9 @@ typedef struct {
     Mat4 u_mvp;
     Mat4 u_vp_inv;
     Mat4 u_model_view;
-    vec3 u_cam_pos;
-    vec3 u_color;
-    vec3 u_ambient;
+    Vec3 u_cam_pos;
+    Vec3 u_color;
+    Vec3 u_ambient;
     bool u_wireframe;
     float u_time;
 
@@ -35,23 +35,23 @@ typedef struct {
     int num_lights;
 
     // Fragment data
-    vec3 frag_pos;
+    Vec3 frag_pos;
 
     // Vertex data
-    vec3 v_position;
-    vec3 v_normal;
+    Vec3 v_position;
+    Vec3 v_normal;
 
     // Data from pipeline
-    vec3 gl_normal;
+    Vec3 gl_normal;
 
     // Data used by pipeline
-    vec4 gl_position;
-    vec4 gl_frag_color;
+    Vec4 gl_position;
+    Vec4 gl_frag_color;
 } UBO;
 
-void vertex_shader(UBO *ubo, vec4 a_position);
+void vertex_shader(UBO *ubo, Vec4 a_position);
 
-void fragment_shader(UBO *ubo, vec3 frag_coord);
+void fragment_shader(UBO *ubo, Vec3 frag_coord);
 
 // Common shader helpers
 float clamp(float value, float min, float max);

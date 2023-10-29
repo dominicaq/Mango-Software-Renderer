@@ -17,12 +17,12 @@
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
 typedef struct {
-    vec3 vertices[3];
-    vec2 uvs[3];
-    vec3 normals[3];
+    Vec3 vertices[3];
+    Vec2 uvs[3];
+    Vec3 normals[3];
 } Triangle;
 
-const extern vec4 WIREFRAME_COLOR;
+const extern Vec4 WIREFRAME_COLOR;
 
 // Wireframe mode
 // -----------------------------------------------------------------------------
@@ -37,7 +37,7 @@ const extern vec4 WIREFRAME_COLOR;
  *
  * Source: https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
  */
-void line(Frame *frame, vec3 v0, vec3 v1);
+void line(Frame *frame, Vec3 v0, Vec3 v1);
 
 /*
  * wire_frame - Draw wireframe triangle
@@ -47,7 +47,7 @@ void line(Frame *frame, vec3 v0, vec3 v1);
  *
  * This function draws a wireframe triangle on the frame.
  */
-void wire_frame(Frame *frame, vec3 screen_space[3]);
+void wire_frame(Frame *frame, Vec3 screen_space[3]);
 
 /*
  * draw - Draw a triangle

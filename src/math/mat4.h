@@ -18,9 +18,9 @@ extern const Mat4 IDENTITY;
 // Right to left multiplication
 Mat4 mat4_mul(const Mat4 a, const Mat4 b);
 
-Mat4 mat4_scale(const vec3 scale);
+Mat4 mat4_scale(const Vec3 scale);
 
-Mat4 mat4_translation(const vec3 v);
+Mat4 mat4_translation(const Vec3 v);
 
 Mat4 mat4_transpose(const Mat4 a);
 

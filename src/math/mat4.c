@@ -23,7 +23,7 @@ Mat4 mat4_mul(const Mat4 a, const Mat4 b) {
     return result;
 }
 
-Mat4 mat4_scale(const vec3 scale) {
+Mat4 mat4_scale(const Vec3 scale) {
     Mat4 res = {{{scale.x, 0.0f, 0.0f, 0.0f},
                  {0.0f, scale.y, 0.0f, 0.0f},
                  {0.0f, 0.0f, scale.z, 0.0f},
@@ -31,7 +31,7 @@ Mat4 mat4_scale(const vec3 scale) {
     return res;
 }
 
-Mat4 mat4_translation(const vec3 v) {
+Mat4 mat4_translation(const Vec3 v) {
     Mat4 res = {{{1.0f, 0.0f, 0.0f, v.x},
                  {0.0f, 1.0f, 0.0f, v.y},
                  {0.0f, 0.0f, 1.0f, v.z},

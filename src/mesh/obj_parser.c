@@ -16,37 +16,37 @@ Mesh *load_obj_mesh(const char *filename) {
     // Parse OBJ file line by line
     char line[128];
     int alloc_amt = 1024;
-    vec3 *verts = (vec3 *)malloc(alloc_amt * sizeof(vec3));
-    vec3 *norms = (vec3 *)malloc(alloc_amt * sizeof(vec3));
-    vec2 *uvs = (vec2 *)malloc(alloc_amt * sizeof(vec2));
+    Vec3 *verts = (Vec3 *)malloc(alloc_amt * sizeof(Vec3));
+    Vec3 *norms = (Vec3 *)malloc(alloc_amt * sizeof(Vec3));
+    Vec2 *uvs = (Vec2 *)malloc(alloc_amt * sizeof(Vec2));
     int *vert_inds = (int *)malloc(alloc_amt * sizeof(int));
     int *norm_inds = (int *)malloc(alloc_amt * sizeof(int));
     int *uv_inds = (int *)malloc(alloc_amt * sizeof(int));
     while (fgets(line, sizeof(line), file)) {
         if (line[0] == 'v' && line[1] == ' ') {
-            vec3 vertex;
+            Vec3 vertex;
             if (mesh->vert_count && mesh->vert_count % alloc_amt == 0) {
                 verts = realloc(verts,
-                                (mesh->vert_count + alloc_amt) * sizeof(vec3));
+                                (mesh->vert_count + alloc_amt) * sizeof(Vec3));
             }
             sscanf(line, "v %f %f %f", &vertex.x, &vertex.y, &vertex.z);
             verts[mesh->vert_count] = vertex;
             ++(mesh->vert_count);
 
         } else if (line[0] == 'v' && line[1] == 'n') {
-            vec3 normal;
+            Vec3 normal;
             if (mesh->vert_count && mesh->vert_count % alloc_amt == 0) {
                 verts = realloc(verts,
-                                (mesh->vert_count + alloc_amt) * sizeof(vec3));
+                                (mesh->vert_count + alloc_amt) * sizeof(Vec3));
             }
             sscanf(line, "vn %f %f %f\n", &normal.x, &normal.y, &normal.z);
             norms[mesh->norm_count] = normal;
             ++(mesh->norm_count);
 
         } else if (line[0] == 'v' && line[1] == 't') {
-            vec2 uv;
+            Vec2 uv;
             if (mesh->uv_count && mesh->uv_count % alloc_amt == 0) {
-                uvs = realloc(uvs, (mesh->uv_count + alloc_amt) * sizeof(vec2));
+                uvs = realloc(uvs, (mesh->uv_count + alloc_amt) * sizeof(Vec2));
             }
             sscanf(line, "vt %f %f\n", &uv.x, &uv.y);
             uvs[mesh->uv_count] = uv;

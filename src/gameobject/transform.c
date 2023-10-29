@@ -2,7 +2,7 @@
 
 const float DEG2RAD = M_PI / 180.0f;
 
-Mat4 rotate(vec3 angles) {
+Mat4 rotate(Vec3 angles) {
     // Z = Roll
     // X = Pitch
     // Y = Yaw

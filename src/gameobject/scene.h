@@ -12,7 +12,7 @@
 
 #define MAX_SCENE_OBJECTS 10
 
-const extern vec3 COLLOR_PALLETE[7];
+const extern Vec3 COLLOR_PALLETE[7];
 
 typedef struct GameObject {
     Transform transform;

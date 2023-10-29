@@ -10,31 +10,31 @@ typedef union {
         float x, y, z;
     };
     float elem[4];
-} vec3;
+} Vec3;
 
 // Vector operations
 // -----------------------------------------------------------------------------
-vec3 vec3_add(vec3 a, vec3 b);
+Vec3 vec3_add( Vec3 a,  Vec3 b);
 
-vec3 vec3_sub(vec3 a, vec3 b);
+Vec3 vec3_sub( Vec3 a,  Vec3 b);
 
-vec3 *vec3_lerp(vec3 *a, const vec3 *b, float alpha);
+Vec3 vec3_lerp( Vec3 a,  Vec3 b, float alpha);
 
-vec3 scale(float s, vec3 a);
+Vec3 vec3_scale(float s, Vec3 a);
 
-float magnitude(vec3 a);
+float vec3_magnitude( Vec3 a);
 
-float dot(vec3 a, vec3 b);
+float vec3_dot( Vec3 a,  Vec3 b);
 
-vec3 cross(vec3 a, vec3 b);
+Vec3 vec3_cross( Vec3 a,  Vec3 b);
 
-vec3 normalize(vec3 a);
+Vec3 vec3_normalize( Vec3 a);
 
-vec3 reflect(vec3 position, vec3 normal);
+Vec3 vec3_reflect( Vec3 position,  Vec3 normal);
 
 // Helper Functions
 // -----------------------------------------------------------------------------
-void vec3_swap(vec3 *v1, vec3 *v2);
-void print_vec3(vec3 v);
+void vec3_swap(Vec3 *v1, Vec3 *v2);
+void vec3_print(Vec3 v);
 
 #endif  // VEC3_H

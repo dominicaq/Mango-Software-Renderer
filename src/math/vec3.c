@@ -2,51 +2,50 @@
 
 // Vector operations
 // -----------------------------------------------------------------------------
-vec3 vec3_add(vec3 a, vec3 b) {
+Vec3 vec3_add(Vec3 a, Vec3 b) {
     a.x = a.x + b.x;
     a.y = a.y + b.y;
     a.z = a.z + b.z;
     return a;
 }
 
-vec3 vec3_sub(vec3 a, vec3 b) {
+Vec3 vec3_sub(Vec3 a, Vec3 b) {
     a.x = a.x - b.x;
     a.y = a.y - b.y;
     a.z = a.z - b.z;
     return a;
 }
 
-vec3 *vec3_lerp(vec3 *a, const vec3 *b, float alpha) {
-    a->x += (b->x - a->x) * alpha;
-    a->y += (b->y - a->y) * alpha;
-    a->z += (b->z - a->z) * alpha;
-
+Vec3 vec3_lerp(Vec3 a, Vec3 b, float alpha) {
+    a.x += (b.x - a.x) * alpha;
+    a.y += (b.y - a.y) * alpha;
+    a.z += (b.z - a.z) * alpha;
     return a;
 }
 
-vec3 scale(float s, vec3 a) {
+Vec3 vec3_scale(float s, Vec3 a) {
     a.x = s * a.x;
     a.y = s * a.y;
     a.z = s * a.z;
     return a;
 }
 
-float magnitude(vec3 a) { return sqrt(a.x * a.x + a.y * a.y + a.z * a.z); }
+float vec3_magnitude(Vec3 a) { return sqrt(a.x * a.x + a.y * a.y + a.z * a.z); }
 
-float dot(vec3 a, vec3 b) { return a.x * b.x + a.y * b.y + a.z * b.z; }
+float vec3_dot(Vec3 a, Vec3 b) { return a.x * b.x + a.y * b.y + a.z * b.z; }
 
-vec3 cross(vec3 a, vec3 b) {
+Vec3 vec3_cross(Vec3 a, Vec3 b) {
     a.x = a.y * b.z - a.z * b.y;
     a.y = a.z * b.x - a.x * b.z;
     a.z = a.x * b.y - a.y * b.x;
     return a;
 }
 
-vec3 normalize(vec3 a) {
+Vec3 vec3_normalize(Vec3 a) {
     // float len = q_rsqrt(dot(a, a));
-    float len = magnitude(a);
+    float len = vec3_magnitude(a);
     if (len == 0.0f) {
-        return (vec3){{0.0f, 0.0f, 0.0f}};
+        return (Vec3){{0.0f, 0.0f, 0.0f}};
     }
     float inv_len = 1.0f / len;
 
@@ -56,18 +55,19 @@ vec3 normalize(vec3 a) {
     return a;
 }
 
-vec3 reflect(vec3 position, vec3 normal) {
-    return vec3_sub(position, scale(2.0f * dot(position, normal), normal));
+Vec3 vec3_reflect(Vec3 position, Vec3 normal) {
+    return vec3_sub(position,
+                    vec3_scale(2.0f * vec3_dot(position, normal), normal));
 }
 
 // Helper Function(s)
 // -----------------------------------------------------------------------------
-void vec3_swap(vec3 *v1, vec3 *v2) {
-    vec3 temp = *v2;
+void vec4_swap(Vec3 *v1, Vec3 *v2) {
+    Vec3 temp = *v2;
     *v2 = *v1;
     *v1 = temp;
 }
 
-void print_vec3(vec3 v) {
+void vec3_print(Vec3 v) {
     printf("x: %.10f, y: %.10f, z: %.10f \n", v.x, v.y, v.z);
 }

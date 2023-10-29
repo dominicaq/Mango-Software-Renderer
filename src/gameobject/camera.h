@@ -52,6 +52,6 @@ Mat4 view(const Camera *cam);
  *
  * Return: The view matrix.
  */
-Mat4 lookAt(const vec3 eye, const vec3 center, const vec3 up);
+Mat4 lookAt(const Vec3 eye, const Vec3 center, const Vec3 up);
 
 #endif

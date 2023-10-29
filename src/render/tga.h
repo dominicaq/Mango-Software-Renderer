@@ -12,11 +12,11 @@ typedef struct {
 
 TGAImage *createTGAImage(int width, int height);
 
-void setPixel(TGAImage *image, int x, int y, vec4 color);
+void setPixel(TGAImage *image, int x, int y, Vec4 color);
 
 void flipImageVertically(TGAImage *image);
 
 void writeTGAImageToFile(TGAImage *image, const char *filename);
 
-void setTGAImageBackground(TGAImage *image, vec3 color);
+void setTGAImageBackground(TGAImage *image, Vec3 color);
 #endif  // TGA_H

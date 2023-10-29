@@ -1,6 +1,6 @@
 #include "scene.h"
 
-const vec3 COLLOR_PALLETE[7] = {
+const Vec3 COLLOR_PALLETE[7] = {
     {{1.0f, 0.0f, 0.0f}},  // Red
     {{0.0f, 1.0f, 0.0f}},  // Green
     {{0.0f, 0.0f, 1.0f}},  // Blue
@@ -17,7 +17,7 @@ void scene_update(Scene *scene, UBO *ubo, float delta_time) {
         float angle = angle_increment * i + delta_time;
         float x = circle_radius * cosf(angle);
         float z = circle_radius * sinf(angle);
-        ubo->lights[i].u_position = (vec3){{x, 0.0f, z}};
+        ubo->lights[i].u_position = (Vec3){{x, 0.0f, z}};
     }
 
     ubo->u_cam_pos = scene->camera.transform.position;
