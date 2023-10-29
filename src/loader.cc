@@ -58,9 +58,9 @@ void *load_fbx_scene(const char *model_path, const char *output_name) {
             c_file << "};" << std::endl;
 
             int32_t vert_inds_count = node->mesh->vertex_indices.count;
-            h_file << "extern int32_t " << name << "_vert_inds["
-                   << vert_inds_count << "];" << std::endl;
-            c_file << "int32_t " << name << "_vert_inds[" << vert_inds_count
+            h_file << "extern int " << name << "_vert_inds[" << vert_inds_count
+                   << "];" << std::endl;
+            c_file << "int " << name << "_vert_inds[" << vert_inds_count
                    << "] = {";
             std::ranges::for_each(node->mesh->vertex_indices, write_i);
             c_file << "};" << std::endl;
@@ -73,9 +73,9 @@ void *load_fbx_scene(const char *model_path, const char *output_name) {
             c_file << "};" << std::endl;
 
             int32_t norm_inds_count = node->mesh->vertex_normal.indices.count;
-            h_file << "extern int32_t " << name << "_norm_inds["
-                   << norm_inds_count << "];" << std::endl;
-            c_file << "int32_t " << name << "_norm_inds[" << norm_inds_count
+            h_file << "extern int " << name << "_norm_inds[" << norm_inds_count
+                   << "];" << std::endl;
+            c_file << "int " << name << "_norm_inds[" << norm_inds_count
                    << "] = {";
             std::ranges::for_each(node->mesh->vertex_indices, write_i);
             c_file << "};" << std::endl;
@@ -88,10 +88,9 @@ void *load_fbx_scene(const char *model_path, const char *output_name) {
             c_file << "};" << std::endl;
 
             int32_t uv_inds_count = node->mesh->vertex_uv.indices.count;
-            h_file << "extern int32_t " << name << "_uv_inds[" << uv_inds_count
+            h_file << "extern int " << name << "_uv_inds[" << uv_inds_count
                    << "];" << std::endl;
-            c_file << "int32_t " << name << "_uv_inds[" << uv_inds_count
-                   << "] = {";
+            c_file << "int " << name << "_uv_inds[" << uv_inds_count << "] = {";
             std::ranges::for_each(node->mesh->vertex_uv.indices, write_i);
             c_file << "};" << std::endl;
 
