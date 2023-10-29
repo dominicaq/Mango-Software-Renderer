@@ -9,7 +9,7 @@
 
 typedef struct {
     Vec3 position;
-    Vec3 euler_angles;
+    Vec4 quaternion;
     Vec3 scale;
 } Transform;
 
@@ -38,5 +38,6 @@ Mat4 rotate(Vec3 angles);
  * Return: The model matrix.
  */
 Mat4 transform_to_mat(Transform transform);
+Transform transform_default();
 
 #endif

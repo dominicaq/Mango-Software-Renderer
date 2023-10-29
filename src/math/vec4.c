@@ -60,3 +60,88 @@ Vec4 *mul(Vec4 *a, const Vec4 *b) {
 
     return a;
 }
+Vec4 quat_from_axis(Vec3 axis, float angle) {
+    // http://www.euclideanspace.com/maths/geometry/rotations/conversions/angleToQuaternion/index.htm
+
+    // assumes axis is normalized
+
+    float halfAngle = angle / 2, s = sinf(halfAngle);
+
+    Vec4 quat = {{
+        axis.x * s,
+        axis.y * s,
+        axis.z * s,
+        cosf(halfAngle),
+    }};
+
+    return quat;
+}
+
+float vec4_magnitude(Vec4 a) {
+    return sqrt(a.x * a.x + a.y * a.y + a.z * a.z + a.w * a.w);
+}
+
+Vec4 vec4_normalize(Vec4 a) {
+    float len = vec4_magnitude(a);
+    if (len == 0.0f) {
+        return (Vec4){{0.0f, 0.0f, 0.0f}};
+    }
+    float inv_len = 1.0f / len;
+
+    a.x *= inv_len;
+    a.y *= inv_len;
+    a.z *= inv_len;
+    return a;
+}
+
+Vec4 quat_from_units(Vec3 vFrom, Vec3 vTo) {
+    // assumes direction vectors vFrom and vTo are normalized
+
+    float r = vec3_dot(vFrom, vTo) + 1;
+    Vec4 quat;
+
+    if (r < EPSILON) {
+        // vFrom and vTo point in opposite directions
+
+        r = 0;
+
+        if (fabsf(vFrom.x) > fabsf(vFrom.z)) {
+            quat = (Vec4){{
+                -vFrom.y,
+                vFrom.x,
+                0,
+                r,
+            }};
+
+        } else {
+            quat = (Vec4){{0, -vFrom.z, vFrom.y, r}};
+        }
+
+    } else {
+        // crossVectors( vFrom, vTo ); // inlined to avoid cyclic dependency on
+        // Vector3
+
+        quat = (Vec4){{vFrom.y * vTo.z - vFrom.z * vTo.y,
+                       vFrom.z * vTo.x - vFrom.x * vTo.z,
+                       vFrom.x * vTo.y - vFrom.y * vTo.x, r
+
+        }};
+    }
+
+    return vec4_normalize(quat);
+}
+
+Vec4 *quat_mul(Vec4 *a, const Vec4 *b) {
+    // from
+    // http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/code/index.htm
+
+    float qax = a->x, qay = a->y, qaz = a->z, qaw = a->w;
+    float qbx = b->x, qby = b->y, qbz = b->z, qbw = b->w;
+
+    a->x = qax * qbw + qaw * qbx + qay * qbz - qaz * qby;
+    a->y = qay * qbw + qaw * qby + qaz * qbx - qax * qbz;
+    a->z = qaz * qbw + qaw * qbz + qax * qby - qay * qbx;
+    a->w = qaw * qbw - qax * qbx - qay * qby - qaz * qbz;
+
+    return a;
+}
