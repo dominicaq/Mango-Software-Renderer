@@ -1,6 +1,6 @@
-#include"vec4.h"
+#include "vec4.h"
 
-vec4 mat_mul_vec4(const Mat4x4 m, const vec4 v) {
+vec4 mat_mul_vec4(const Mat4 m, const vec4 v) {
     vec4 ret;
     for (int i = 0; i < 4; ++i) {
         ret.elem[i] = 0.0f;
@@ -24,19 +24,15 @@ vec3 homogenize_vec4(const vec4 v) {
     float epsilon = 1e-6;
     float w = v.elem[3];
     if (fabs(w) < epsilon) {
-        return (vec3){0.0f, 0.0f, 0.0f};
+        return (vec3){{0.0f, 0.0f, 0.0f}};
     }
 
-    vec3 result = {
-        v.elem[0] / w,
-        v.elem[1] / w,
-        v.elem[2] / w
-    };
+    vec3 result = {{v.elem[0] / w, v.elem[1] / w, v.elem[2] / w}};
     return result;
 }
 
 vec3 vec4_to_vec3(const vec4 v) {
-    return (vec3){v.elem[0], v.elem[1], v.elem[2]};
+    return (vec3){{v.elem[0], v.elem[1], v.elem[2]}};
 }
 
 vec4 vec4_add(const vec4 a, const vec4 b) {
@@ -49,25 +45,18 @@ vec4 vec4_add(const vec4 a, const vec4 b) {
 }
 
 void print_vec4(const vec4 v) {
-    printf("x: %.10f, y: %.10f, z: %.10f, w: %.10f \n",
-        v.elem[0],
-        v.elem[1],
-        v.elem[2],
-        v.elem[3]
-    );
+    printf("x: %.10f, y: %.10f, z: %.10f, w: %.10f \n", v.elem[0], v.elem[1],
+           v.elem[2], v.elem[3]);
 }
 
 vec4 *mul(vec4 *a, const vec4 *b) {
+    float qax = a->x, qay = a->y, qaz = a->z, qaw = a->w;
+    float qbx = b->x, qby = b->y, qbz = b->z, qbw = b->w;
 
-  float qax = a->x, qay = a->y, qaz = a->z, qaw = a->w;
-  float qbx = b->x, qby = b->y, qbz = b->z, qbw = b->w;
+    a->x = qax * qbw + qaw * qbx + qay * qbz - qaz * qby;
+    a->y = qay * qbw + qaw * qby + qaz * qbx - qax * qbz;
+    a->z = qaz * qbw + qaw * qbz + qax * qby - qay * qbx;
+    a->w = qaw * qbw - qax * qbx - qay * qby - qaz * qbz;
 
-
-  a->x = qax * qbw + qaw * qbx + qay * qbz - qaz * qby;
-  a->y = qay * qbw + qaw * qby + qaz * qbx - qax * qbz;
-  a->z = qaz * qbw + qaw * qbz + qax * qby - qay * qbx;
-  a->w = qaw * qbw - qax * qbx - qay * qby - qaz * qbz;
-
-  return a;
+    return a;
 }
-

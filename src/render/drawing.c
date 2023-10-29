@@ -1,5 +1,4 @@
 #include "drawing.h"
-#include <string.h>
 
 const vec4 WIREFRAME_COLOR = (vec4){{255, 165, 0, 255}};
 
@@ -15,7 +14,7 @@ void rasterize(Frame *frame, vec3 ss[3], vec3 model_space[3], vec3 normals[3], U
     // Loop through the bounding box
     for (int y = y_min; y <= y_max; ++y) {
         for (int x = x_min; x <= x_max; ++x) {
-            vec3 P = {x, y, 0.0f};
+            vec3 P = {{x, y, 0.0f}};
             vec3 bc_coords = barycentric_coords(P, ss[0], ss[1], ss[2]);
             // Not within triangle
             if (bc_coords.x < 0 || bc_coords.y < 0 || bc_coords.z < 0) {
@@ -65,104 +64,89 @@ void rasterize_triangle(Frame* frame, vec3 clip_space[3], vec3 normals[3], UBO *
     rasterize(frame, screen_space, model_space, normals, ubo);
 }
 
-void clip1(Frame * frame, vec3 cs1[3], vec3 norms1[3], UBO * ubo) {
+void clip_one_vert(Frame * frame, vec3 cs1[3], vec3 norms1[3], UBO * ubo) {
+    vec3 cs2[3] = {
+        cs1[0],
+        cs1[1],
+        cs1[2],
+    };
+    vec3 norms2[3] = {
+        norms1[0],
+        norms1[1],
+        norms1[2],
+    };
 
-  vec3 cs2[3];
-  memcpy(cs2, cs1, 3 * sizeof(vec3));
-  vec3 norms2[3];
-  memcpy(norms2, norms1, 3 * sizeof(vec3));
+    float alpha1 = -cs1[0].z / (cs1[1].z - cs1[0].z);
+    float alpha2 = -cs2[0].z / (cs2[2].z - cs2[0].z);
+    vec3_lerp(cs1, cs1 + 1, alpha1);
+    vec3_lerp(norms1, norms1 + 1, alpha1);
+    vec3_lerp(cs2, cs2 + 2, alpha2);
+    vec3_lerp(norms2, norms2 + 2, alpha2);
 
-  float alpha1 = -cs1[0].z / (cs1[1].z - cs1[0].z);
-  float alpha2 = -cs2[0].z / (cs2[2].z - cs2[0].z);
-  vec3_lerp(cs1, cs1 + 1, alpha1);
-  vec3_lerp(norms1, norms1 + 1, alpha1);
-  vec3_lerp(cs2, cs2 + 2, alpha2);
-  vec3_lerp(norms2, norms2 + 2, alpha2);
-
-  rasterize_triangle(frame, cs1, norms1, ubo);
-  rasterize_triangle(frame, cs2, norms2, ubo);
+    rasterize_triangle(frame, cs1, norms1, ubo);
+    rasterize_triangle(frame, cs2, norms2, ubo);
 }
 
-void clip2(Frame * frame, vec3 cs[3], vec3 norms[3], UBO * ubo) {
+void clip_two_verts(Frame * frame, vec3 cs[3], vec3 norms[3], UBO * ubo) {
+    float alpha0 = -cs[0].z / (cs[2].z - cs[0].z);
+    float alpha1 = -cs[1].z / (cs[2].z - cs[1].z);
+    vec3_lerp(cs, cs + 2, alpha0);
+    vec3_lerp(cs + 1, cs + 2, alpha1);
+    vec3_lerp(norms, norms + 2, alpha0);
+    vec3_lerp(norms + 1, norms + 2, alpha1);
 
-  float alpha0 = -cs[0].z / (cs[2].z - cs[0].z);
-  float alpha1 = -cs[1].z / (cs[2].z - cs[1].z);
-  vec3_lerp(cs, cs + 2, alpha0);
-  vec3_lerp(cs + 1, cs + 2, alpha1);
-  vec3_lerp(norms, norms + 2, alpha0);
-  vec3_lerp(norms + 1, norms + 2, alpha1);
-
-  rasterize_triangle(frame, cs, norms, ubo);
+    rasterize_triangle(frame, cs, norms, ubo);
 }
-
-bool clip_near(vec3 ndc[3]) {
-  float *floats = (float *)ndc;
-  for (int i = 2; i < 9; i += 3) {
-    if (fabsf(floats[i]) > 1.0f) {
-      return false;
-    }
-  }
-  return true;
-}
-
-
 
 void draw_triangle(Frame *frame, Triangle *triangle, UBO *ubo) {
-  // Apply vertex shader
-  vec3 clip_space[3];
-  vec3 world_space[3];
-  vec3 normals[3];
-  for (int i = 0; i < 3; ++i) {
-    // Passed into shader
-    vec4 a_position = vec3_to_vec4(triangle->vertices[i], 1.0f);
-    ubo->v_normal = triangle->normals[i];
-    vertex_shader(ubo, a_position);
+    // Apply vertex shader
+    vec3 clip_space[3];
+    vec3 world_space[3];
+    vec3 normals[3];
+    for (int i = 0; i < 3; ++i) {
+        // Passed into shader
+        vec4 a_position = vec3_to_vec4(triangle->vertices[i], 1.0f);
+        ubo->v_normal = triangle->normals[i];
+        vertex_shader(ubo, a_position);
 
-    // Shader output
-    // ndc[i] = clip_space
-    clip_space[i] = homogenize_vec4(ubo->gl_position);
-    world_space[i] = ubo->frag_pos;
-    normals[i] = ubo->v_normal;
+        // Shader output
+        // ndc[i] = clip_space
+        clip_space[i] = homogenize_vec4(ubo->gl_position);
+        world_space[i] = ubo->frag_pos;
+        normals[i] = ubo->v_normal;
 
-  }
-  /*
-  if (clip_space[0].z > 1.0f
-    ||clip_space[1].z > 1.0f
-    ||clip_space[2].z > 1.0f) {
-    return;
-  }
-  */
-
-  if (clip_space[0].z > 1.0f) {
-    if (clip_space[1].z > 1.0f) {
-      if (clip_space[2].z > 1.0f) {
-        return;
-      }
-      clip2(frame, clip_space, normals, ubo);
-    }else if (clip_space[2].z > 1.0f) {
-      vec3 cs[3] = { clip_space[2], clip_space[0], clip_space[1] };
-      vec3 norms[3] = { normals[2], normals[0], normals[1] };
-      clip2(frame, cs, norms, ubo);
-    } else {
-      clip1(frame, clip_space, normals, ubo);
     }
-  } else if (clip_space[1].z > 1.0f) {
-    if (clip_space[2].z > 1.0f) {
-      vec3 cs[3] = { clip_space[1], clip_space[2], clip_space[0] };
-      vec3 norms[3] = { normals[1], normals[2], normals[0] };
-      clip2(frame, cs, norms, ubo);
+
+    if (clip_space[0].z > 1.0f) {
+        if (clip_space[1].z > 1.0f) {
+            if (clip_space[2].z > 1.0f) {
+                return;
+            }
+            clip_two_verts(frame, clip_space, normals, ubo);
+        }else if (clip_space[2].z > 1.0f) {
+            vec3 cs[3] = { clip_space[2], clip_space[0], clip_space[1] };
+            vec3 norms[3] = { normals[2], normals[0], normals[1] };
+            clip_two_verts(frame, cs, norms, ubo);
+        } else {
+            clip_one_vert(frame, clip_space, normals, ubo);
+        }
+    } else if (clip_space[1].z > 1.0f) {
+        if (clip_space[2].z > 1.0f) {
+            vec3 cs[3] = { clip_space[1], clip_space[2], clip_space[0] };
+            vec3 norms[3] = { normals[1], normals[2], normals[0] };
+            clip_two_verts(frame, cs, norms, ubo);
+        } else {
+            vec3 cs[3] = { clip_space[1], clip_space[2], clip_space[0] };
+            vec3 norms[3] = { normals[1], normals[2], normals[0] };
+            clip_one_vert(frame, cs, norms, ubo);
+        }
+    } else if (clip_space[2].z > 1.0f) {
+        vec3 cs[3] = { clip_space[2], clip_space[0], clip_space[1] };
+        vec3 norms[3] = { normals[2], normals[0], normals[1] };
+        clip_one_vert(frame, cs, norms, ubo);
     } else {
-      vec3 cs[3] = { clip_space[1], clip_space[2], clip_space[0] };
-      vec3 norms[3] = { normals[1], normals[2], normals[0] };
-      clip1(frame, cs, norms, ubo);
+        rasterize_triangle(frame, clip_space,  normals, ubo);
     }
-  } else if (clip_space[2].z > 1.0f) {
-    vec3 cs[3] = { clip_space[2], clip_space[0], clip_space[1] };
-    vec3 norms[3] = { normals[2], normals[0], normals[1] };
-    clip1(frame, cs, norms, ubo);
-  } else {
-    rasterize_triangle(frame, clip_space,  normals, ubo);
-  }
 }
 
 

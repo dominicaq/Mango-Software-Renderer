@@ -4,9 +4,9 @@
 #include <math.h>
 #include <stdbool.h>
 
+#include "mat4.h"
 #include "vec3.h"
 #include "vec4.h"
-#include "mat4x4.h"
 
 /*
  * barycentric_coords - Calculate efficient barycentric coordinates
@@ -18,7 +18,8 @@
  * Calculate the efficient barycentric coordinates of a point @p within the
  * triangle formed by vertices @a, @b, and @c.
  *
- * Source: https://gamedev.stackexchange.com/questions/23743/whats-the-most-efficient-way-to-find-barycentric-coordinates
+ * Source:
+ * https://gamedev.stackexchange.com/questions/23743/whats-the-most-efficient-way-to-find-barycentric-coordinates
  *
  * Return: The barycentric coordinates of point @p.
  */
@@ -59,7 +60,8 @@ vec3 world_to_screen(int width, int height, vec3 v);
  * Determine whether a triangle with vertices represented by NDC (Normalized
  * Device Coordinates) is a backface or not.
  *
- * Source: https://gamedev.stackexchange.com/questions/203694/how-to-make-backface-culling-work-correctly-in-both-orthographic-and-perspective
+ * Source:
+ * https://gamedev.stackexchange.com/questions/203694/how-to-make-backface-culling-work-correctly-in-both-orthographic-and-perspective
  *
  * Return: 'true' if the triangle is a backface; 'false' otherwise.
  */

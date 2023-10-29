@@ -3,9 +3,9 @@
 // Coordinate functions
 // -----------------------------------------------------------------------------
 vec3 barycentric_coords(vec3 p, vec3 a, vec3 b, vec3 c) {
-    vec3 v0 = vec3_sub(b,a);
-    vec3 v1 = vec3_sub(c,a);
-    vec3 v2 = vec3_sub(p,a);
+    vec3 v0 = vec3_sub(b, a);
+    vec3 v1 = vec3_sub(c, a);
+    vec3 v2 = vec3_sub(p, a);
 
     float d00 = dot(v0, v0);
     float d01 = dot(v0, v1);
@@ -16,7 +16,7 @@ vec3 barycentric_coords(vec3 p, vec3 a, vec3 b, vec3 c) {
     float v = (d11 * d20 - d01 * d21) * invDenom;
     float w = (d00 * d21 - d01 * d20) * invDenom;
     float u = 1.0f - v - w;
-    return (vec3){u,v,w};
+    return (vec3){{u, v, w}};
 }
 
 vec3 lerp_barycentric_coords(vec3 bc_coords, vec3 normals[3]) {
@@ -49,10 +49,7 @@ vec3 world_to_screen(int width, int height, vec3 v) {
     }
 
     vec3 screen_coord = {
-        (v.x + 1.0) * scaleX,
-        (1.0 - (v.y + 1.0)) * scaleY,
-        v.z
-    };
+        {(v.x + 1.0) * scaleX, (1.0 - (v.y + 1.0)) * scaleY, v.z}};
     return screen_coord;
 }
 

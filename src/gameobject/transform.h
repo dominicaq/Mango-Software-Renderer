@@ -3,9 +3,7 @@
 
 #include <math.h>
 
-#include "../math/vec3.h"
 #include "../math/vec4.h"
-#include "../math/mat4x4.h"
 
 typedef struct {
     vec3 position;
@@ -25,7 +23,7 @@ extern const float DEG2RAD;
  *
  * Return: The rotation matrix.
  */
-Mat4x4 rotate(vec3 angles);
+Mat4 rotate(vec3 angles);
 
 /*
  * get_model_matrix - Calculate the model matrix based on a transform
@@ -37,6 +35,6 @@ Mat4x4 rotate(vec3 angles);
  *
  * Return: The model matrix.
  */
-Mat4x4 transform_to_mat(Transform transform);
+Mat4 transform_to_mat(Transform transform);
 
 #endif

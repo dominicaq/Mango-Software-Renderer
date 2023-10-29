@@ -1,6 +1,7 @@
-#include <stdlib.h>
-#include <stdio.h>
 #include "framedata.h"
+
+#include <stdio.h>
+#include <stdlib.h>
 
 float *init_zbuffer(int width, int height) {
     int pixel_count = width * height;
@@ -53,4 +54,3 @@ void free_frame(Frame *frame) {
     free(frame->framebuffer);
     free(frame);
 }
-

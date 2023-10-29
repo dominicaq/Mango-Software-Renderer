@@ -7,22 +7,16 @@ const bool PHONG_SHADING = false;
 void vertex_shader(UBO *ubo, vec4 a_position) {
     // If you you ever want non-uniform scaling, use this:
     // vec3 normalMatrix = transpose(inverse(mat3(modelMatrix)));
-    Mat4x4 mv_no_trans = ubo->u_model_view;
+    Mat4 mv_no_trans = ubo->u_model_view;
     mv_no_trans.elem[0][3] = 0.0f;
     mv_no_trans.elem[1][3] = 0.0f;
     mv_no_trans.elem[2][3] = 0.0f;
-    vec4 mv_normal = mat_mul_vec4(
-        mv_no_trans,
-        vec3_to_vec4(ubo->v_normal, 0.0f)
-    );
-
-    vec4 world_space = mat_mul_vec4(ubo->u_model, a_position);
-    ubo->frag_pos = vec4_to_vec3(world_space);
+    vec4 mv_normal =
+        mat_mul_vec4(mv_no_trans, vec3_to_vec4(ubo->v_normal, 0.0f));
 
     // Don't homogenize
     ubo->v_normal = normalize(vec4_to_vec3(mv_normal));
     ubo->gl_position = mat_mul_vec4(ubo->u_mvp, a_position);
-
 }
 
 void fragment_shader(UBO *ubo, vec3 frag_coord) {
@@ -32,8 +26,8 @@ void fragment_shader(UBO *ubo, vec3 frag_coord) {
 
     // Multiple lights
     vec3 total_diffuse = ubo->u_color;
-    vec3 total_specular = (vec3){0.0f, 0.0f, 0.0f};
-    for (int i = 0; i < ubo->num_lights; i++){
+    vec3 total_specular = (vec3){{0.0f, 0.0f, 0.0f}};
+    for (int i = 0; i < ubo->num_lights; i++) {
         vec3 light_pos = ubo->lights[i].u_position;
         vec3 light_color = vec4_to_vec3(ubo->lights[i].u_color);
         vec3 light_vec = vec3_sub(light_pos, ubo->frag_pos);
@@ -60,15 +54,16 @@ void fragment_shader(UBO *ubo, vec3 frag_coord) {
 
         total_specular = vec3_add(total_specular, specular);
         total_diffuse = vec3_add(total_diffuse, scale(angle, intensity));
-	}
+    }
 
     // Scale to RGB to TGA format
     vec3 lighting = vec3_add(total_diffuse, total_specular);
-    lighting = scale(255.0f / ubo->num_lights, lighting); // this does not look right
+    lighting =
+        scale(255.0f / ubo->num_lights, lighting);  // this does not look right
     lighting.x = clamp(lighting.x, 0.0f, 255.0f);
     lighting.y = clamp(lighting.y, 0.0f, 255.0f);
     lighting.z = clamp(lighting.z, 0.0f, 255.0f);
-    ubo->gl_frag_color = vec3_to_vec4(lighting, 255.0f); // TGA RGBA
+    ubo->gl_frag_color = vec3_to_vec4(lighting, 255.0f);  // TGA RGBA
 }
 
 float clamp(float value, float min, float max) {

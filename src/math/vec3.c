@@ -17,12 +17,11 @@ vec3 vec3_sub(vec3 a, vec3 b) {
 }
 
 vec3 *vec3_lerp(vec3 *a, const vec3 *b, float alpha) {
+    a->x += (b->x - a->x) * alpha;
+    a->y += (b->y - a->y) * alpha;
+    a->z += (b->z - a->z) * alpha;
 
-  a->x += ( b->x - a->x ) * alpha;
-  a->y += ( b->y - a->y ) * alpha;
-  a->z += ( b->z - a->z ) * alpha;
-
-  return a;
+    return a;
 }
 
 vec3 scale(float s, vec3 a) {
@@ -32,13 +31,9 @@ vec3 scale(float s, vec3 a) {
     return a;
 }
 
-float magnitude(vec3 a) {
-    return sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
-}
+float magnitude(vec3 a) { return sqrt(a.x * a.x + a.y * a.y + a.z * a.z); }
 
-float dot(vec3 a, vec3 b) {
-    return a.x * b.x + a.y * b.y + a.z * b.z;
-}
+float dot(vec3 a, vec3 b) { return a.x * b.x + a.y * b.y + a.z * b.z; }
 
 vec3 cross(vec3 a, vec3 b) {
     a.x = a.y * b.z - a.z * b.y;
@@ -51,7 +46,7 @@ vec3 normalize(vec3 a) {
     // float len = q_rsqrt(dot(a, a));
     float len = magnitude(a);
     if (len == 0.0f) {
-        return (vec3){0.0f,0.0f,0.0f};
+        return (vec3){{0.0f, 0.0f, 0.0f}};
     }
     float inv_len = 1.0f / len;
 

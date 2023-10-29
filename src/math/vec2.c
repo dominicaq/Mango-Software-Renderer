@@ -18,26 +18,18 @@ vec2 vec2_scale(float s, vec2 a) {
     return a;
 }
 
-float vec2_magnitude(vec2 a) {
-    return sqrt(a.x * a.x + a.y * a.y);
-}
+float vec2_magnitude(vec2 a) { return sqrt(a.x * a.x + a.y * a.y); }
 
-float vec2_dot(vec2 a, vec2 b) {
-    return a.x * b.x + a.y * b.y;
-}
+float vec2_dot(vec2 a, vec2 b) { return a.x * b.x + a.y * b.y; }
 
-float vec2_cross(vec2 a, vec2 b) {
-    return (a.x * b.y) - (a.y * b.x);
-}
+float vec2_cross(vec2 a, vec2 b) { return (a.x * b.y) - (a.y * b.x); }
 
 // Helper Function(s)
 // -----------------------------------------------------------------------------
-void vec2_swap(vec2* v1, vec2* v2) {
+void vec2_swap(vec2 *v1, vec2 *v2) {
     vec2 temp = *v2;
     *v2 = *v1;
     *v1 = temp;
 }
 
-void print_vec2(vec2 v) {
-    printf("x: %f, y: %f \n", v.x, v.y);
-}
+void print_vec2(vec2 v) { printf("x: %f, y: %f \n", v.x, v.y); }

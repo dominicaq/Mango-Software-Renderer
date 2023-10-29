@@ -3,13 +3,12 @@
 
 #include <math.h>
 
-#include "transform.h"
-#include "camera.h"
-#include "../shaders/shader.h"
 #include "../math/vec3.h"
-
 #include "../mesh/mesh.h"
 #include "../mesh/obj_parser.h"
+#include "../shaders/shader.h"
+#include "camera.h"
+#include "transform.h"
 
 #define MAX_SCENE_OBJECTS 10
 

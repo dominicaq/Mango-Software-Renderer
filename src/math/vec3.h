@@ -1,15 +1,15 @@
 #ifndef VEC3_H
 #define VEC3_H
 
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
 #define EPSILON 1.0e-6
 
-
-typedef struct {
-    float x;
-    float y;
-    float z;
+typedef union {
+    struct {
+        float x, y, z;
+    };
+    float elem[4];
 } vec3;
 
 // Vector operations
@@ -37,4 +37,4 @@ vec3 reflect(vec3 position, vec3 normal);
 void vec3_swap(vec3 *v1, vec3 *v2);
 void print_vec3(vec3 v);
 
-#endif // VEC3_H
+#endif  // VEC3_H
