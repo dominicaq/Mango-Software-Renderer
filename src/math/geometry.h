@@ -25,7 +25,7 @@
  */
 Vec3 barycentric_coords(Vec3 p, Vec3 a, Vec3 b, Vec3 c);
 
-Vec3 lerp_barycentric_coords(Vec3 bc_coords, Vec3 normals[3]);
+Vec3 lerp_bc_coords(Vec3 bc_coords, Vec3 normals[3]);
 
 /*
  * ndc_to_screen - Convert NDC to screen coordinates

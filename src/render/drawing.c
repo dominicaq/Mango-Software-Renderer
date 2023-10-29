@@ -30,36 +30,49 @@ void rasterize(Frame *frame, Vec3 ss[3], Vec3 model_space[3], Vec3 normals[3],
             // Determine if triangle is on top
             int buffer_index = x + y * frame->width;
             if (P.z < frame->zBuffer[buffer_index]) {
+                // Update depth
                 frame->zBuffer[buffer_index] = P.z;
-                ubo->gl_normal = lerp_barycentric_coords(bc_coords, normals);
-                ubo->frag_pos = lerp_barycentric_coords(bc_coords, model_space);
+
+                // Lerp data
+                ubo->f_data.gl_normal = lerp_bc_coords(bc_coords, normals);
+                ubo->f_data.frag_pos = lerp_bc_coords(bc_coords, model_space);
+
                 fragment_shader(ubo, P);
-                setPixel(frame->framebuffer, P.x, P.y, ubo->gl_frag_color);
+
+                setPixel(frame->framebuffer, P.x, P.y, ubo->f_data.gl_frag_color);
             }
         }
     }
 }
-void rasterize_triangle(Frame *frame, Vec3 clip_space[3], Vec3 normals[3],
-                        UBO *ubo) {
+
+void draw_triangle(Frame *frame, Vec3 clip_space[3], Vec3 normals[3], UBO *ubo) {
     // Backface culling
     if (is_backface(clip_space) == true) {
         return;
     }
 
-    Vec3 screen_space[3];
+    // Get coordinate spaces
     Vec3 model_space[3];
-
+    Vec3 screen_space[3];
     for (int i = 0; i < 3; ++i) {
-        screen_space[i] =
-            ndc_to_screen(frame->width, frame->height, clip_space[i]);
-        model_space[i] = vec4_homogenize(
-            mat_mul_vec4(ubo->u_vp_inv, vec3_to_vec4(clip_space[i], 1)));
+        screen_space[i] = ndc_to_screen(
+            frame->width,
+            frame->height,
+            clip_space[i]
+        );
+
+        Vec4 clip_space_vec4 = vec3_to_vec4(clip_space[i], 1.0f);
+        Vec4 view_space = mat_mul_vec4(ubo->u_vp_inv, clip_space_vec4);
+        model_space[i] = vec4_homogenize(view_space);
     }
 
-    if (ubo->u_wireframe == true) {
+    if (ubo->debug.wireframe == true) {
         wire_frame(frame, screen_space);
     }
-    rasterize(frame, screen_space, model_space, normals, ubo);
+
+    if (ubo->debug.rasterize == true) {
+        rasterize(frame, screen_space, model_space, normals, ubo);
+    }
 }
 
 void clip_one_vert(Frame *frame, Vec3 cs1[3], Vec3 norms1[3], UBO *ubo) {
@@ -81,8 +94,8 @@ void clip_one_vert(Frame *frame, Vec3 cs1[3], Vec3 norms1[3], UBO *ubo) {
     cs2[0] = vec3_lerp(cs2[0], cs2[2], alpha2);
     norms2[0] = vec3_lerp(norms2[0], norms2[2], alpha2);
 
-    rasterize_triangle(frame, cs1, norms1, ubo);
-    rasterize_triangle(frame, cs2, norms2, ubo);
+    draw_triangle(frame, cs1, norms1, ubo);
+    draw_triangle(frame, cs2, norms2, ubo);
 }
 
 void clip_two_verts(Frame *frame, Vec3 cs[3], Vec3 norms[3], UBO *ubo) {
@@ -93,25 +106,29 @@ void clip_two_verts(Frame *frame, Vec3 cs[3], Vec3 norms[3], UBO *ubo) {
     norms[0] = vec3_lerp(norms[0], norms[2], alpha0);
     norms[1] = vec3_lerp(norms[1], norms[2], alpha1);
 
-    rasterize_triangle(frame, cs, norms, ubo);
+    draw_triangle(frame, cs, norms, ubo);
 }
 
-void draw_triangle(Frame *frame, Triangle *triangle, UBO *ubo) {
-    // Apply vertex shader
-    Vec3 clip_space[3];
+void transform_triangle(Frame *frame, Vertex *verts, UBO *ubo) {
+    // Transform triangle data
     Vec3 normals[3];
+    Vec3 clip_space[3];
     for (int i = 0; i < 3; ++i) {
         // Passed into shader
-        Vec4 a_position = vec3_to_vec4(triangle->vertices[i], 1.0f);
-        ubo->v_normal = triangle->normals[i];
+        Vertex current_vertex = verts[i];
+        Vec4 a_position = vec3_to_vec4(current_vertex.position, 1.0f);
+        ubo->v_data.in_normal = current_vertex.normal;
+
+        // Apply vertex shader
         vertex_shader(ubo, a_position);
 
-        // Shader output
-        // ndc[i] = clip_space
-        clip_space[i] = vec4_homogenize(ubo->gl_position);
-        normals[i] = ubo->v_normal;
+        // gl_position means NDC
+        // Perspective divide
+        clip_space[i] = vec4_homogenize(ubo->v_data.gl_position);
+        normals[i] = ubo->v_data.out_normal;
     }
 
+    // Vertex clipping (nasty)
     if (clip_space[0].z > 1.0f) {
         if (clip_space[1].z > 1.0f) {
             if (clip_space[2].z > 1.0f) {
@@ -140,7 +157,7 @@ void draw_triangle(Frame *frame, Triangle *triangle, UBO *ubo) {
         Vec3 norms[3] = {normals[2], normals[0], normals[1]};
         clip_one_vert(frame, cs, norms, ubo);
     } else {
-        rasterize_triangle(frame, clip_space, normals, ubo);
+        draw_triangle(frame, clip_space, normals, ubo);
     }
 }
 
@@ -151,14 +168,14 @@ void draw_mesh(Frame *frame, Mesh *mesh, UBO *ubo) {
         }
 
         // Input assembly
-        Triangle triangle;
+        Vertex verts[3];
         for (int j = 0; j < 3; ++j) {
             int index = i + j;
-            triangle.vertices[j] = mesh->verts[mesh->vert_inds[index]];
-            triangle.normals[j] = mesh->norms[mesh->norm_inds[index]];
-            triangle.uvs[j] = mesh->uvs[mesh->uv_inds[index]];
+            verts[j].position = mesh->verts[mesh->vert_inds[index]];
+            verts[j].normal   = mesh->norms[mesh->norm_inds[index]];
+            verts[j].uv       = mesh->uvs[mesh->uv_inds[index]];
         }
-        draw_triangle(frame, &triangle, ubo);
+        transform_triangle(frame, verts, ubo);
     }
 }
 

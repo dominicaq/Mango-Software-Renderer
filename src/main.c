@@ -17,6 +17,7 @@
 const int SCREEN_WIDTH = 720;
 const int SCREEN_HEIGHT = 440;
 const bool USE_WIREFRAME = false;
+const bool USE_RASTERIZE = true;
 
 void init_camera(Scene *scene, int frame_width, int frame_height) {
     // Camera properties
@@ -108,8 +109,8 @@ int main() {
     int num_lights = 3;
     Light lights[3];
     for (int i = 0; i < num_lights; ++i) {
-        lights[i].u_color = vec3_to_vec4(COLLOR_PALLETE[i], 1.0f);
-        lights[i].u_radius = light_radius;
+        lights[i].color = vec3_to_vec4(COLLOR_PALLETE[i], 1.0f);
+        lights[i].radius = light_radius;
     }
     ubo.lights = lights;
     ubo.num_lights = num_lights;
@@ -148,8 +149,10 @@ int main() {
             ubo.u_mvp = mvp;
             ubo.u_vp_inv = mat4_invert(vp);
             ubo.u_model_view = model_view_matrix;
-            ubo.u_wireframe = USE_WIREFRAME;
             ubo.u_color = render_target.mesh->color;
+
+            ubo.debug.wireframe = USE_WIREFRAME;
+            ubo.debug.rasterize = USE_RASTERIZE;
             draw_mesh(frame, render_target.mesh, &ubo);
         }
 

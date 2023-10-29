@@ -19,11 +19,11 @@ Vec3 barycentric_coords(Vec3 p, Vec3 a, Vec3 b, Vec3 c) {
     return (Vec3){{u, v, w}};
 }
 
-Vec3 lerp_barycentric_coords(Vec3 bc_coords, Vec3 normals[3]) {
+Vec3 lerp_bc_coords(Vec3 bc_coords, Vec3 data[3]) {
     // Interpolate the color using barycentric coordinates
-    Vec3 scale_x = vec3_scale(bc_coords.x, normals[0]);
-    Vec3 scale_y = vec3_scale(bc_coords.y, normals[1]);
-    Vec3 scale_z = vec3_scale(bc_coords.z, normals[2]);
+    Vec3 scale_x = vec3_scale(bc_coords.x, data[0]);
+    Vec3 scale_y = vec3_scale(bc_coords.y, data[1]);
+    Vec3 scale_z = vec3_scale(bc_coords.z, data[2]);
 
     Vec3 color = vec3_add(scale_x, scale_y);
     color = vec3_add(color, scale_z);

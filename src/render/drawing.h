@@ -17,10 +17,11 @@
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
 typedef struct {
-    Vec3 vertices[3];
-    Vec2 uvs[3];
-    Vec3 normals[3];
-} Triangle;
+    Vec3 position;
+    Vec3 normal;
+    Vec4 color;
+    Vec2 uv;
+} Vertex;
 
 const extern Vec4 WIREFRAME_COLOR;
 
@@ -57,7 +58,7 @@ void wire_frame(Frame *frame, Vec3 screen_space[3]);
  * @color: The color of the triangle
  * @wireframe: Boolean indicating whether to draw in wireframe mode
  */
-void draw_triangle(Frame *frame, Triangle *triangle, UBO *ubo);
+void transform_triangle(Frame *frame, Vertex *vertices, UBO *ubo);
 
 /*
  * draw_model - Draw a 3D model
@@ -67,5 +68,9 @@ void draw_triangle(Frame *frame, Triangle *triangle, UBO *ubo);
  * @wireframe: Boolean indicating whether to draw in wireframe mode
  */
 void draw_mesh(Frame *frame, Mesh *mesh, UBO *ubo);
+
+void rasterize(Frame *frame, Vec3 ss[3], Vec3 model_space[3], Vec3 normals[3], UBO *ubo);
+
+void draw_triangle(Frame *frame, Vec3 clip_space[3], Vec3 normals[3], UBO *ubo);
 
 #endif // DRAWING_H
