@@ -31,10 +31,10 @@ Vec3 lerp_bc_coords(Vec3 bc_coords, Vec3 data[3]) {
 }
 
 // Normalized device coordinates to screen coordinates
-Vec3 ndc_to_screen(int screenWidth, int screenHeight, Vec3 ndc_coords) {
+Vec3 ndc_to_screen(int screen_width, int screen_height, Vec3 ndc_coords) {
     Vec3 screen_coords;
-    screen_coords.x = (ndc_coords.x + 1.0f) * 0.5f * screenWidth;
-    screen_coords.y = (1.0f - ndc_coords.y) * 0.5f * screenHeight;
+    screen_coords.x = (ndc_coords.x + 1.0f) * 0.5f * screen_width;
+    screen_coords.y = (1.0f - ndc_coords.y) * 0.5f * screen_height;
     // Preserve z-coordinate for depth testing
     screen_coords.z = ndc_coords.z;
     return screen_coords;

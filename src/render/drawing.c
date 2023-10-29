@@ -15,7 +15,7 @@ void rasterize(Frame *frame, Vec3 ss[3], Vec3 model_space[3], Vec3 normals[3],
     // Loop through the bounding box
     for (int y = y_min; y <= y_max; ++y) {
         for (int x = x_min; x <= x_max; ++x) {
-            Vec3 P = {{x, y, 0.0f}};
+            Vec3 P = (Vec3){{x, y, 0.0f}};
             Vec3 bc_coords = barycentric_coords(P, ss[0], ss[1], ss[2]);
             // Not within triangle
             if (bc_coords.x < 0 || bc_coords.y < 0 || bc_coords.z < 0) {

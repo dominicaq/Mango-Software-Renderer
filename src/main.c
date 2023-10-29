@@ -134,7 +134,7 @@ int main() {
         // Update MVP Matrix: projection * view * model (multiplication order)
         Mat4 projection_matrix = perspective(&scene.camera);
         Mat4 cam_matrix = transform_to_mat(scene.camera.transform);
-        Mat4 view_matrix = mat4_invert(cam_matrix);
+        Mat4 view_matrix = mat4_inverse(cam_matrix);
         quat_mul(&scene.objects[3].transform.quaternion, &slight_right);
         for (int i = 0; i < scene.num_objects; ++i) {
             GameObject render_target = scene.objects[i];
@@ -147,7 +147,7 @@ int main() {
             Mat4 vp = mat4_mul(projection_matrix, view_matrix);
 
             ubo.u_mvp = mvp;
-            ubo.u_vp_inv = mat4_invert(vp);
+            ubo.u_vp_inv = mat4_inverse(vp);
             ubo.u_model_view = model_view_matrix;
             ubo.u_color = render_target.mesh->color;
 

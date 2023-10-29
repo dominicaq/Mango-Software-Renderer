@@ -65,7 +65,7 @@ Mat4 mat4_transpose(const Mat4 a) {
     return result;
 }
 
-Mat4 mat4_invert(const Mat4 m) {
+Mat4 mat4_inverse(const Mat4 m) {
     float n11 = m.elem[0][0], n21 = m.elem[1][0], n31 = m.elem[2][0],
           n41 = m.elem[3][0];
     float n12 = m.elem[0][1], n22 = m.elem[1][1], n32 = m.elem[2][1],
