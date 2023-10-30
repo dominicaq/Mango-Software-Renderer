@@ -105,28 +105,6 @@ void clip_two_verts(Frame *frame, Vec3 ndc[3], Vec3 norms[3], UBO *ubo) {
     draw_triangle(frame, ndc, norms, ubo);
 }
 
-int clip_triangle(Frame *frame, Vec4 clip_space[3], Vec3 *ndc) {
-    // Clip a triangle within if its outside the frustum
-    int num_clipped = 0;
-    // Vec4 previous_cs = clip_space[2];
-    // bool previous_inside = is_point_in_frustum(&previous_cs);
-
-    for (int i = 0; i < 3; ++i) {
-        Vec4 current_cs = clip_space[i];
-        bool current_inside = is_point_in_frustum(&current_cs);
-
-        if (current_inside) {
-            // Don't need to clip, do perspective divide and continue
-            ndc[i] = vec4_homogenize(clip_space[i]);
-        }
-        else {
-            ++num_clipped;
-        }
-    }
-
-    return num_clipped;
-}
-
 void transform_triangle(Frame *frame, Vertex *verts, UBO *ubo) {
     // Transform triangle data
     Vec3 normals[3];
@@ -146,6 +124,8 @@ void transform_triangle(Frame *frame, Vertex *verts, UBO *ubo) {
         normals[i] = ubo->v_data.out_normal;
     }
 
+    // TODO: Note in the future, apparently clipping using the clip_space is
+    // easier, but cant find a paper / dont have the time to translate one
     // Vertex clipping (nasty)
     if (ndc[0].z > 1.0f) {
         if (ndc[1].z > 1.0f) {
@@ -177,11 +157,6 @@ void transform_triangle(Frame *frame, Vertex *verts, UBO *ubo) {
     } else {
         draw_triangle(frame, ndc, normals, ubo);
     }
-    // Vec3 ndc[3];
-    // int clip_count = clip_triangle(frame, clip_space, ndc);
-    // if (clip_count == 0) {
-    //     draw_triangle(frame, ndc, normals, ubo);
-    // }
 }
 
 void draw_mesh(Frame *frame, Mesh *mesh, UBO *ubo) {

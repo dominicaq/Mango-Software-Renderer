@@ -121,7 +121,7 @@ int main() {
     // Update loop
     // -------------------------------------------------------------------------
     Vec3 black = (Vec3){{0.0f, 0.0f, 0.0f}};
-    Vec4 slight_right = quat_from_axis(UNIT_Y, 0.1f);
+    Vec4 slight_right = quat_from_axis(UNIT_Y, 0.01f);
 
     int frame_count = 1000;
     float delta_time = 0.0f;
@@ -136,7 +136,7 @@ int main() {
 
         // Update object(s)
         quat_mul(&scene.objects[3].transform.quaternion, &slight_right);
-        // quat_mul(&scene.camera.transform.quaternion, &slight_right);
+        quat_mul(&scene.camera.transform.quaternion, &slight_right);
         // End
 
         // Update camera transform
