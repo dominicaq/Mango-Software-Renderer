@@ -123,6 +123,9 @@ Vec3 vec3_normalize(Vec3 a);
  */
 Vec3 vec3_reflect(Vec3 position, Vec3 normal);
 
+
+Vec3 vec3_negate(const Vec3 v);
+
 /**
  * Swap the values of two 3D vectors.
  *

@@ -43,6 +43,30 @@ Mat4 rotate(Vec3 angles) {
     return result;
 }
 
+Vec3 get_forward_vector(const Mat4* transform_matrix) {
+    Vec3 forward;
+    forward.x = transform_matrix->elem[0][2];
+    forward.y = transform_matrix->elem[1][2];
+    forward.z = transform_matrix->elem[2][2];
+    return vec3_normalize(forward);
+}
+
+Vec3 get_right_vector(const Mat4* transform_matrix) {
+    Vec3 right;
+    right.x = transform_matrix->elem[0][0];
+    right.y = transform_matrix->elem[1][0];
+    right.z = transform_matrix->elem[2][0];
+    return vec3_normalize(right);
+}
+
+Vec3 get_up_vector(const Mat4* transform_matrix) {
+    Vec3 up;
+    up.x = transform_matrix->elem[0][1];
+    up.y = transform_matrix->elem[1][1];
+    up.z = transform_matrix->elem[2][1];
+    return vec3_normalize(up);
+}
+
 Mat4 transform_to_mat(Transform tsf) {
     float x = tsf.quaternion.x, y = tsf.quaternion.y, z = tsf.quaternion.z,
           w = tsf.quaternion.w;
@@ -74,6 +98,19 @@ Mat4 transform_to_mat(Transform tsf) {
     res.elem[2][3] = tsf.position.z;
     res.elem[3][3] = 1;
     return res;
+}
+
+Transform update_transform(const Transform* transform) {
+    Transform new_transform = *transform;
+    Mat4 model_matrix = transform_to_mat(new_transform);
+
+    // Update axis
+    new_transform.up = get_up_vector(&model_matrix);
+    new_transform.forward = get_forward_vector(&model_matrix);
+    new_transform.right = get_right_vector(&model_matrix);
+
+    new_transform.model_matirx = model_matrix;
+    return new_transform;
 }
 
 Transform transform_default() {

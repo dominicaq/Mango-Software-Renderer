@@ -34,9 +34,13 @@ Vec3 vec3_scale(float s, Vec3 a) {
     return a;
 }
 
-float vec3_magnitude(Vec3 a) { return sqrt(a.x * a.x + a.y * a.y + a.z * a.z); }
+float vec3_magnitude(Vec3 a) {
+    return sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
+}
 
-float vec3_dot(Vec3 a, Vec3 b) { return a.x * b.x + a.y * b.y + a.z * b.z; }
+float vec3_dot(Vec3 a, Vec3 b) {
+    return a.x * b.x + a.y * b.y + a.z * b.z;
+}
 
 Vec3 vec3_cross(Vec3 a, Vec3 b) {
     a.x = a.y * b.z - a.z * b.y;
@@ -62,6 +66,14 @@ Vec3 vec3_normalize(Vec3 a) {
 Vec3 vec3_reflect(Vec3 position, Vec3 normal) {
     return vec3_sub(position,
                     vec3_scale(2.0f * vec3_dot(position, normal), normal));
+}
+
+Vec3 vec3_negate(const Vec3 v) {
+    Vec3 result;
+    result.x = -v.x;
+    result.y = -v.y;
+    result.z = -v.z;
+    return result;
 }
 
 // Helper Function(s)

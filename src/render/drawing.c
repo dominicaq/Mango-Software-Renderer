@@ -91,9 +91,7 @@ void clip_one_vert(Frame *frame, Vec3 ndc1[3], Vec3 norms1[3], UBO *ubo) {
     float alpha1 = -ndc1[0].z / (ndc1[1].z - ndc1[0].z);
     float alpha2 = -ndc2[0].z / (ndc2[2].z - ndc2[0].z);
     ndc1[0] = vec3_lerp(ndc1[0], ndc1[1], alpha1);
-    norms1[0] = vec3_lerp(norms1[0], norms1[1], alpha1);
     ndc2[0] = vec3_lerp(ndc2[0], ndc2[2], alpha2);
-    norms2[0] = vec3_lerp(norms2[0], norms2[2], alpha2);
 
     draw_triangle(frame, ndc1, norms1, ubo);
     draw_triangle(frame, ndc2, norms2, ubo);
@@ -104,17 +102,36 @@ void clip_two_verts(Frame *frame, Vec3 ndc[3], Vec3 norms[3], UBO *ubo) {
     float alpha1 = -ndc[1].z / (ndc[2].z - ndc[1].z);
     ndc[0] = vec3_lerp(ndc[0], ndc[2], alpha0);
     ndc[1] = vec3_lerp(ndc[1], ndc[2], alpha1);
-    norms[0] = vec3_lerp(norms[0], norms[2], alpha0);
-    norms[1] = vec3_lerp(norms[1], norms[2], alpha1);
-
     draw_triangle(frame, ndc, norms, ubo);
+}
+
+int clip_triangle(Frame *frame, Vec4 clip_space[3], Vec3 *ndc) {
+    // Clip a triangle within if its outside the frustum
+    int num_clipped = 0;
+    // Vec4 previous_cs = clip_space[2];
+    // bool previous_inside = is_point_in_frustum(&previous_cs);
+
+    for (int i = 0; i < 3; ++i) {
+        Vec4 current_cs = clip_space[i];
+        bool current_inside = is_point_in_frustum(&current_cs);
+
+        if (current_inside) {
+            // Don't need to clip, do perspective divide and continue
+            ndc[i] = vec4_homogenize(clip_space[i]);
+        }
+        else {
+            ++num_clipped;
+        }
+    }
+
+    return num_clipped;
 }
 
 void transform_triangle(Frame *frame, Vertex *verts, UBO *ubo) {
     // Transform triangle data
-    Vec3 ndc[3];
     Vec3 normals[3];
-    bool triangle_in_frustum = false;
+    // Vec4 clip_space[3];
+    Vec3 ndc[3];
     for (int i = 0; i < 3; ++i) {
         // Passed into shader
         Vertex current_vertex = verts[i];
@@ -124,20 +141,9 @@ void transform_triangle(Frame *frame, Vertex *verts, UBO *ubo) {
         // Apply vertex shader
         vertex_shader(ubo, a_position);
 
-        Vec4 clip_space = ubo->v_data.gl_position;
-        // Perspective divide
-        ndc[i] = vec4_homogenize(clip_space);
+        // clip_space[i] = ubo->v_data.gl_position;
+        ndc[i] = vec4_homogenize(ubo->v_data.gl_position);
         normals[i] = ubo->v_data.out_normal;
-
-        // Check if the current vertex is in the frustum
-        if (triangle_in_frustum == false) {
-            triangle_in_frustum = is_point_in_frustum(&ndc[i]);
-        }
-    }
-
-    // None of the vertices are in the frustum
-    if (triangle_in_frustum == false) {
-        return;
     }
 
     // Vertex clipping (nasty)
@@ -171,6 +177,11 @@ void transform_triangle(Frame *frame, Vertex *verts, UBO *ubo) {
     } else {
         draw_triangle(frame, ndc, normals, ubo);
     }
+    // Vec3 ndc[3];
+    // int clip_count = clip_triangle(frame, clip_space, ndc);
+    // if (clip_count == 0) {
+    //     draw_triangle(frame, ndc, normals, ubo);
+    // }
 }
 
 void draw_mesh(Frame *frame, Mesh *mesh, UBO *ubo) {

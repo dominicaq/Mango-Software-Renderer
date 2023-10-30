@@ -71,6 +71,9 @@ void draw_mesh(Frame *frame, Mesh *mesh, UBO *ubo);
 
 void rasterize(Frame *frame, Vec3 ss[3], Vec3 model_space[3], Vec3 normals[3], UBO *ubo);
 
-void draw_triangle(Frame *frame, Vec3 clip_space[3], Vec3 normals[3], UBO *ubo);
+void draw_triangle(Frame *frame, Vec3 ndc[3], Vec3 normals[3], UBO *ubo);
+
+// Returns clip count, updates ndc
+int clip_triangle(Frame *frame, Vec4 clip_space[3], Vec3 *ndc);
 
 #endif // DRAWING_H

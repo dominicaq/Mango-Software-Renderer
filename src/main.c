@@ -121,11 +121,11 @@ int main() {
     // Update loop
     // -------------------------------------------------------------------------
     Vec3 black = (Vec3){{0.0f, 0.0f, 0.0f}};
+    Vec4 slight_right = quat_from_axis(UNIT_Y, 0.1f);
 
     int frame_count = 1000;
     float delta_time = 0.0f;
     clock_t frame_rate_start = clock();
-    Vec4 slight_right = quat_from_axis(UNIT_Y, 0.1f);
     for (int i = 0; i < frame_count; ++i) {
         // Reset frame
         setTGAImageBackground(frame->framebuffer, black);
@@ -134,31 +134,42 @@ int main() {
         scene_update(&scene, &ubo, delta_time);
         ubo.u_time = delta_time;
 
+        // Update object(s)
+        quat_mul(&scene.objects[3].transform.quaternion, &slight_right);
+        // quat_mul(&scene.camera.transform.quaternion, &slight_right);
+        // End
+
+        // Update camera transform
+        scene.camera.transform = update_transform(&scene.camera.transform);
+        update_view_frustum(&scene.camera);
+
         // Update MVP Matrix: projection * view * model (multiplication order)
         Mat4 projection_matrix = perspective(&scene.camera);
         Mat4 cam_matrix = transform_to_mat(scene.camera.transform);
         Mat4 view_matrix = mat4_inverse(cam_matrix);
-        quat_mul(&scene.objects[3].transform.quaternion, &slight_right);
-        // Rotate camera
-        // quat_mul(&scene.camera.transform.quaternion, &slight_right);
-
         for (int i = 0; i < scene.num_objects; ++i) {
             GameObject render_target = scene.objects[i];
             if (render_target.mesh == NULL) {
                 continue;
             }
-            Mat4 model_matrix = transform_to_mat(render_target.transform);
+            render_target.transform = update_transform(&render_target.transform);
+
+            // Update matricies
+            Mat4 model_matrix = render_target.transform.model_matirx;
             Mat4 model_view_matrix = mat4_mul(view_matrix, model_matrix);
             Mat4 mvp = mat4_mul(projection_matrix, model_view_matrix);
             Mat4 vp = mat4_mul(projection_matrix, view_matrix);
 
+            // Update UBO
             ubo.u_mvp = mvp;
             ubo.u_vp_inv = mat4_inverse(vp);
             ubo.u_model_view = model_view_matrix;
             ubo.u_color = render_target.mesh->color;
 
+            // UBO debug options
             ubo.debug.wireframe = USE_WIREFRAME;
             ubo.debug.rasterize = USE_RASTERIZE;
+
             draw_mesh(frame, render_target.mesh, &ubo);
         }
 

@@ -1,16 +1,19 @@
 #ifndef CAMERA_h
 #define CAMERA_h
 
+#include <stdlib.h>
 #include <stdbool.h>
 
 #include "../math/mat4.h"
 #include "../math/vec3.h"
+#include "../math/plane.h"
 #include "transform.h"
 
 typedef struct {
     float fov;
     float zNear, zFar;
     float aspect;
+    Plane view_frustum[6];
     Transform transform;
 } Camera;
 
@@ -30,6 +33,8 @@ typedef struct {
 Mat4 perspective(const Camera *cam);
 
 Mat4 orthographic(const Camera *cam);
+
+void update_view_frustum(Camera *cam);
 
 /*
  * view - Calculate a view matrix

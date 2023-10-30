@@ -62,8 +62,13 @@ bool is_backface(Vec3 ndc[3]) {
     return sign < 0.0f;
 }
 
-bool is_point_in_frustum(const Vec3* ndc_point) {
-    return (ndc_point->x >= -1.0f && ndc_point->x <= 1.0f) &&
-           (ndc_point->y >= -1.0f && ndc_point->y <= 1.0f) &&
-           (ndc_point->z >= -1.0f && ndc_point->z <= 1.0f);
+bool is_point_in_frustum(const Vec4* clip_space_point) {
+    float x = clip_space_point->x;
+    float y = clip_space_point->y;
+    float z = clip_space_point->z;
+    float w = clip_space_point->w;
+
+    return (x >= -w && x <= w) &&
+           (y >= -w && y <= w) &&
+           (z >= -w && z <= w);
 }
