@@ -13,10 +13,27 @@ const extern bool SMOOTH_SHADING;
 const extern bool PHONG_SHADING;
 
 typedef struct {
-    float u_radius;
-    Vec3 u_position;
-    Vec4 u_color;
+    float radius;
+    Vec3 position;
+    Vec4 color;
 } Light;
+
+typedef struct {
+    bool wireframe;
+    bool rasterize;
+} DebugOptions;
+
+typedef struct {
+    Vec3 in_normal;
+    Vec3 out_normal;
+    Vec4 gl_position;
+} VertexData;
+
+typedef struct {
+    Vec3 frag_pos;
+    Vec3 gl_normal;
+    Vec4 gl_frag_color;
+} FragmentData;
 
 // Uniform buffer object
 typedef struct {
@@ -27,26 +44,16 @@ typedef struct {
     Vec3 u_cam_pos;
     Vec3 u_color;
     Vec3 u_ambient;
-    bool u_wireframe;
     float u_time;
 
     // Lighting
     Light *lights;
     int num_lights;
 
-    // Fragment data
-    Vec3 frag_pos;
-
-    // Vertex data
-    Vec3 v_position;
-    Vec3 v_normal;
-
-    // Data from pipeline
-    Vec3 gl_normal;
-
-    // Data used by pipeline
-    Vec4 gl_position;
-    Vec4 gl_frag_color;
+    // Pipeline data
+    VertexData v_data;
+    FragmentData f_data;
+    DebugOptions debug;
 } UBO;
 
 void vertex_shader(UBO *ubo, Vec4 a_position);

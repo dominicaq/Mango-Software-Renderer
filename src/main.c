@@ -3,6 +3,7 @@
 #include <time.h>
 
 #include "gameobject/scene.h"
+#include "math/vec4.h"
 #include "models/spider.h"
 #include "render/drawing.h"
 #include "render/framedata.h"
@@ -17,6 +18,7 @@
 const int SCREEN_WIDTH = 720;
 const int SCREEN_HEIGHT = 440;
 const bool USE_WIREFRAME = false;
+const bool USE_RASTERIZE = true;
 
 void init_camera(Scene *scene, int frame_width, int frame_height) {
     // Camera properties
@@ -42,6 +44,8 @@ int alloc_objects(Scene *scene) {
     scene->objects = objects;
 
     objects[0].transform = transform_default();
+    objects[0].transform.quaternion =
+        quat_from_euler((Vec3){{0.0f, 70.0f, 30.0f}});
     objects[0].transform.position = (Vec3){{6.0f, -3.0f, -8.0f}};
     objects[0].transform.scale = (Vec3){{5.0f, 5.0f, 5.0f}};
     Mesh *head_mesh = load_obj_mesh("../models/head.obj");
@@ -108,8 +112,8 @@ int main() {
     int num_lights = 3;
     Light lights[3];
     for (int i = 0; i < num_lights; ++i) {
-        lights[i].u_color = vec3_to_vec4(COLLOR_PALLETE[i], 1.0f);
-        lights[i].u_radius = light_radius;
+        lights[i].color = vec3_to_vec4(COLLOR_PALLETE[i], 1.0f);
+        lights[i].radius = light_radius;
     }
     ubo.lights = lights;
     ubo.num_lights = num_lights;
@@ -117,11 +121,11 @@ int main() {
     // Update loop
     // -------------------------------------------------------------------------
     Vec3 black = (Vec3){{0.0f, 0.0f, 0.0f}};
+    Vec4 slight_right = quat_from_axis(UNIT_Y, 0.01f);
 
     int frame_count = 1000;
     float delta_time = 0.0f;
     clock_t frame_rate_start = clock();
-    Vec4 slight_right = quat_from_axis(UNIT_Y, 0.1);
     for (int i = 0; i < frame_count; ++i) {
         // Reset frame
         setTGAImageBackground(frame->framebuffer, black);
@@ -130,26 +134,42 @@ int main() {
         scene_update(&scene, &ubo, delta_time);
         ubo.u_time = delta_time;
 
+        // Update object(s)
+        quat_mul(&scene.objects[3].transform.quaternion, &slight_right);
+        quat_mul(&scene.camera.transform.quaternion, &slight_right);
+        // End
+
+        // Update camera transform
+        scene.camera.transform = update_transform(&scene.camera.transform);
+        update_view_frustum(&scene.camera);
+
         // Update MVP Matrix: projection * view * model (multiplication order)
         Mat4 projection_matrix = perspective(&scene.camera);
         Mat4 cam_matrix = transform_to_mat(scene.camera.transform);
-        Mat4 view_matrix = mat4_invert(cam_matrix);
-        quat_mul(&scene.objects[3].transform.quaternion, &slight_right);
+        Mat4 view_matrix = mat4_inverse(cam_matrix);
         for (int i = 0; i < scene.num_objects; ++i) {
             GameObject render_target = scene.objects[i];
             if (render_target.mesh == NULL) {
                 continue;
             }
-            Mat4 model_matrix = transform_to_mat(render_target.transform);
+            render_target.transform = update_transform(&render_target.transform);
+
+            // Update matricies
+            Mat4 model_matrix = render_target.transform.model_matirx;
             Mat4 model_view_matrix = mat4_mul(view_matrix, model_matrix);
             Mat4 mvp = mat4_mul(projection_matrix, model_view_matrix);
             Mat4 vp = mat4_mul(projection_matrix, view_matrix);
 
+            // Update UBO
             ubo.u_mvp = mvp;
-            ubo.u_vp_inv = mat4_invert(vp);
+            ubo.u_vp_inv = mat4_inverse(vp);
             ubo.u_model_view = model_view_matrix;
-            ubo.u_wireframe = USE_WIREFRAME;
             ubo.u_color = render_target.mesh->color;
+
+            // UBO debug options
+            ubo.debug.wireframe = USE_WIREFRAME;
+            ubo.debug.rasterize = USE_RASTERIZE;
+
             draw_mesh(frame, render_target.mesh, &ubo);
         }
 

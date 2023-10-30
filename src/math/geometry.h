@@ -8,65 +8,88 @@
 #include "vec3.h"
 #include "vec4.h"
 
-/*
- * barycentric_coords - Calculate efficient barycentric coordinates
- * @p: The point to calculate barycentric coordinates for
- * @a: The first vertex of the triangle
- * @b: The second vertex of the triangle
- * @c: The third vertex of the triangle
+/**
+ * Calculate efficient barycentric coordinates of a point in a triangle.
  *
- * Calculate the efficient barycentric coordinates of a point @p within the
- * triangle formed by vertices @a, @b, and @c.
+ * This function calculates efficient barycentric coordinates of a point `p`
+ * within the triangle formed by vertices `a`, `b`, and `c`.
  *
  * Source:
  * https://gamedev.stackexchange.com/questions/23743/whats-the-most-efficient-way-to-find-barycentric-coordinates
  *
- * Return: The barycentric coordinates of point @p.
+ * @param p The point to calculate barycentric coordinates for.
+ * @param a The first vertex of the triangle.
+ * @param b The second vertex of the triangle.
+ * @param c The third vertex of the triangle.
+ * @return The barycentric coordinates of point `p`.
  */
 Vec3 barycentric_coords(Vec3 p, Vec3 a, Vec3 b, Vec3 c);
 
-Vec3 lerp_barycentric_coords(Vec3 bc_coords, Vec3 normals[3]);
-
-/*
- * ndc_to_screen - Convert NDC to screen coordinates
- * @screenWidth: The width of the screen
- * @screenHeight: The height of the screen
- * @ndc_coords: The coordinates in Normalized Device Coordinates (NDC)
+/**
+ * Linearly interpolate data based on barycentric coordinates.
  *
- * Convert NDC (Normalized Device Coordinates) to screen coordinates based on
- * the provided screen width and height.
+ * This function linearly interpolates data using barycentric coordinates.
  *
- * Return: The coordinates in screen space.
+ * @param bc_coords The barycentric coordinates.
+ * @param data An array of data values associated with the vertices.
+ * @return The interpolated data value.
  */
-Vec3 ndc_to_screen(int screenWidth, int screenHeight, Vec3 ndc_coords);
+Vec3 lerp_bc_coords(Vec3 bc_coords, Vec3 data[3]);
 
-/*
- * world_to_screen - Convert world coordinates to screen coordinates
- * @width: The width of the screen
- * @height: The height of the screen
- * @v: The world coordinates to be converted
+/**
+ * Convert NDC to screen coordinates.
  *
- * Convert world coordinates to screen coordinates based on the provided
- * screen width and height.
+ * @param screen_width The width of the screen.
+ * @param screen_height The height of the screen.
+ * @param ndc_coords The coordinates in Normalized Device Coordinates (NDC).
+ * @return The coordinates in screen space.
+ */
+Vec3 ndc_to_screen(int screen_width, int screen_height, Vec3 ndc_coords);
+
+/**
+ * Convert world coordinates to screen coordinates.
  *
- * Return: The coordinates in screen space.
+ * @param width The width of the screen.
+ * @param height The height of the screen.
+ * @param v The world coordinates to be converted.
+ * @return The coordinates in screen space.
  */
 Vec3 world_to_screen(int width, int height, Vec3 v);
 
-/*
- * is_backface - Check if a triangle is a backface in NDC
- * @ndc: An array of three vertices in Normalized Device Coordinates (NDC)geome
+/**
+ * Check if a triangle is a backface in NDC.
  *
- * Determine whether a triangle with vertices represented by NDC (Normalized
+ * This function determines if a triangle with vertices in NDC (Normalized
  * Device Coordinates) is a backface or not.
  *
  * Source:
  * https://gamedev.stackexchange.com/questions/203694/how-to-make-backface-culling-work-correctly-in-both-orthographic-and-perspective
  *
- * Return: 'true' if the triangle is a backface; 'false' otherwise.
+ * @param ndc An array of three vertices in Normalized Device Coordinates (NDC).
+ * @return 'true' if the triangle is a backface; 'false' otherwise.
  */
 bool is_backface(Vec3 ndc[3]);
 
+/**
+ * Check if a point in clip space (represented by a Vec4) is within
+ * the normalized device coordinates (NDC) range of [-1, 1] in all dimensions.
+ *
+ * @param clip_space_point The 4D point represented in clip space.
+ * @return true if the point is within the NDC range of [-1, 1]
+ * in all dimensions (x, y, z), false otherwise.
+ */
+bool is_point_in_frustum(const Vec4* clip_space_point);
+
+/**
+ * Clamp a value within a specified range.
+ *
+ * This function clamps a value to be within the specified minimum and maximum range.
+ *
+ * @param value The value to clamp.
+ * @param min The minimum value.
+ * @param max The maximum value.
+ * @return The clamped value.
+ */
 float clamp(float value, float min, float max);
 
 #endif
