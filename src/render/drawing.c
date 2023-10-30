@@ -40,10 +40,60 @@ void rasterize(Frame *frame, Vec3 ss[3], Vec3 model_space[3], Vec3 normals[3],
                 fragment_shader(ubo, P);
 
                 setPixel(frame->framebuffer, P.x, P.y,
-                    ubo->f_data.gl_frag_color);
+                         ubo->f_data.gl_frag_color);
             }
         }
     }
+}
+
+// Wireframe mode
+// -----------------------------------------------------------------------------
+void swap_ints(int *a, int *b) {
+    *a = *a ^ *b;
+    *b = *a ^ *b;
+    *a = *a ^ *b;
+}
+
+void line(Frame *frame, Vec3 v0, Vec3 v1) {
+    int x0 = (int)v0.x;
+    int x1 = (int)v1.x;
+    int y0 = (int)v0.y;
+    int y1 = (int)v1.y;
+
+    int steep = 0;
+    if (abs(x0 - x1) < abs(y0 - y1)) {
+        swap_ints(&x0, &y0);
+        swap_ints(&x1, &y1);
+        steep = 1;
+    }
+    if (x0 > x1) {
+        swap_ints(&x0, &x1);
+        swap_ints(&y0, &y1);
+    }
+
+    int dx = x1 - x0;
+    int dy = y1 - y0;
+    int derror2 = abs(dy) * 2;
+    int error2 = 0;
+    int y = y0;
+    for (int x = x0; x <= x1; x++) {
+        if (steep) {
+            setPixel(frame->framebuffer, y, x, WIREFRAME_COLOR);
+        } else {
+            setPixel(frame->framebuffer, x, y, WIREFRAME_COLOR);
+        }
+        error2 += derror2;
+        if (error2 > dx) {
+            y += (y1 > y0 ? 1 : -1);
+            error2 -= dx * 2;
+        }
+    }
+}
+
+void wire_frame(Frame *frame, Vec3 screen_space[3]) {
+    line(frame, screen_space[0], screen_space[1]);
+    line(frame, screen_space[1], screen_space[2]);
+    line(frame, screen_space[2], screen_space[0]);
 }
 
 void draw_triangle(Frame *frame, Vec3 ndc[3], Vec3 normals[3], UBO *ubo) {
@@ -56,11 +106,7 @@ void draw_triangle(Frame *frame, Vec3 ndc[3], Vec3 normals[3], UBO *ubo) {
     Vec3 model_space[3];
     Vec3 screen_space[3];
     for (int i = 0; i < 3; ++i) {
-        screen_space[i] = ndc_to_screen(
-            frame->width,
-            frame->height,
-            ndc[i]
-        );
+        screen_space[i] = ndc_to_screen(frame->width, frame->height, ndc[i]);
 
         Vec4 ndc_vec4 = vec3_to_vec4(ndc[i], 1.0f);
         Vec4 view_space = mat_mul_vec4(ubo->u_vp_inv, ndc_vec4);
@@ -89,9 +135,15 @@ void clip_one_vert(Frame *frame, Vec3 ndc1[3], Vec3 norms1[3], UBO *ubo) {
     };
 
     float alpha1 = -ndc1[0].z / (ndc1[1].z - ndc1[0].z);
-    float alpha2 = -ndc2[0].z / (ndc2[2].z - ndc2[0].z);
     ndc1[0] = vec3_lerp(ndc1[0], ndc1[1], alpha1);
+    // norms1[0] = vec3_lerp(norms1[0], norms1[1], alpha1);
+
+    ndc2[1] = ndc1[0];
+    norms1[1] = norms1[0];
+
+    float alpha2 = -ndc2[0].z / (ndc2[2].z - ndc2[0].z);
     ndc2[0] = vec3_lerp(ndc2[0], ndc2[2], alpha2);
+    // norms2[0] = vec3_lerp(norms2[0], norms2[2], alpha2);
 
     draw_triangle(frame, ndc1, norms1, ubo);
     draw_triangle(frame, ndc2, norms2, ubo);
@@ -170,59 +222,9 @@ void draw_mesh(Frame *frame, Mesh *mesh, UBO *ubo) {
         for (int j = 0; j < 3; ++j) {
             int index = i + j;
             verts[j].position = mesh->verts[mesh->vert_inds[index]];
-            verts[j].normal   = mesh->norms[mesh->norm_inds[index]];
-            verts[j].uv       = mesh->uvs[mesh->uv_inds[index]];
+            verts[j].normal = mesh->norms[mesh->norm_inds[index]];
+            verts[j].uv = mesh->uvs[mesh->uv_inds[index]];
         }
         transform_triangle(frame, verts, ubo);
     }
-}
-
-// Wireframe mode
-// -----------------------------------------------------------------------------
-void swap_ints(int *a, int *b) {
-    *a = *a ^ *b;
-    *b = *a ^ *b;
-    *a = *a ^ *b;
-}
-
-void line(Frame *frame, Vec3 v0, Vec3 v1) {
-    int x0 = (int)v0.x;
-    int x1 = (int)v1.x;
-    int y0 = (int)v0.y;
-    int y1 = (int)v1.y;
-
-    int steep = 0;
-    if (abs(x0 - x1) < abs(y0 - y1)) {
-        swap_ints(&x0, &y0);
-        swap_ints(&x1, &y1);
-        steep = 1;
-    }
-    if (x0 > x1) {
-        swap_ints(&x0, &x1);
-        swap_ints(&y0, &y1);
-    }
-
-    int dx = x1 - x0;
-    int dy = y1 - y0;
-    int derror2 = abs(dy) * 2;
-    int error2 = 0;
-    int y = y0;
-    for (int x = x0; x <= x1; x++) {
-        if (steep) {
-            setPixel(frame->framebuffer, y, x, WIREFRAME_COLOR);
-        } else {
-            setPixel(frame->framebuffer, x, y, WIREFRAME_COLOR);
-        }
-        error2 += derror2;
-        if (error2 > dx) {
-            y += (y1 > y0 ? 1 : -1);
-            error2 -= dx * 2;
-        }
-    }
-}
-
-void wire_frame(Frame *frame, Vec3 screen_space[3]) {
-    line(frame, screen_space[0], screen_space[1]);
-    line(frame, screen_space[1], screen_space[2]);
-    line(frame, screen_space[2], screen_space[0]);
 }

@@ -4,8 +4,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "mesh.h"
+#include "../game/gameobject.h"
 
-Mesh *load_obj_mesh(const char *filename);
+Mesh load_obj_mesh(const char *filename);
 
 #endif

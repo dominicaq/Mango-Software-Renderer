@@ -1,9 +1,11 @@
 
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
-#include "gameobject/scene.h"
+#include "game/scene.h"
 #include "math/vec4.h"
+#include "mesh/obj_parser.h"
 #include "models/spider.h"
 #include "render/drawing.h"
 #include "render/framedata.h"
@@ -22,9 +24,8 @@ const bool USE_RASTERIZE = true;
 
 void init_camera(Scene *scene, int frame_width, int frame_height) {
     // Camera properties
-    scene->camera.transform.position = (Vec3){{0.0f, 2.0f, 40.0f}};
-    scene->camera.transform.quaternion = (Vec4){{0.0f, 0.0f, 0.0f, 1.0f}};
-    scene->camera.transform.scale = (Vec3){{1.0f, 1.0f, 1.0f}};
+    scene->camera.game_object = game_object_default();
+    scene->camera.game_object.position = (Vec3){{0.0f, 2.0f, 30.0f}};
     scene->camera.fov = 45.0f;
     scene->camera.aspect = (float)(frame_width) / frame_height;
     scene->camera.zNear = 0.1f;
@@ -35,56 +36,41 @@ int alloc_objects(Scene *scene) {
     Vec3 white = (Vec3){{1.0f, 1.0f, 1.0f}};
     Vec3 red = (Vec3){{0.0f, 1.0f, 0.5f}};
     // Objects
-    scene->num_objects = 4;
-    GameObject *objects =
-        malloc(scene->num_objects * scene->num_objects * sizeof(GameObject));
-    if (objects == NULL) {
+    scene->num_game_objects = 3 + spider_object_amt;
+    Mesh *meshes = malloc(scene->num_game_objects * scene->num_game_objects *
+                          sizeof(Mesh));
+    GameObject *gos = malloc(scene->num_game_objects * scene->num_game_objects *
+                             sizeof(GameObject));
+    if (meshes == NULL) {
         return -1;
     }
-    scene->objects = objects;
+    scene->meshes = meshes;
+    scene->game_objects = gos;
 
-    objects[0].transform = transform_default();
-    objects[0].transform.quaternion =
-        quat_from_euler((Vec3){{0.0f, 70.0f, 30.0f}});
-    objects[0].transform.position = (Vec3){{6.0f, -3.0f, -8.0f}};
-    objects[0].transform.scale = (Vec3){{5.0f, 5.0f, 5.0f}};
-    Mesh *head_mesh = load_obj_mesh("../models/head.obj");
-    if (head_mesh == NULL) {
-        printf("ERROR: Failed to load head mesh\n");
-        free(objects);
-        return -1;
-    }
-    head_mesh->color = white;
-    objects[0].mesh = head_mesh;
+    gos[0] = game_object_default();
+    gos[0].position = (Vec3){{6.0f, -3.0f, -8.0f}};
+    gos[0].scale = (Vec3){{5.0f, 5.0f, 5.0f}};
+    meshes[0] = load_obj_mesh("../models/head.obj");
+    meshes[0].color = white;
 
-    objects[1].transform = transform_default();
-    objects[1].transform.quaternion = quat_from_units(UNIT_X, UNIT_Z);
-    objects[1].transform.position = (Vec3){{0.0f, 6.0f, -10.0f}};
-    Mesh *box_model = load_obj_mesh("../models/light_box.obj");
-    if (box_model == NULL) {
-        printf("ERROR: Failed to loead plane mesh\n");
-        free(objects);
-        return -1;
-    }
-    box_model->color = red;
-    objects[1].mesh = box_model;
+    gos[1] = game_object_default();
+    gos[1].quaternion = quat_from_units(UNIT_X, UNIT_Z);
+    gos[1].position = (Vec3){{0.0f, 6.0f, -10.0f}};
+    meshes[1] = load_obj_mesh("../models/light_box.obj");
+    meshes[1].color = red;
 
-    objects[2].transform = transform_default();
-    objects[2].transform.position = (Vec3){{-5.0f, -3.0f, -10.0f}};
-    objects[2].transform.scale = (Vec3){{6.0f, 6.0f, 6.0f}};
-    Mesh *diablo_model = load_obj_mesh("../models/head.obj");
-    if (diablo_model == NULL) {
-        printf("ERROR: Failed to load diablo mesh\n");
-        free(objects);
-        return -1;
-    }
-    diablo_model->color = white;
-    objects[2].mesh = diablo_model;
+    gos[2] = game_object_default();
+    gos[2].position = (Vec3){{-5.0f, -3.0f, -10.0f}};
+    gos[2].scale = (Vec3){{6.0f, 6.0f, 6.0f}};
+    meshes[2] = load_obj_mesh("../models/head.obj");
+    meshes[2].color = white;
 
-    objects[3].transform = transform_default();
-    objects[3].transform.position = (Vec3){{0.0f, -3.0f, 0.0f}};
-    spider001_mesh.color = white;
-    objects[3].mesh = &spider001_mesh;
+    memcpy(scene->game_objects + 3, spider_game_objects,
+           spider_object_amt * sizeof(GameObject));
+    memcpy(scene->meshes + 3, spider_meshes, spider_object_amt * sizeof(Mesh));
+    scene->max_depth = MAX(scene->max_depth, spider_max_depth);
+
+    gos[3].scale = (Vec3){{0.1f, 0.1f, 0.1f}};
 
     return 0;
 }
@@ -135,27 +121,27 @@ int main() {
         ubo.u_time = delta_time;
 
         // Update object(s)
-        quat_mul(&scene.objects[3].transform.quaternion, &slight_right);
-        quat_mul(&scene.camera.transform.quaternion, &slight_right);
+        quat_mul(&scene.game_objects[3].quaternion, &slight_right);
+        scene.game_objects[3].needs_update = true;
+        // quat_mul(&scene.camera.game_object.quaternion, &slight_right);
+        // scene.camera.game_object.needs_update = true;
         // End
 
         // Update camera transform
-        scene.camera.transform = update_transform(&scene.camera.transform);
-        update_view_frustum(&scene.camera);
+        scene_update_matrices(&scene);
 
         // Update MVP Matrix: projection * view * model (multiplication order)
         Mat4 projection_matrix = perspective(&scene.camera);
-        Mat4 cam_matrix = transform_to_mat(scene.camera.transform);
-        Mat4 view_matrix = mat4_inverse(cam_matrix);
-        for (int i = 0; i < scene.num_objects; ++i) {
-            GameObject render_target = scene.objects[i];
-            if (render_target.mesh == NULL) {
+        Mat4 view_matrix = mat4_inverse(scene.camera.game_object.model_matrix);
+        for (int i = 0; i < scene.num_game_objects; ++i) {
+            Mesh *target_mesh = scene.meshes + i;
+            if (target_mesh->vert_count == 0) {
                 continue;
             }
-            render_target.transform = update_transform(&render_target.transform);
+            GameObject *target_object = scene.game_objects + i;
 
             // Update matricies
-            Mat4 model_matrix = render_target.transform.model_matirx;
+            Mat4 model_matrix = target_object->model_matrix;
             Mat4 model_view_matrix = mat4_mul(view_matrix, model_matrix);
             Mat4 mvp = mat4_mul(projection_matrix, model_view_matrix);
             Mat4 vp = mat4_mul(projection_matrix, view_matrix);
@@ -164,13 +150,13 @@ int main() {
             ubo.u_mvp = mvp;
             ubo.u_vp_inv = mat4_inverse(vp);
             ubo.u_model_view = model_view_matrix;
-            ubo.u_color = render_target.mesh->color;
+            ubo.u_color = target_mesh->color;
 
             // UBO debug options
             ubo.debug.wireframe = USE_WIREFRAME;
             ubo.debug.rasterize = USE_RASTERIZE;
 
-            draw_mesh(frame, render_target.mesh, &ubo);
+            draw_mesh(frame, target_mesh, &ubo);
         }
 
         delta_time += 0.05f;
