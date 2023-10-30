@@ -1,60 +1,80 @@
 #include "camera.h"
 
-Mat4x4 perspective(const Camera *cam) {
+Mat4 perspective(const Camera *cam) {
     float f = 1.0f / tanf((cam->fov * DEG2RAD) * 0.5f);
     float range_inv = 1.0f / (cam->zNear - cam->zFar);
     float a = (cam->zFar + cam->zNear) * range_inv;
     float b = (2.0f * cam->zFar * cam->zNear) * range_inv;
-    Mat4x4 perspective_matrix = {
-        {{f / cam->aspect, 0.0f, 0.0f, 0.0f},
-        {0.0f, f, 0.0f, 0.0f},
-        {0.0f, 0.0f, a, b},
-        {0.0f, 0.0f, -1.0f, 0.0f}}
-    };
+    Mat4 perspective_matrix = {{{f / cam->aspect, 0.0f, 0.0f, 0.0f},
+                                {0.0f, f, 0.0f, 0.0f},
+                                {0.0f, 0.0f, a, b},
+                                {0.0f, 0.0f, -1.0f, 0.0f}}};
     return perspective_matrix;
 }
 
-Mat4x4 view(const Camera *cam) {
-    Mat4x4 rot_matrix = rotate(cam->transform.euler_angles);
-    Mat4x4 pos_matrix = translate(IDENTITY, cam->transform.position);
-    return mat_mul(rot_matrix, pos_matrix);
-    // vec3 target = (vec3){0,4,0};
-    // vec3 up = (vec3){0,1,0};
-    // return lookAt(cam->transform.position, target, up);
-}
+void update_view_frustum(Camera *cam) {
+    // 6 planes (left, right, bottom, top, near, far).
+    Plane frustum[6];
 
-Mat4x4 lookAt(const vec3 eye, const vec3 center, const vec3 up) {
-    // NOTE: crashes, dont use
-    vec3 f;
-    vec3 u;
-    vec3 s = vec3_sub(eye, center);
-    if (dot(s, s) == 0) {
-        s.z = 1;
+    // Extract camera properties.
+    Vec3 cam_position = cam->transform.position;
+    Vec3 cam_forward = cam->transform.forward;
+    Vec3 cam_right = cam->transform.right;
+    Vec3 cam_up = cam->transform.up;
+    float near_clip = cam->zNear;
+    float far_clip = cam->zFar;
+    float fov = cam->fov;
+
+    // Calculate half of the near plane height and width.
+    float half_near_height = tan(fov * DEG2RAD * 0.5f) * near_clip;
+    float half_near_width = half_near_height * cam->aspect;
+
+    // Calculate the near and far plane centers.
+    Vec3 near_center = vec3_add(cam_position,
+        vec3_scale(near_clip, cam_forward));
+    Vec3 far_center = vec3_add(cam_position,
+        vec3_scale(far_clip, cam_forward));
+
+    // Calculate the normals for the near and far planes.
+    Vec3 near_normal = cam_forward;
+    Vec3 far_normal = vec3_negate(cam_forward);
+
+    // Calculate the normals and points on the planes
+    Vec3 right_normal = vec3_normalize(vec3_cross(cam_up, cam_forward));
+    Vec3 left_normal = vec3_negate(right_normal);
+
+    Vec3 top_normal = vec3_normalize(vec3_cross(cam_right, cam_forward));
+    Vec3 bottom_normal = vec3_negate(top_normal);
+
+    Vec3 left_point = vec3_add(near_center,
+        vec3_scale(-half_near_width, right_normal));
+    Vec3 right_point = vec3_add(near_center,
+        vec3_scale(half_near_width, right_normal));
+    Vec3 bottom_point = vec3_add(near_center,
+        vec3_scale(-half_near_height, top_normal));
+    Vec3 top_point = vec3_add(near_center,
+        vec3_scale(half_near_height, top_normal));
+
+    // Define the planes based on normals and points.
+    frustum[0].normal = left_normal;
+    frustum[0].position = left_point;
+
+    frustum[1].normal = right_normal;
+    frustum[1].position = right_point;
+
+    frustum[2].normal = bottom_normal;
+    frustum[2].position = bottom_point;
+
+    frustum[3].normal = top_normal;
+    frustum[3].position = top_point;
+
+    frustum[4].normal = near_normal;
+    frustum[4].position = near_center;
+
+    frustum[5].normal = far_normal;
+    frustum[5].position = far_center;
+
+    for (int i = 0; i < 6; i++) {
+        cam->view_frustum[i] = frustum[i];
     }
-    s = normalize(s);
-    f = cross(up, s);
-
-    if (dot(f, f) == 0) {
-        if (abs(up.z) == 1) {
-            s.x += 0.0001;
-        } else {
-           s.z += 0.0001;
-
-        }
-        s = normalize(s);
-        f = cross(up, s);
-    }
-
-    f = normalize(f);
-    u = cross(s, f);
-
-
-    Mat4x4 m = {
-        {{s.x, u.x, f.x, 0.0f},
-         {s.y, u.y, f.y, 0.0f},
-         {s.z, u.z, f.z, 0.0f},
-         {0.0f, 0.0f, 0.0f, 1.0f}}
-    };
-
-    return m;
 }

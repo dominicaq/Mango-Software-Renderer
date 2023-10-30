@@ -1,7 +1,8 @@
+#include "tga.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "tga.h"
 
 TGAImage *createTGAImage(int width, int height) {
     TGAImage *image = malloc(sizeof(TGAImage));
@@ -16,8 +17,9 @@ TGAImage *createTGAImage(int width, int height) {
     return image;
 }
 
-void setPixel(TGAImage *image, int x, int y, vec4 color) {
-    if (image == NULL || x < 0 || x >= image->width || y < 0 || y >= image->height) {
+void setPixel(TGAImage *image, int x, int y, Vec4 color) {
+    if (image == NULL || x < 0 || x >= image->width || y < 0 ||
+        y >= image->height) {
         return;
     }
 
@@ -52,12 +54,12 @@ void writeTGAImageToFile(TGAImage *image, const char *filename) {
 
     // Write the TGA header
     unsigned char header[18] = {0};
-    header[2] = 2; // Uncompressed, true-color image
+    header[2] = 2;  // Uncompressed, true-color image
     header[12] = image->width & 0xFF;
     header[13] = (image->width >> 8) & 0xFF;
     header[14] = image->height & 0xFF;
     header[15] = (image->height >> 8) & 0xFF;
-    header[16] = 32; // 32 bits per pixel
+    header[16] = 32;  // 32 bits per pixel
     fwrite(header, 1, sizeof(header), file);
 
     // Write the image data
@@ -65,8 +67,8 @@ void writeTGAImageToFile(TGAImage *image, const char *filename) {
     fclose(file);
 }
 
-void setTGAImageBackground(TGAImage *image, vec3 color) {
-    vec4 tga_color = vec3_to_vec4(color, 255);
+void setTGAImageBackground(TGAImage *image, Vec3 color) {
+    Vec4 tga_color = vec3_to_vec4(color, 255);
     for (int i = 0; i < image->width; ++i) {
         for (int j = 0; j < image->height; ++j) {
             setPixel(image, i, j, tga_color);

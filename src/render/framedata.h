@@ -1,8 +1,9 @@
 #ifndef FRAME_DATA_H
 #define FRAME_DATA_H
 
-#include "tga.h"
 #include <float.h>
+
+#include "tga.h"
 
 typedef struct {
     int width, height;
@@ -17,4 +18,4 @@ void reset_zbuffer(Frame *frame);
 Frame *init_frame(int width, int height);
 
 void free_frame(Frame *frame);
-#endif // FRAME_DATA_H
+#endif  // FRAME_DATA_H

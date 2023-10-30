@@ -1,43 +1,43 @@
 #include "vec2.h"
 
-vec2 vec2_add(vec2 a, vec2 b) {
+Vec2 vec2_add(Vec2  a, Vec2 b) {
     a.x = a.x + b.x;
     a.y = a.y + b.y;
     return a;
 }
 
-vec2 vec2_sub(vec2 a, vec2 b) {
+Vec2 vec2_sub(Vec2 a, Vec2 b) {
     a.x = a.x - b.x;
     a.y = a.y - b.y;
     return a;
 }
 
-vec2 vec2_scale(float s, vec2 a) {
+Vec2 vec2_scale(float s, Vec2 a) {
     a.x = s * a.x;
     a.y = s * a.y;
     return a;
 }
 
-float vec2_magnitude(vec2 a) {
+float vec2_magnitude(Vec2 a) {
     return sqrt(a.x * a.x + a.y * a.y);
 }
 
-float vec2_dot(vec2 a, vec2 b) {
+float vec2_dot(Vec2 a, Vec2 b) {
     return a.x * b.x + a.y * b.y;
 }
 
-float vec2_cross(vec2 a, vec2 b) {
+float vec2_cross(Vec2 a, Vec2 b) {
     return (a.x * b.y) - (a.y * b.x);
 }
 
 // Helper Function(s)
 // -----------------------------------------------------------------------------
-void vec2_swap(vec2* v1, vec2* v2) {
-    vec2 temp = *v2;
+void vec2_swap(Vec2 *v1, Vec2 *v2) {
+    Vec2 temp = *v2;
     *v2 = *v1;
     *v1 = temp;
 }
 
-void print_vec2(vec2 v) {
+void print_vec2(Vec2 v) {
     printf("x: %f, y: %f \n", v.x, v.y);
 }

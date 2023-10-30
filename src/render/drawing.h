@@ -17,12 +17,13 @@
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
 typedef struct {
-    vec3 vertices[3];
-    vec2 uvs[3];
-    vec3 normals[3];
-} Triangle;
+    Vec3 position;
+    Vec3 normal;
+    Vec4 color;
+    Vec2 uv;
+} Vertex;
 
-const extern vec4 WIREFRAME_COLOR;
+const extern Vec4 WIREFRAME_COLOR;
 
 // Wireframe mode
 // -----------------------------------------------------------------------------
@@ -37,7 +38,7 @@ const extern vec4 WIREFRAME_COLOR;
  *
  * Source: https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
  */
-void line(Frame *frame, vec3 v0, vec3 v1);
+void line(Frame *frame, Vec3 v0, Vec3 v1);
 
 /*
  * wire_frame - Draw wireframe triangle
@@ -47,21 +48,7 @@ void line(Frame *frame, vec3 v0, vec3 v1);
  *
  * This function draws a wireframe triangle on the frame.
  */
-void wire_frame(Frame *frame, vec3 screen_space[3]);
-
-// Drawing
-// -----------------------------------------------------------------------------
-/*
- * rasterize - Rasterize a triangle
- * @frame: The frame to rasterize the triangle on
- * @clip_space: An array of three 4D clip space coordinates
- * @color: The color of the rasterized triangle
- *
- * This function rasterizes a filled triangle on the frame.
- *
- * Source: http://www.sunshine2k.de/coding/java/TriangleRasterization/TriangleRasterization.html
- */
-void rasterize(Frame *frame, vec3 ss[3], vec3 world_space[3], vec3 normals[3], UBO *ubo);
+void wire_frame(Frame *frame, Vec3 screen_space[3]);
 
 /*
  * draw - Draw a triangle
@@ -71,7 +58,7 @@ void rasterize(Frame *frame, vec3 ss[3], vec3 world_space[3], vec3 normals[3], U
  * @color: The color of the triangle
  * @wireframe: Boolean indicating whether to draw in wireframe mode
  */
-void draw_triangle(Frame *frame, Triangle *triangle, UBO *ubo);
+void transform_triangle(Frame *frame, Vertex *vertices, UBO *ubo);
 
 /*
  * draw_model - Draw a 3D model
@@ -81,5 +68,9 @@ void draw_triangle(Frame *frame, Triangle *triangle, UBO *ubo);
  * @wireframe: Boolean indicating whether to draw in wireframe mode
  */
 void draw_mesh(Frame *frame, Mesh *mesh, UBO *ubo);
+
+void rasterize(Frame *frame, Vec3 ss[3], Vec3 model_space[3], Vec3 normals[3], UBO *ubo);
+
+void draw_triangle(Frame *frame, Vec3 ndc[3], Vec3 normals[3], UBO *ubo);
 
 #endif // DRAWING_H
