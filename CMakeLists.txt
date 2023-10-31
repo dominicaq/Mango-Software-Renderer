@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 
 set(CMAKE_C_STANDARD 99)
-
 set(C_STANDARD_REQUIRED ON)
 
 project(c_software_renderer)
@@ -13,7 +12,6 @@ file(GLOB_RECURSE SOURCES
     src/*/*.c
     src/*/*.h
 )
-option(BUILD_MODEL_LOADER "Build Model loader" OFF)
 
 add_executable(c_software_renderer src/main.c ${SOURCES})
 
