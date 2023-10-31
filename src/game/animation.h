@@ -1,5 +1,6 @@
 #ifndef ANIMATION_H
 #define ANIMATION_H
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -11,13 +12,6 @@
         p_type *data;             \
         size_t count;             \
     } p_name
-
-typedef struct {
-    int boneIndex;
-    float weight;
-} BoneWeight;
-
-LIST_TYPE(BoneWeightList, BoneWeight);
 
 typedef enum interpolation {
     INTERPOLATION_CONSTANT_PREV,  // < Hold previous key value

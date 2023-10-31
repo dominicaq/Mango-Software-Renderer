@@ -10,8 +10,15 @@
 #include "../math/vec3.h"
 #include "../math/vec4.h"
 
+#define MAX_VERT_WEIGHTS 8
+
 const extern Vec3 COLLOR_PALLETE[7];
 extern const float DEG2RAD;
+
+typedef struct {
+    int boneIndex;
+    float weight;
+} BoneWeight;
 
 typedef struct {
     int ind_count;
@@ -21,7 +28,7 @@ typedef struct {
 
     Vec3 color;
 
-    BoneWeight *bone_weights;
+    BoneWeight (*weights)[MAX_VERT_WEIGHTS];
     Vec3 *verts;
     Vec3 *norms;
     Vec2 *uvs;

@@ -30,6 +30,14 @@ std::string node_parse_name(ufbx_node *node) {
     }
     return name;
 }
+struct BoneWeight {
+    int bone_index;
+    float weight;
+};
+std::ostream &operator<<(std::ostream &os, const BoneWeight &bw) {
+    os << "{" << bw.bone_index << ", " << bw.weight << "}";
+    return os;
+}
 
 class FBXWriter {
    public:
@@ -67,6 +75,9 @@ class FBXWriter {
         c_ofs_ << "int " << name << "_max_depth = " << max_depth_ << ";"
                << std::endl;
 
+        for (auto stack : scene->anim_stacks) {
+            std::cout << stack->name.data << std::endl;
+        }
         for (auto node : nodes_) {
             if (node->mesh) {
                 write_mesh_buffers(node);
@@ -127,12 +138,14 @@ class FBXWriter {
                        << ", .norm_count = "
                        << node->mesh->vertex_normal.values.count
                        << ", .uv_count = " << node->mesh->vertex_uv.values.count
-                       << ", .verts = " << name << "_verts, .norms = " << name
-                       << "_norms, .uvs = " << name
-                       << "_uvs, .vert_inds = " << name
-                       << "_vert_inds, .norm_inds = " << name
-                       << "_norm_inds, .uv_inds = " << name
-                       << "_uv_inds, .color = " << ufbx_vec3{1, 1, 1} << "}}, "
+                       << ", .weights = " << name << "_weights"
+                       << ", .verts = " << name << "_verts"
+                       << ", .norms = " << name << "_norms"
+                       << ", .uvs = " << name << "_uvs"
+                       << ", .vert_inds = " << name << "_vert_inds"
+                       << ", .norm_inds = " << name << "_norm_inds"
+                       << ", .uv_inds = " << name << "_uv_inds"
+                       << ", .color = " << ufbx_vec3{1, 1, 1} << "}}, "
                        << std::endl;
             } else if (node->bone) {
                 c_ofs_ << "{BONE, "
@@ -145,9 +158,46 @@ class FBXWriter {
         }
         c_ofs_ << "};";
     }
+    void push_bone_weights(std::vector<std::vector<BoneWeight>> &weights,
+                           ufbx_skin_deformer *deformer) {
+        for (auto cluster : deformer->clusters) {
+            int bone_i =
+                std::find(nodes_.begin(), nodes_.end(), cluster->bone_node) -
+                nodes_.begin();
+            for (int i = 0; i < cluster->num_weights; ++i) {
+                weights[cluster->vertices[i]].push_back({
+                    bone_i,
+                    (float)cluster->weights[i],
+                });
+            }
+        }
+    }
+
     void write_mesh_buffers(ufbx_node *node) {
         std::string name = node_parse_name(node);
         int32_t vert_count = node->mesh->vertices.count;
+        std::vector<std::vector<BoneWeight>> bone_weights;
+        bone_weights.resize(node->mesh->vertices.count);
+        for (auto deformer : node->mesh->skin_deformers) {
+            push_bone_weights(bone_weights, deformer);
+        }
+        auto max_weight = std::max_element(
+            bone_weights.begin(), bone_weights.end(),
+            [](auto const &a, auto const &b) { return a.size() < b.size(); });
+        std::cout << name << " max " << max_weight->size() << std::endl;
+        h_ofs_ << "extern BoneWeight " << name << "_weights[" << vert_count
+               << "][8];" << std::endl;
+        c_ofs_ << "BoneWeight " << name << "_weights[" << vert_count
+               << "][8] = {";
+        for (auto const &vert_weights : bone_weights) {
+            c_ofs_ << "{";
+            for (auto const &w : vert_weights) {
+                c_ofs_ << w << ", ";
+            }
+            c_ofs_ << "}, ";
+        }
+        c_ofs_ << "};" << std::endl;
+
         h_ofs_ << "extern Vec3 " << name << "_verts[" << vert_count << "];"
                << std::endl;
         c_ofs_ << "Vec3 " << name << "_verts[" << vert_count << "] = {";
