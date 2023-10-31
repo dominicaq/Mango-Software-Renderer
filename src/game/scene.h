@@ -8,12 +8,14 @@
 #include "gameobject.h"
 
 typedef struct {
-    GameObject *game_objects;
-    Mesh *meshes;
-    int num_game_objects;
+    bool *dirty_locals;
+    GameObject *objects;
+    GameObjectAttr *attributes;
+    int object_count;
     int max_depth;
 
     // Lights and camera dont count as objects
+    bool camera_dirty_local;
     Camera camera;
 } Scene;
 

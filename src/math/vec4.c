@@ -88,18 +88,11 @@ Vec4 quat_from_units(Vec3 vFrom, Vec3 vTo) {
     if (r < EPSILON) {
         // vFrom and vTo point in opposite directions
 
-        r = 0;
-
         if (fabsf(vFrom.x) > fabsf(vFrom.z)) {
-            quat = (Vec4){{
-                -vFrom.y,
-                vFrom.x,
-                0,
-                r,
-            }};
+            quat = (Vec4){{-vFrom.y, vFrom.x, 0, 0}};
 
         } else {
-            quat = (Vec4){{0, -vFrom.z, vFrom.y, r}};
+            quat = (Vec4){{0, -vFrom.z, vFrom.y, 0}};
         }
 
     } else {

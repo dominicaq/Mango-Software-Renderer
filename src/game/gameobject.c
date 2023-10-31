@@ -61,7 +61,7 @@ Mesh mesh_empty() {
     return mesh;
 }
 
-void game_object_update_model_matrix(GameObject *go) {
+void game_object_update_local_matrix(GameObject *go) {
     float x = go->quaternion.x, y = go->quaternion.y, z = go->quaternion.z,
           w = go->quaternion.w;
     float x2 = x + x, y2 = y + y, z2 = z + z;
@@ -71,30 +71,29 @@ void game_object_update_model_matrix(GameObject *go) {
 
     float sx = go->scale.x, sy = go->scale.y, sz = go->scale.z;
 
-    go->model_matrix.elem[0][0] = (1 - (yy + zz)) * sx;
-    go->model_matrix.elem[1][0] = (xy + wz) * sx;
-    go->model_matrix.elem[2][0] = (xz - wy) * sx;
-    go->model_matrix.elem[3][0] = 0;
+    go->local_matrix.elem[0][0] = (1 - (yy + zz)) * sx;
+    go->local_matrix.elem[1][0] = (xy + wz) * sx;
+    go->local_matrix.elem[2][0] = (xz - wy) * sx;
+    go->local_matrix.elem[3][0] = 0;
 
-    go->model_matrix.elem[0][1] = (xy - wz) * sy;
-    go->model_matrix.elem[1][1] = (1 - (xx + zz)) * sy;
-    go->model_matrix.elem[2][1] = (yz + wx) * sy;
-    go->model_matrix.elem[3][1] = 0;
+    go->local_matrix.elem[0][1] = (xy - wz) * sy;
+    go->local_matrix.elem[1][1] = (1 - (xx + zz)) * sy;
+    go->local_matrix.elem[2][1] = (yz + wx) * sy;
+    go->local_matrix.elem[3][1] = 0;
 
-    go->model_matrix.elem[0][2] = (xz + wy) * sz;
-    go->model_matrix.elem[1][2] = (yz - wx) * sz;
-    go->model_matrix.elem[2][2] = (1 - (xx + yy)) * sz;
-    go->model_matrix.elem[3][2] = 0;
+    go->local_matrix.elem[0][2] = (xz + wy) * sz;
+    go->local_matrix.elem[1][2] = (yz - wx) * sz;
+    go->local_matrix.elem[2][2] = (1 - (xx + yy)) * sz;
+    go->local_matrix.elem[3][2] = 0;
 
-    go->model_matrix.elem[0][3] = go->position.x;
-    go->model_matrix.elem[1][3] = go->position.y;
-    go->model_matrix.elem[2][3] = go->position.z;
-    go->model_matrix.elem[3][3] = 1;
+    go->local_matrix.elem[0][3] = go->position.x;
+    go->local_matrix.elem[1][3] = go->position.y;
+    go->local_matrix.elem[2][3] = go->position.z;
+    go->local_matrix.elem[3][3] = 1;
 }
 
 GameObject game_object_default() {
     GameObject go = {
-        .needs_update = true,
         .position = {{0.0f, 0.0f, 0.0f}},
         .quaternion = {{0.0f, 0.0f, 0.0f, 1.0f}},
         .scale = {{1.0f, 1.0f, 1.0f}},

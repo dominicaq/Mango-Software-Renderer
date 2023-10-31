@@ -87,7 +87,6 @@ float vec2_cross(Vec2 a, Vec2 b);
  */
 void vec2_swap(Vec2 *v1, Vec2 *v2);
 
-
 /**
  * Print the components of a 2D vector to the standard output.
  *

@@ -30,5 +30,5 @@ extern int spiderteeth_norm_inds[540];
 extern Vec2 spiderteeth_uvs[180];
 extern int spiderteeth_uv_inds[540];
 extern GameObject spider_game_objects[93];
-extern Mesh spider_meshes[93];
+extern GameObjectAttr spider_attrs[93];
 #endif

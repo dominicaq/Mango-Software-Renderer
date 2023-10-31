@@ -31,13 +31,30 @@ typedef struct {
 
 Mesh mesh_empty();
 
+typedef struct {
+    float radius;
+    float length;
+} Bone;
+
+typedef struct {
+    enum {
+        NONE,
+        MESH,
+        BONE,
+    } type;
+    union {
+        Mesh mesh;
+        Bone bone;
+    };
+} GameObjectAttr;
+
 typedef struct GameObject {
-    bool needs_update;
     Vec3 position;
     Vec4 quaternion;
     Vec3 scale;
     int num_children;
-    Mat4 model_matrix;
+    Mat4 local_matrix;
+    Mat4 world_matrix;
 } GameObject;
 
 /*
@@ -50,7 +67,7 @@ typedef struct GameObject {
  *
  * Return: The model matrix.
  */
-void game_object_update_model_matrix(GameObject *);
+void game_object_update_local_matrix(GameObject *);
 GameObject game_object_default();
 
 #endif
