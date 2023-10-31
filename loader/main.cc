@@ -73,7 +73,7 @@ class FBXWriter {
             }
         }
         write_game_objects();
-        write_meshes();
+        write_attributes();
 
         h_ofs_ << "#endif" << std::endl;
 
@@ -103,8 +103,7 @@ class FBXWriter {
                << "] = {" << std::endl;
         for (auto node : nodes_) {
             std::string name = node_parse_name(node);
-            c_ofs_ << "{ .needs_update = true, .position = "
-                   << node->local_transform.translation
+            c_ofs_ << "{.position = " << node->local_transform.translation
                    << ", .quaternion = " << node->local_transform.rotation
                    << ", .scale = " << node->local_transform.scale
                    << ", .num_children = " << node->children.count << "}, "
@@ -112,15 +111,18 @@ class FBXWriter {
         }
         c_ofs_ << "};" << std::endl;
     }
-    void write_meshes() {
-        h_ofs_ << "extern Mesh " << name_ << "_meshes[" << nodes_.size() << "];"
-               << std::endl;
-        c_ofs_ << "Mesh " << name_ << "_meshes[" << nodes_.size() << "] = {";
+    void write_attributes() {
+        h_ofs_ << "extern GameObjectAttr " << name_ << "_attrs["
+               << nodes_.size() << "];" << std::endl;
+        c_ofs_ << "GameObjectAttr " << name_ << "_attrs[" << nodes_.size()
+               << "] = {";
         for (auto node : nodes_) {
             std::string name = node_parse_name(node);
 
             if (node->mesh) {
-                c_ofs_ << "{  .ind_count = " << node->mesh->vertex_indices.count
+                c_ofs_ << "{MESH, "
+                       << ".mesh = {  .ind_count = "
+                       << node->mesh->vertex_indices.count
                        << ", .vert_count = " << node->mesh->vertices.count
                        << ", .norm_count = "
                        << node->mesh->vertex_normal.values.count
@@ -130,10 +132,15 @@ class FBXWriter {
                        << "_uvs, .vert_inds = " << name
                        << "_vert_inds, .norm_inds = " << name
                        << "_norm_inds, .uv_inds = " << name
-                       << "_uv_inds, .color = " << ufbx_vec3{1, 1, 1} << "}, "
+                       << "_uv_inds, .color = " << ufbx_vec3{1, 1, 1} << "}}, "
+                       << std::endl;
+            } else if (node->bone) {
+                c_ofs_ << "{BONE, "
+                       << ".bone = { .radius = " << node->bone->radius
+                       << ", .length = " << node->bone->relative_length << "}},"
                        << std::endl;
             } else {
-                c_ofs_ << "{0}, " << std::endl;
+                c_ofs_ << "{NONE}, " << std::endl;
             }
         }
         c_ofs_ << "};";

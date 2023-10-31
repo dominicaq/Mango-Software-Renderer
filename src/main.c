@@ -36,41 +36,52 @@ int alloc_objects(Scene *scene) {
     Vec3 white = (Vec3){{1.0f, 1.0f, 1.0f}};
     Vec3 red = (Vec3){{0.0f, 1.0f, 0.5f}};
     // Objects
-    scene->num_game_objects = 3 + spider_object_amt;
-    Mesh *meshes = malloc(scene->num_game_objects * scene->num_game_objects *
-                          sizeof(Mesh));
-    GameObject *gos = malloc(scene->num_game_objects * scene->num_game_objects *
-                             sizeof(GameObject));
-    if (meshes == NULL) {
-        return -1;
+    scene->object_count = 3 + spider_object_amt;
+    scene->dirty_locals = malloc(scene->object_count * sizeof(bool));
+    if (scene->dirty_locals == NULL) {
+        fprintf(stderr, "malloc failed objects");
     }
-    scene->meshes = meshes;
-    scene->game_objects = gos;
+    for (int i = 0; i < scene->object_count; ++i) {
+        scene->dirty_locals[i] = true;
+    }
+    scene->camera_dirty_local = true;
+    scene->attributes = malloc(scene->object_count * sizeof(GameObjectAttr));
+    if (scene->attributes == NULL) {
+        fprintf(stderr, "malloc failed attributes");
+    }
+    scene->objects = malloc(scene->object_count * sizeof(GameObject));
+    if (scene->objects == NULL) {
+        fprintf(stderr, "malloc failed objects");
+    }
 
-    gos[0] = game_object_default();
-    gos[0].position = (Vec3){{6.0f, -3.0f, -8.0f}};
-    gos[0].scale = (Vec3){{5.0f, 5.0f, 5.0f}};
-    meshes[0] = load_obj_mesh("../models/head.obj");
-    meshes[0].color = white;
+    scene->objects[0] = game_object_default();
+    scene->objects[0].position = (Vec3){{6.0f, -3.0f, -8.0f}};
+    scene->objects[0].scale = (Vec3){{5.0f, 5.0f, 5.0f}};
+    scene->attributes[0].type = MESH;
+    scene->attributes[0].mesh = load_obj_mesh("../models/head.obj");
+    scene->attributes[0].mesh.color = white;
 
-    gos[1] = game_object_default();
-    gos[1].quaternion = quat_from_units(UNIT_X, UNIT_Z);
-    gos[1].position = (Vec3){{0.0f, 6.0f, -10.0f}};
-    meshes[1] = load_obj_mesh("../models/light_box.obj");
-    meshes[1].color = red;
+    scene->objects[1] = game_object_default();
+    scene->objects[1].quaternion = quat_from_units(UNIT_X, UNIT_Z);
+    scene->objects[1].position = (Vec3){{0.0f, 6.0f, -10.0f}};
+    scene->attributes[1].type = MESH;
+    scene->attributes[1].mesh = load_obj_mesh("../models/light_box.obj");
+    scene->attributes[1].mesh.color = red;
 
-    gos[2] = game_object_default();
-    gos[2].position = (Vec3){{-5.0f, -3.0f, -10.0f}};
-    gos[2].scale = (Vec3){{6.0f, 6.0f, 6.0f}};
-    meshes[2] = load_obj_mesh("../models/head.obj");
-    meshes[2].color = white;
+    scene->objects[2] = game_object_default();
+    scene->objects[2].position = (Vec3){{-5.0f, -3.0f, -10.0f}};
+    scene->objects[2].scale = (Vec3){{6.0f, 6.0f, 6.0f}};
+    scene->attributes[2].type = MESH;
+    scene->attributes[2].mesh = load_obj_mesh("../models/head.obj");
+    scene->attributes[2].mesh.color = white;
 
-    memcpy(scene->game_objects + 3, spider_game_objects,
+    memcpy(scene->objects + 3, spider_game_objects,
            spider_object_amt * sizeof(GameObject));
-    memcpy(scene->meshes + 3, spider_meshes, spider_object_amt * sizeof(Mesh));
+    memcpy(scene->attributes + 3, spider_attrs,
+           spider_object_amt * sizeof(GameObjectAttr));
     scene->max_depth = MAX(scene->max_depth, spider_max_depth);
 
-    gos[3].scale = (Vec3){{0.1f, 0.1f, 0.1f}};
+    scene->objects[3].scale = (Vec3){{0.1f, 0.1f, 0.1f}};
 
     return 0;
 }
@@ -121,8 +132,8 @@ int main() {
         ubo.u_time = delta_time;
 
         // Update object(s)
-        quat_mul(&scene.game_objects[3].quaternion, &slight_right);
-        scene.game_objects[3].needs_update = true;
+        quat_mul(&scene.objects[3].quaternion, &slight_right);
+        scene.dirty_locals[3] = true;
         // quat_mul(&scene.camera.game_object.quaternion, &slight_right);
         // scene.camera.game_object.needs_update = true;
         // End
@@ -132,16 +143,16 @@ int main() {
 
         // Update MVP Matrix: projection * view * model (multiplication order)
         Mat4 projection_matrix = perspective(&scene.camera);
-        Mat4 view_matrix = mat4_inverse(scene.camera.game_object.model_matrix);
-        for (int i = 0; i < scene.num_game_objects; ++i) {
-            Mesh *target_mesh = scene.meshes + i;
-            if (target_mesh->vert_count == 0) {
+        Mat4 view_matrix = mat4_inverse(scene.camera.game_object.world_matrix);
+        for (int i = 0; i < scene.object_count; ++i) {
+            if (scene.attributes[i].type != MESH) {
                 continue;
             }
-            GameObject *target_object = scene.game_objects + i;
+            Mesh *target_mesh = &scene.attributes[i].mesh;
+            GameObject *target_object = scene.objects + i;
 
             // Update matricies
-            Mat4 model_matrix = target_object->model_matrix;
+            Mat4 model_matrix = target_object->world_matrix;
             Mat4 model_view_matrix = mat4_mul(view_matrix, model_matrix);
             Mat4 mvp = mat4_mul(projection_matrix, model_view_matrix);
             Mat4 vp = mat4_mul(projection_matrix, view_matrix);
