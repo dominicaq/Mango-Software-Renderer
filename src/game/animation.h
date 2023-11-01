@@ -36,12 +36,8 @@ typedef struct {
 LIST_TYPE(KeyframeList, Keyframe);
 
 typedef struct {
-    KeyframeList keyframes;
-} AnimCurve;
-
-typedef struct {
     Vec3 default_value;
-    AnimCurve curves[3];
+    KeyframeList curves[3];
 } AnimValue;
 
 typedef struct {
@@ -53,7 +49,7 @@ typedef struct {
     bool compose_scale;
 
     AnimValue *anim_values;
-    int *bone_inds;  // < Sorted by `element,prop_name`
+    int *bone_inds;
 } AnimLayer;
 
 LIST_TYPE(AnimLayerList, AnimLayer);
