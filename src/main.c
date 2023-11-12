@@ -1,4 +1,5 @@
 
+#include <SDL.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -9,7 +10,6 @@
 #include "models/spider.h"
 #include "render/drawing.h"
 #include "render/framedata.h"
-#include "render/tga.h"
 #include "shaders/shader.h"
 
 // EMU Resolution:
@@ -34,7 +34,7 @@ void init_camera(Scene *scene, int frame_width, int frame_height) {
 
 int alloc_objects(Scene *scene) {
     Vec3 white = (Vec3){{1.0f, 1.0f, 1.0f}};
-    Vec3 red = (Vec3){{0.0f, 1.0f, 0.5f}};
+    Vec3 blue = (Vec3){{0.0f, 0.5f, 1.0f}};
     // Objects
     scene->object_count = 3 + spider_object_amt;
     scene->dirty_locals = malloc(scene->object_count * sizeof(bool));
@@ -66,7 +66,7 @@ int alloc_objects(Scene *scene) {
     scene->objects[1].position = (Vec3){{0.0f, 6.0f, -10.0f}};
     scene->attributes[1].type = MESH;
     scene->attributes[1].mesh = load_obj_mesh("../models/light_box.obj");
-    scene->attributes[1].mesh.color = red;
+    scene->attributes[1].mesh.color = blue;
 
     scene->objects[2] = game_object_default();
     scene->objects[2].position = (Vec3){{-5.0f, -3.0f, -10.0f}};
@@ -86,7 +86,7 @@ int alloc_objects(Scene *scene) {
     return 0;
 }
 
-int main() {
+int main(int argc, char *argv[]) {
     // Allocate space for frame data
     Frame *frame = init_frame(SCREEN_WIDTH, SCREEN_HEIGHT);
     if (frame == NULL) {
@@ -117,15 +117,29 @@ int main() {
 
     // Update loop
     // -------------------------------------------------------------------------
-    Vec3 black = (Vec3){{0.0f, 0.0f, 0.0f}};
     Vec4 slight_right = quat_from_axis(UNIT_Y, 0.01f);
 
-    int frame_count = 1000;
     float delta_time = 0.0f;
     clock_t frame_rate_start = clock();
-    for (int i = 0; i < frame_count; ++i) {
+
+    // Fill the surface white
+
+    SDL_Event e;
+    bool quit = false;
+
+    while (!quit) {
+        while (SDL_PollEvent(&e)) {
+            switch (e.type) {
+            case SDL_QUIT:
+                quit = true;
+                break;
+            default:
+                break;
+            }
+        }
         // Reset frame
-        setTGAImageBackground(frame->framebuffer, black);
+        SDL_FillRect(frame->surface, NULL,
+                     SDL_MapRGB(frame->surface->format, 0, 0, 0));
         reset_zbuffer(frame);
 
         scene_update(&scene, &ubo, delta_time);
@@ -141,9 +155,11 @@ int main() {
         // Update camera transform
         scene_update_matrices(&scene);
 
-        // Update MVP Matrix: projection * view * model (multiplication order)
+        // Update MVP Matrix: projection * view * model (multiplication
+        // order)
         Mat4 projection_matrix = perspective(&scene.camera);
         Mat4 view_matrix = mat4_inverse(scene.camera.game_object.world_matrix);
+        SDL_LockSurface(frame->surface);
         for (int i = 0; i < scene.object_count; ++i) {
             if (scene.attributes[i].type != MESH) {
                 continue;
@@ -171,10 +187,8 @@ int main() {
         }
 
         delta_time += 0.05f;
-
-        // Set (0,0) origin to top left
-        flipImageVertically(frame->framebuffer);
-        writeTGAImageToFile(frame->framebuffer, "../output.tga");
+        SDL_UnlockSurface(frame->surface);
+        SDL_UpdateWindowSurface(frame->window);
     }
 
     clock_t frame_rate_end = clock();
