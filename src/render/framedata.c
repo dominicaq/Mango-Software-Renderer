@@ -25,16 +25,38 @@ void reset_zbuffer(Frame *frame) {
     }
 }
 
+void setPixel(Frame *frame, int x, int y, Vec4 color) {
+    Uint32 *const target_pixel =
+        (Uint32 *)((Uint8 *)frame->surface->pixels + y * frame->surface->pitch +
+                   x * frame->surface->format->BytesPerPixel);
+    *target_pixel = SDL_MapRGBA(frame->format, color.elem[0], color.elem[1],
+                                color.elem[2], color.elem[3]);
+}
+
 Frame *init_frame(int width, int height) {
     Frame *frame = malloc(sizeof(Frame));
-    if (frame == NULL) {
-        printf("ERROR: Failed to malloc frame\n");
+
+    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+        printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
+        return NULL;
+    }
+    // Create window
+    frame->window = SDL_CreateWindow(
+        "c_software_renderer", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+        width, height, SDL_WINDOW_SHOWN);
+    if (frame->window == NULL) {
+        printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
         return NULL;
     }
 
-    frame->framebuffer = createTGAImage(width, height);
-    if (frame->framebuffer == NULL) {
-        printf("ERROR: Failed to malloc TGAImage\n");
+    Uint32 format = SDL_GetWindowPixelFormat(frame->window);
+    frame->format = SDL_AllocFormat(format);
+
+    // Get window surface
+    frame->surface = SDL_GetWindowSurface(frame->window);
+
+    if (frame == NULL) {
+        printf("ERROR: Failed to malloc frame\n");
         return NULL;
     }
 
@@ -51,6 +73,7 @@ Frame *init_frame(int width, int height) {
 
 void free_frame(Frame *frame) {
     free(frame->zBuffer);
-    free(frame->framebuffer);
+    SDL_DestroyWindow(frame->window);
+    SDL_Quit();
     free(frame);
 }

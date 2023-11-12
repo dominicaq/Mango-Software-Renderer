@@ -21,13 +21,15 @@ Vec3 barycentric_coords(Vec3 p, Vec3 a, Vec3 b, Vec3 c) {
 
 Vec3 lerp_bc_coords(Vec3 bc_coords, Vec3 data[3]) {
     // Interpolate the color using barycentric coordinates
-    Vec3 scale_x = vec3_scale(bc_coords.x, data[0]);
-    Vec3 scale_y = vec3_scale(bc_coords.y, data[1]);
-    Vec3 scale_z = vec3_scale(bc_coords.z, data[2]);
+    return (Vec3){{
+        data[0].x * bc_coords.x + data[1].x * bc_coords.y +
+            data[2].x * bc_coords.z,
+        data[0].y * bc_coords.x + data[1].y * bc_coords.y +
+            data[2].y * bc_coords.z,
+        data[0].z * bc_coords.x + data[1].z * bc_coords.y +
+            data[2].z * bc_coords.z,
 
-    Vec3 color = vec3_add(scale_x, scale_y);
-    color = vec3_add(color, scale_z);
-    return color;
+    }};
 }
 
 // Normalized device coordinates to screen coordinates
@@ -62,13 +64,11 @@ bool is_backface(Vec3 ndc[3]) {
     return sign < 0.0f;
 }
 
-bool is_point_in_frustum(const Vec4* clip_space_point) {
+bool is_point_in_frustum(const Vec4 *clip_space_point) {
     float x = clip_space_point->x;
     float y = clip_space_point->y;
     float z = clip_space_point->z;
     float w = clip_space_point->w;
 
-    return (x >= -w && x <= w) &&
-           (y >= -w && y <= w) &&
-           (z >= -w && z <= w);
+    return (x >= -w && x <= w) && (y >= -w && y <= w) && (z >= -w && z <= w);
 }

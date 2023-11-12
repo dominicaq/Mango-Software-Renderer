@@ -39,8 +39,7 @@ void rasterize(Frame *frame, Vec3 ss[3], Vec3 model_space[3], Vec3 normals[3],
 
                 fragment_shader(ubo, P);
 
-                setPixel(frame->framebuffer, P.x, P.y,
-                         ubo->f_data.gl_frag_color);
+                setPixel(frame, P.x, P.y, ubo->f_data.gl_frag_color);
             }
         }
     }
@@ -78,9 +77,9 @@ void line(Frame *frame, Vec3 v0, Vec3 v1) {
     int y = y0;
     for (int x = x0; x <= x1; x++) {
         if (steep) {
-            setPixel(frame->framebuffer, y, x, WIREFRAME_COLOR);
+            setPixel(frame, y, x, WIREFRAME_COLOR);
         } else {
-            setPixel(frame->framebuffer, x, y, WIREFRAME_COLOR);
+            setPixel(frame, x, y, WIREFRAME_COLOR);
         }
         error2 += derror2;
         if (error2 > dx) {

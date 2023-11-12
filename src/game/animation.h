@@ -1,5 +1,6 @@
 #ifndef ANIMATION_H
 #define ANIMATION_H
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -11,13 +12,6 @@
         p_type *data;             \
         size_t count;             \
     } p_name
-
-typedef struct {
-    int boneIndex;
-    float weight;
-} BoneWeight;
-
-LIST_TYPE(BoneWeightList, BoneWeight);
 
 typedef enum interpolation {
     INTERPOLATION_CONSTANT_PREV,  // < Hold previous key value
@@ -42,12 +36,8 @@ typedef struct {
 LIST_TYPE(KeyframeList, Keyframe);
 
 typedef struct {
-    KeyframeList keyframes;
-} AnimCurve;
-
-typedef struct {
     Vec3 default_value;
-    AnimCurve curves[3];
+    KeyframeList curves[3];
 } AnimValue;
 
 typedef struct {
@@ -59,7 +49,7 @@ typedef struct {
     bool compose_scale;
 
     AnimValue *anim_values;
-    int *bone_inds;  // < Sorted by `element,prop_name`
+    int *bone_inds;
 } AnimLayer;
 
 LIST_TYPE(AnimLayerList, AnimLayer);

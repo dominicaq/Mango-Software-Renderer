@@ -17,21 +17,6 @@ TGAImage *createTGAImage(int width, int height) {
     return image;
 }
 
-void setPixel(TGAImage *image, int x, int y, Vec4 color) {
-    if (image == NULL || x < 0 || x >= image->width || y < 0 ||
-        y >= image->height) {
-        return;
-    }
-
-    int index = (x + y * image->width) * 4;
-    if (index + 3 < image->width * image->height * 4) {
-        image->data[index + 0] = color.elem[1];
-        image->data[index + 1] = color.elem[2];
-        image->data[index + 2] = color.elem[0];
-        image->data[index + 3] = color.elem[3];
-    }
-}
-
 void flipImageVertically(TGAImage *image) {
     int bytes_per_line = image->width * 4;
     unsigned char *temp = malloc(bytes_per_line);
@@ -65,13 +50,4 @@ void writeTGAImageToFile(TGAImage *image, const char *filename) {
     // Write the image data
     fwrite(image->data, 1, image->width * image->height * 4, file);
     fclose(file);
-}
-
-void setTGAImageBackground(TGAImage *image, Vec3 color) {
-    Vec4 tga_color = vec3_to_vec4(color, 255);
-    for (int i = 0; i < image->width; ++i) {
-        for (int j = 0; j < image->height; ++j) {
-            setPixel(image, i, j, tga_color);
-        }
-    }
 }
