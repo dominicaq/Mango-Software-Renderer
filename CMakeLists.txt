@@ -10,6 +10,7 @@ set( BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE )
 
 # SDL
 # https://github.com/libsdl-org/SDL
+set(SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS 1)
 set( SDL_LIBC ON CACHE BOOL "" FORCE )
 set( SDL_TEST OFF CACHE BOOL "" FORCE )
 add_subdirectory( SDL )
