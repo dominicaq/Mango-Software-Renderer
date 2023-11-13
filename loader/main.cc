@@ -89,9 +89,11 @@ class FBXWriter {
 
         h_ofs_ << "#ifndef " << upper_model_path << "_H" << std::endl;
         h_ofs_ << "#define " << upper_model_path << "_H" << std::endl;
-        h_ofs_ << "#include \"../math/vec3.h\"" << std::endl;
-        h_ofs_ << "#include \"../math/vec2.h\"" << std::endl;
-        h_ofs_ << "#include \"../game/gameobject.h\"" << std::endl;
+        h_ofs_ << "#include <Mango/math/vec3.h>" << std::endl;
+        h_ofs_ << "#include <Mango/math/vec2.h>" << std::endl;
+        h_ofs_ << "#include <Mango/game/gameobject.h>" << std::endl;
+        c_ofs_ << "#include \"" << h_filename << "\"" << std::endl;
+        c_ofs_ << "#include <Mango/game/animation.h>" << std::endl;
         c_ofs_ << "#include \"" << h_filename << "\"" << std::endl;
         push_nodes_depth_first(scene->root_node);
         h_ofs_ << "extern int " << name << "_object_amt;" << std::endl;
@@ -204,7 +206,7 @@ class FBXWriter {
             std::string name = str_to_var_name(node->name.data);
 
             if (node->mesh) {
-                c_ofs_ << "{MESH, "
+                c_ofs_ << "{ATTR_MESH, "
                        << ".mesh = {  .ind_count = "
                        << node->mesh->vertex_indices.count
                        << ", .vert_count = " << node->mesh->vertices.count
@@ -221,12 +223,12 @@ class FBXWriter {
                        << ", .color = " << ufbx_vec3{1, 1, 1} << "}}, "
                        << std::endl;
             } else if (node->bone) {
-                c_ofs_ << "{BONE, "
+                c_ofs_ << "{ATTR_BONE, "
                        << ".bone = { .radius = " << node->bone->radius
                        << ", .length = " << node->bone->relative_length << "}},"
                        << std::endl;
             } else {
-                c_ofs_ << "{NONE}, " << std::endl;
+                c_ofs_ << "{ATTR_NONE}, " << std::endl;
             }
         }
         c_ofs_ << "};";
