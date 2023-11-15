@@ -14,6 +14,5 @@ file(GLOB_RECURSE SOURCES
 add_library(Mango ${SOURCES})
 target_link_libraries(Mango
   PUBLIC m 
-  PRIVATE SDL2::SDL2main SDL2::SDL2-static )
+  PUBLIC SDL2::SDL2main SDL2::SDL2-static )
 target_include_directories(Mango PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
-target_compile_definitions(Mango PUBLIC)
