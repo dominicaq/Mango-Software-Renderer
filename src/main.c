@@ -138,7 +138,7 @@ void update(MangoReal dt) {
     }
 }
 
-int main(int argc, char *argv[]) {
+int SDL_main(int argc, char *argv[]) {
     // Allocate space for frame data
     // Scene data
     slight_right = quat_from_axis(UNIT_Y, 0.01f);
