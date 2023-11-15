@@ -229,6 +229,7 @@ void draw_mesh(Frame *frame, Mesh *mesh, UBO *ubo) {
 }
 
 void draw_sdf(Frame *frame, SDFSphere *sphere) {
+    // SDF Note:
     // If the result is negative, the point is inside the sphere.
     // If the result is zero, the point is on the sphere's surface.
     // If the result is positive, the point is outside the sphere.
@@ -244,17 +245,16 @@ void draw_sdf(Frame *frame, SDFSphere *sphere) {
             float sdf = sdf_sphere(sdf_pos, sphere->radius);
 
             // SDF is behind or out of range, dont draw
-            if (current_depth < sdf || sdf > 0.0f) {
+            if (sdf > 0.0f) {
                 continue;
             }
-
-            Vec4 pixel_color = vec3_to_vec4(sphere->color, 1.0f);
 
             // Edge
             if (sdf == 0.0f) {
 
             }
 
+            Vec4 pixel_color = vec3_to_vec4(sphere->color, 1.0f);
             frame->zBuffer[buffer_index] = sdf;
             frame_set_pixel(frame, x, y, pixel_color);
         }

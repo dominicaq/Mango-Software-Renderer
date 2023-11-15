@@ -5,6 +5,7 @@
 Vec3 UNIT_X = {{1, 0, 0}};
 Vec3 UNIT_Y = {{0, 1, 0}};
 Vec3 UNIT_Z = {{0, 0, 1}};
+Vec3 VEC3_ZERO = {{0, 0, 0}};
 
 // Vector operations
 // -----------------------------------------------------------------------------
@@ -86,6 +87,31 @@ Vec3 vec3_negate(const Vec3 v) {
     result.y = -v.y;
     result.z = -v.z;
     return result;
+}
+
+Vec3 vec3_abs(Vec3 v) {
+    v.x = fabs(v.x);
+    v.y = fabs(v.y);
+    v.z = fabs(v.z);
+    return v;
+}
+
+Vec3 vec3_max(Vec3 a, Vec3 b) {
+    float len_a = vec3_magnitude(a);
+    float len_b = vec3_magnitude(b);
+    if (len_a > len_b) {
+        return a;
+    }
+    return b;
+}
+
+Vec3 vec3_min(Vec3 a, Vec3 b) {
+    float len_a = vec3_magnitude(a);
+    float len_b = vec3_magnitude(b);
+    if (len_a < len_b) {
+        return a;
+    }
+    return b;
 }
 
 // Helper Function(s)

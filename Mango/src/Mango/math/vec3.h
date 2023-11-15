@@ -20,6 +20,7 @@ typedef union {
 extern Vec3 UNIT_X;
 extern Vec3 UNIT_Y;
 extern Vec3 UNIT_Z;
+extern Vec3 VEC3_ZERO;
 
 /**
  * Add two 3D vectors element-wise.
@@ -146,5 +147,13 @@ void vec3_swap(Vec3 *v1, Vec3 *v2);
  * @param v The 3D vector to print.
  */
 void vec3_print(Vec3 v);
+
+Vec3 vec3_abs(Vec3 v);
+
+// Returns the vector with the largest length
+Vec3 vec3_max(Vec3 a, Vec3 b);
+
+// Returns the vector with the smallest length
+Vec3 vec3_min(Vec3 a, Vec3 b);
 
 #endif  // VEC3_H
