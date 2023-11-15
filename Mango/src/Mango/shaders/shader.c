@@ -11,8 +11,8 @@ void vertex_shader(UBO *ubo, Vec4 a_position) {
     mv_no_trans.elem[0][3] = 0.0f;
     mv_no_trans.elem[1][3] = 0.0f;
     mv_no_trans.elem[2][3] = 0.0f;
-    Vec4 mv_normal =
-        mat_mul_vec4(mv_no_trans, vec3_to_vec4(ubo->v_data.in_normal, 0.0f));
+    Vec4 normal_homogeneous = vec3_to_vec4(ubo->v_data.in_normal, 0.0f);
+    Vec4 mv_normal = mat_mul_vec4(mv_no_trans, normal_homogeneous);
 
     // Don't homogenize
     ubo->v_data.out_normal = vec3_normalize(vec4_to_vec3(mv_normal));

@@ -81,9 +81,15 @@ void mango_run(Scene *scene, Camera *camera) {
             ubo.u_color = target_mesh->color;
 
             // UBO debug options
-
             draw_mesh(frame, target_mesh, &ubo);
         }
+
+        // TODO: Temp
+        SDFSphere dummy_sphere;
+        dummy_sphere.position = (Vec3){{0,0,0}};
+        dummy_sphere.radius = 1.0f;
+        dummy_sphere.color = (Vec3){{1.0f, 0.0f, 0.0f}};
+        draw_sdf(frame, &dummy_sphere);
         frame_update(frame);
     }
     frame_free(frame);

@@ -227,3 +227,36 @@ void draw_mesh(Frame *frame, Mesh *mesh, UBO *ubo) {
         transform_triangle(frame, verts, ubo);
     }
 }
+
+void draw_sdf(Frame *frame, SDFSphere *sphere) {
+    // If the result is negative, the point is inside the sphere.
+    // If the result is zero, the point is on the sphere's surface.
+    // If the result is positive, the point is outside the sphere.
+    for (int x = 0; x < frame->width; ++x) {
+        for (int y = 0; y < frame->height; ++y) {
+            // Depth
+            int buffer_index = x + y * frame->width;
+            float current_depth = frame->zBuffer[buffer_index];
+
+            // SDF
+            Vec3 frame_pos = (Vec3){{x, y, current_depth}};
+            Vec3 sdf_pos = vec3_sub(frame_pos, sphere->position);
+            float sdf = sdf_sphere(sdf_pos, sphere->radius);
+
+            // SDF is behind or out of range, dont draw
+            if (current_depth < sdf || sdf > 0.0f) {
+                continue;
+            }
+
+            Vec4 pixel_color = vec3_to_vec4(sphere->color, 1.0f);
+
+            // Edge
+            if (sdf == 0.0f) {
+
+            }
+
+            frame->zBuffer[buffer_index] = sdf;
+            frame_set_pixel(frame, x, y, pixel_color);
+        }
+    }
+}

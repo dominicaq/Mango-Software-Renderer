@@ -5,12 +5,13 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+#include "framedata.h"
 #include "../game/gameobject.h"
 #include "../math/geometry.h"
 #include "../math/vec3.h"
 #include "../math/vec4.h"
 #include "../shaders/shader.h"
-#include "framedata.h"
+#include "sdf.h"
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
@@ -29,8 +30,13 @@ const extern Vec4 WIREFRAME_COLOR;
  * @frame: The frame to draw the model on
  * @mesh: The 3D model mesh
  * @mvp: The Model-View-Projection matrix
- * @wireframe: Boolean indicating whether to draw in wireframe mode
  */
 void draw_mesh(Frame *frame, Mesh *mesh, UBO *ubo);
+
+/*
+ * draw_sdf - Draw all signed distance fields (SDF)
+ * @frame: The frame to draw the model on
+ */
+void draw_sdf(Frame *frame, SDFSphere *sphere);
 
 #endif  // DRAWING_H

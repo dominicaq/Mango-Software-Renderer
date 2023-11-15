@@ -10,7 +10,7 @@ struct Display {
     SDL_PixelFormat *format;
 };
 
-float *init_zbuffer(int width, int height) {
+float *frame_init_zbuffer(int width, int height) {
     int pixel_count = width * height;
     float *zbuffer = malloc(sizeof(float) * pixel_count);
     if (zbuffer == NULL) {
@@ -25,8 +25,8 @@ float *init_zbuffer(int width, int height) {
 }
 
 void frame_reset(Frame *frame) {
-    SDL_FillRect(frame->display->surface, NULL,
-                 SDL_MapRGB(frame->display->surface->format, 0, 0, 0));
+    uint32_t rgb_map = SDL_MapRGB(frame->display->surface->format, 0, 0, 0);
+    SDL_FillRect(frame->display->surface, NULL, rgb_map);
     SDL_LockSurface(frame->display->surface);
     // Reset zbuffer to be "far away"
     int pixel_count = frame->width * frame->height;
@@ -41,13 +41,18 @@ void frame_update(Frame *frame) {
 }
 
 void frame_set_pixel(Frame *frame, int x, int y, Vec4 color) {
-    Uint32 *const target_pixel =
-        (Uint32 *)((Uint8 *)frame->display->surface->pixels +
-                   y * frame->display->surface->pitch +
-                   x * frame->display->surface->format->BytesPerPixel);
-    *target_pixel = SDL_MapRGBA(frame->display->format, color.elem[0],
-                                color.elem[1], color.elem[2], color.elem[3]);
+    // Calculate the address of the target pixel
+    int pitch = y * frame->display->surface->pitch;
+    int bytes_per_pixel = x * frame->display->surface->format->BytesPerPixel;
+    Uint8 *pixel_base = (Uint8 *)frame->display->surface->pixels;
+    Uint32 *target_pixel = (Uint32 *)(pixel_base + pitch + bytes_per_pixel);
+
+    // Set the pixel color using SDL_MapRGBA
+    *target_pixel = SDL_MapRGBA(frame->display->format,
+                                color.elem[0], color.elem[1],
+                                color.elem[2], color.elem[3]);
 }
+
 
 Frame *frame_alloc(int width, int height) {
     Frame *frame = malloc(sizeof(Frame));
@@ -90,7 +95,7 @@ Frame *frame_alloc(int width, int height) {
         return NULL;
     }
 
-    frame->zBuffer = init_zbuffer(width, height);
+    frame->zBuffer = frame_init_zbuffer(width, height);
     if (frame->zBuffer == NULL) {
         printf("ERROR: Failed to malloc zBuffer\n");
         return NULL;

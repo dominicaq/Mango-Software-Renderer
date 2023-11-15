@@ -16,6 +16,7 @@ typedef struct {
 float *frame_init_zbuffer(int width, int height);
 
 void frame_reset(Frame *frame);
+
 void frame_update(Frame *frame);
 
 void frame_set_pixel(Frame *, int x, int y, Vec4 color);
@@ -23,4 +24,5 @@ void frame_set_pixel(Frame *, int x, int y, Vec4 color);
 Frame *frame_alloc(int width, int height);
 
 void frame_free(Frame *frame);
+
 #endif  // FRAME_DATA_H

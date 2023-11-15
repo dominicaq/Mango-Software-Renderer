@@ -75,8 +75,9 @@ Vec3 vec3_normalize(Vec3 a) {
 }
 
 Vec3 vec3_reflect(Vec3 position, Vec3 normal) {
-    return vec3_sub(position,
-                    vec3_scale(normal, 2.0f * vec3_dot(position, normal)));
+    MangoReal angle = vec3_dot(position, normal);
+    Vec3 scaled_normal = vec3_scale(normal, 2.0f * angle);
+    return vec3_sub(position, scaled_normal);
 }
 
 Vec3 vec3_negate(const Vec3 v) {
@@ -89,7 +90,7 @@ Vec3 vec3_negate(const Vec3 v) {
 
 // Helper Function(s)
 // -----------------------------------------------------------------------------
-void vec4_swap(Vec3 *v1, Vec3 *v2) {
+void vec3_swap(Vec3 *v1, Vec3 *v2) {
     Vec3 temp = *v2;
     *v2 = *v1;
     *v1 = temp;
