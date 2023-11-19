@@ -124,7 +124,7 @@ int alloc_objects(Scene *scene) {
 Scene scene;
 Vec4 slight_right;
 
-void update(MangoReal dt) {
+void update(Real dt) {
     static float frames = 0;
     // Update object(s)
     // quat_mul(&scene.camera.game_object.quaternion, &slight_right);

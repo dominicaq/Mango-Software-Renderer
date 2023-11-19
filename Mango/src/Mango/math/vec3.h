@@ -11,9 +11,9 @@
 
 typedef union {
     struct {
-        MangoReal x, y, z;
+        Real x, y, z;
     };
-    MangoReal elem[3];
+    Real elem[3];
 } Vec3;
 
 // Constants
@@ -58,7 +58,7 @@ Vec3 vec3_sub(Vec3 a, Vec3 b);
  * @param alpha The interpolation parameter (0.0 to 1.0).
  * @return The interpolated 3D vector.
  */
-Vec3 vec3_lerp(Vec3 a, Vec3 b, MangoReal alpha);
+Vec3 vec3_lerp(Vec3 a, Vec3 b, Real alpha);
 
 /**
  * Scale a 3D vector by a scalar value.
@@ -70,7 +70,7 @@ Vec3 vec3_lerp(Vec3 a, Vec3 b, MangoReal alpha);
  * @param s The scalar value.
  * @return The scaled 3D vector.
  */
-Vec3 vec3_scale(Vec3 a, MangoReal s);
+Vec3 vec3_scale(Vec3 a, Real s);
 
 /**
  * Calculate the magnitude (length) of a 3D vector.
@@ -80,7 +80,7 @@ Vec3 vec3_scale(Vec3 a, MangoReal s);
  * @param a The 3D vector.
  * @return The magnitude of the vector.
  */
-MangoReal vec3_magnitude(Vec3 a);
+Real vec3_magnitude(Vec3 a);
 
 /**
  * Calculate the dot product of two 3D vectors.
@@ -91,7 +91,7 @@ MangoReal vec3_magnitude(Vec3 a);
  * @param b The second 3D vector.
  * @return The dot product.
  */
-MangoReal vec3_dot(Vec3 a, Vec3 b);
+Real vec3_dot(Vec3 a, Vec3 b);
 
 /**
  * Calculate the cross product of two 3D vectors.

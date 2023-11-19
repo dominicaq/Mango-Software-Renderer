@@ -8,9 +8,9 @@
 
 typedef union {
     struct {
-        MangoReal x, y, z, w;
+        Real x, y, z, w;
     };
-    MangoReal elem[4];
+    Real elem[4];
 } Vec4;
 
 /**

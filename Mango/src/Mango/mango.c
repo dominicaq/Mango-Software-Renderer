@@ -16,8 +16,8 @@ uint32_t SetVideoCallback(void (*on_video)());
 
 uint32_t mango_get_controller() { return GetController(); }
 #endif
-void (*user_update)(MangoReal dt);
-void mango_on_update(void (*callback)(MangoReal dt)) { user_update = callback; }
+void (*user_update)(Real dt);
+void mango_on_update(void (*callback)(Real dt)) { user_update = callback; }
 
 typedef struct {
     Frame *frame;

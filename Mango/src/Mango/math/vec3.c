@@ -21,25 +21,23 @@ Vec3 vec3_sub(Vec3 a, Vec3 b) {
     return a;
 }
 
-Vec3 vec3_lerp(Vec3 a, Vec3 b, MangoReal alpha) {
+Vec3 vec3_lerp(Vec3 a, Vec3 b, Real alpha) {
     a.x += (b.x - a.x) * alpha;
     a.y += (b.y - a.y) * alpha;
     a.z += (b.z - a.z) * alpha;
     return a;
 }
 
-Vec3 vec3_scale(Vec3 a, MangoReal s) {
+Vec3 vec3_scale(Vec3 a, Real s) {
     a.x *= s;
     a.y *= s;
     a.z *= s;
     return a;
 }
 
-MangoReal vec3_magnitude(Vec3 a) {
-    return sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
-}
+Real vec3_magnitude(Vec3 a) { return sqrt(a.x * a.x + a.y * a.y + a.z * a.z); }
 
-MangoReal vec3_dot(Vec3 a, Vec3 b) { return a.x * b.x + a.y * b.y + a.z * b.z; }
+Real vec3_dot(Vec3 a, Vec3 b) { return a.x * b.x + a.y * b.y + a.z * b.z; }
 
 Vec3 vec3_cross(Vec3 a, Vec3 b) {
     a.x = a.y * b.z - a.z * b.y;
@@ -48,9 +46,9 @@ Vec3 vec3_cross(Vec3 a, Vec3 b) {
     return a;
 }
 
-MangoReal q_rsqrt(MangoReal number) {
+Real q_rsqrt(Real number) {
     union {
-        MangoReal f;
+        Real f;
         uint32_t i;
     } conv = {.f = number};
     conv.i = 0x5f3759df - (conv.i >> 1);
@@ -59,13 +57,13 @@ MangoReal q_rsqrt(MangoReal number) {
 }
 
 Vec3 vec3_normalize(Vec3 a) {
-    MangoReal len_sq = vec3_dot(a, a);
-    // MangoReal len = vec3_magnitude(a);
+    Real len_sq = vec3_dot(a, a);
+    // Real len = vec3_magnitude(a);
     if (len_sq == 0.0f) {
         return (Vec3){{0.0f, 0.0f, 0.0f}};
     }
-    MangoReal inv_len = q_rsqrt(len_sq);
-    // MangoReal inv_len = 1.0f / len;
+    Real inv_len = q_rsqrt(len_sq);
+    // Real inv_len = 1.0f / len;
 
     a.x *= inv_len;
     a.y *= inv_len;
@@ -74,7 +72,7 @@ Vec3 vec3_normalize(Vec3 a) {
 }
 
 Vec3 vec3_reflect(Vec3 position, Vec3 normal) {
-    MangoReal angle = vec3_dot(position, normal);
+    Real angle = vec3_dot(position, normal);
     Vec3 scaled_normal = vec3_scale(normal, 2.0f * angle);
     return vec3_sub(position, scaled_normal);
 }

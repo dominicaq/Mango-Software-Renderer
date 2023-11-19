@@ -4,15 +4,15 @@
 #include <math.h>
 #include <stdio.h>
 
-#include "vec3.h"
 #include "real.h"
+#include "vec3.h"
 
 typedef union {
     struct {
-        MangoReal x;
-        MangoReal y;
+        Real x;
+        Real y;
     };
-    MangoReal elem[2];
+    Real elem[2];
 } Vec2;
 
 /**
@@ -46,7 +46,7 @@ Vec2 vec2_sub(Vec2 a, Vec2 b);
  * @param a The 2D vector to be scaled.
  * @return The resulting scaled 2D vector.
  */
-Vec2 vec2_scale(Vec2 a, MangoReal s);
+Vec2 vec2_scale(Vec2 a, Real s);
 
 /**
  * Calculate the magnitude (length) of a 2D vector.
@@ -56,7 +56,7 @@ Vec2 vec2_scale(Vec2 a, MangoReal s);
  * @param a The 2D vector.
  * @return The magnitude of the vector.
  */
-MangoReal vec2_magnitude(Vec2 a);
+Real vec2_magnitude(Vec2 a);
 
 /**
  * Calculate the dot product of two 2D vectors.
@@ -67,7 +67,7 @@ MangoReal vec2_magnitude(Vec2 a);
  * @param b The second 2D vector.
  * @return The dot product of the two vectors.
  */
-MangoReal vec2_dot(Vec2 a, Vec2 b);
+Real vec2_dot(Vec2 a, Vec2 b);
 
 /**
  * Calculate the cross product of two 2D vectors.
@@ -78,7 +78,7 @@ MangoReal vec2_dot(Vec2 a, Vec2 b);
  * @param b The second 2D vector.
  * @return The cross product value.
  */
-MangoReal vec2_cross(Vec2 a, Vec2 b);
+Real vec2_cross(Vec2 a, Vec2 b);
 
 /**
  * Swap the contents of two 2D vectors.
