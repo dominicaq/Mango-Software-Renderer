@@ -6,12 +6,12 @@ Mat4 perspective(const Camera *cam) {
         mango_real_tan(mango_real_mul(mango_real_deg_to_rad(cam->fov),
                                       mango_real_from_float(0.5f))));
     MangoReal range_inv = mango_real_div(mango_real_from_float(1.0f),
-                                         mango_real_sub(cam->zNear, cam->zFar));
+                                         mango_real_sub(cam->z_near, cam->z_far));
     MangoReal a =
-        mango_real_mul(mango_real_add(cam->zFar, cam->zNear), range_inv);
+        mango_real_mul(mango_real_add(cam->z_far, cam->z_near), range_inv);
     MangoReal b = mango_real_mul(
-        mango_real_mul(mango_real_mul(mango_real_from_float(2.0f), cam->zFar),
-                       cam->zNear),
+        mango_real_mul(mango_real_mul(mango_real_from_float(2.0f), cam->z_far),
+                       cam->z_near),
         range_inv);
     Mat4 perspective_matrix = {
         {{mango_real_div(f, cam->aspect), 0.0f, 0.0f, 0.0f},

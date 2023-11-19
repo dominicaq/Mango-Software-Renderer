@@ -9,7 +9,7 @@ typedef struct Display Display;
 
 typedef struct {
     int width, height;
-    float *zBuffer;
+    float *z_buffer;
     Display *display;
 } Frame;
 

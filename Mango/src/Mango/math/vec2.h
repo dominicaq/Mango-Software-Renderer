@@ -4,6 +4,7 @@
 #include <math.h>
 #include <stdio.h>
 
+#include "vec3.h"
 #include "real.h"
 
 typedef union {
@@ -88,6 +89,8 @@ MangoReal vec2_cross(Vec2 a, Vec2 b);
  * @param v2 The second 2D vector.
  */
 void vec2_swap(Vec2 *v1, Vec2 *v2);
+
+Vec3 vec2_to_vec3(Vec2 a, float z);
 
 /**
  * Print the components of a 2D vector to the standard output.

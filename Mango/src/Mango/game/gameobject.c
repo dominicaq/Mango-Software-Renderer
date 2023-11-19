@@ -53,6 +53,7 @@ Mesh mesh_empty() {
 }
 
 void game_object_update_local_matrix(GameObject *go) {
+    // go = game object
     float x = go->quaternion.x, y = go->quaternion.y, z = go->quaternion.z,
           w = go->quaternion.w;
     float x2 = x + x, y2 = y + y, z2 = z + z;
@@ -81,6 +82,21 @@ void game_object_update_local_matrix(GameObject *go) {
     go->local_matrix.elem[1][3] = go->position.y;
     go->local_matrix.elem[2][3] = go->position.z;
     go->local_matrix.elem[3][3] = 1;
+
+    // Extract the forward direction (third column)
+    go->forward.x = go->local_matrix.elem[0][2];
+    go->forward.y = go->local_matrix.elem[1][2];
+    go->forward.z = go->local_matrix.elem[2][2];
+
+    // Extract the right direction (first column)
+    go->right.x = go->local_matrix.elem[0][0];
+    go->right.y = go->local_matrix.elem[1][0];
+    go->right.z = go->local_matrix.elem[2][0];
+
+    // Extract the up direction (second column)
+    go->up.x = go->local_matrix.elem[0][1];
+    go->up.y = go->local_matrix.elem[1][1];
+    go->up.z = go->local_matrix.elem[2][1];
 }
 
 GameObject game_object_default() {

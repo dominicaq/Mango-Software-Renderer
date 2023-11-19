@@ -6,7 +6,7 @@ file(GLOB_RECURSE SOURCES
 
 add_library(Mango ${SOURCES})
 target_include_directories(Mango PUBLIC src)
-
+target_compile_options(Mango PRIVATE -O3)
 target_link_libraries(Mango PUBLIC m)
 if (${RISCV_CONSOLE})
     add_definitions(-DRISCV_CONSOLE)

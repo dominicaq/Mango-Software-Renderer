@@ -57,8 +57,9 @@ typedef struct {
 typedef struct {
     enum {
         ATTR_NONE,
-        ATTR_MESH,
         ATTR_LIGHT,
+        ATTR_SDF,
+        ATTR_MESH,
         ATTR_BONE,
     } type;
     union {
@@ -69,9 +70,14 @@ typedef struct {
 } GameObjectAttr;
 
 typedef struct GameObject {
+    Vec3 forward;
+    Vec3 right;
+    Vec3 up;
+
     Vec3 position;
     Vec4 quaternion;
     Vec3 scale;
+
     int num_children;
     Mat4 local_matrix;
     Mat4 world_matrix;

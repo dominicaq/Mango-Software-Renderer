@@ -1,17 +1,38 @@
 #ifndef SDF_H
 #define SDF_H
 
+#include "../game/camera.h"
 #include "../math/vec2.h"
 #include "../math/vec3.h"
 #include "../math/vec4.h"
+#include "../math/mat4.h"
 #include "../math/shader_math.h"
+#include "framedata.h"
 
 struct {
-    float radius;
     Vec3 position;
-    Vec3 transformed_position;
+    float radius;
     Vec3 color;
+    Vec3 ndc;
 } typedef SDFSphere;
+
+#define SDF_MAX_MARCH_STEPS 255
+#define SDF_START 0
+#define SDF_END 100
+
+// Render Pipeline
+// -----------------------------------------------------------------------------
+float scene_sdf(Vec3 sample_point);
+
+void sdf_draw(Frame *frame, const Camera *camera);
+
+Vec3 sdf_estimate_normal(Vec3 p);
+
+// SDF Helpers
+
+Vec3 sdf_ray_dir(float fov, Vec2 size, Vec2 frag_coord);
+
+float sdf_ray_march(Vec2 pixel, Vec3 eye, Vec3 view_dir);
 
 // Signed Distance Field functions
 // Source: https://iquilezles.org/articles/distfunctions/

@@ -7,6 +7,7 @@
 #include "mango.h"
 #include "render/drawing.h"
 #include "render/framedata.h"
+#include "render/sdf.h"
 
 #ifdef RISCV_CONSOLE
 uint32_t GetTicks(void);
@@ -69,12 +70,7 @@ void mango_update(Mango *mango) {
     }
 
     // TODO: Temp
-    SDFSphere dummy_sphere;
-    dummy_sphere.position =
-        (Vec3){{mango->frame->width / 2, mango->frame->height / 2, 0}};
-    dummy_sphere.radius = 50.0f;
-    dummy_sphere.color = (Vec3){{255.0f, 255.0f, 255.0f}};
-    draw_sdf(mango->frame, &dummy_sphere);
+    sdf_draw(mango->frame, mango->camera);
 
     frame_update(mango->frame);
 }

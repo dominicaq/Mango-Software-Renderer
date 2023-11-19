@@ -47,7 +47,7 @@ void fragment_shader(UBO *ubo, Vec3 frag_coord) {
             // Specular
             Vec3 half_angle = vec3_normalize(vec3_add(L, V));
             float blinn = clamp(vec3_dot(N, half_angle), 0.0f, 1.0f);
-            blinn = pow(blinn, 512.0f);
+            blinn = pow(blinn, 2.0f);
 
             Vec3 specular = intensity;
             specular = vec3_scale(specular, blinn);

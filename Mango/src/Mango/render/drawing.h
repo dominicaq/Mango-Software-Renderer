@@ -11,7 +11,9 @@
 #include "../math/vec3.h"
 #include "../math/vec4.h"
 #include "../shaders/shader.h"
+
 #include "sdf.h"
+#include "../game/camera.h"
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
@@ -32,11 +34,5 @@ const extern Vec4 WIREFRAME_COLOR;
  * @mvp: The Model-View-Projection matrix
  */
 void draw_mesh(Frame *frame, Mesh *mesh, UBO *ubo);
-
-/*
- * draw_sdf - Draw all signed distance fields (SDF)
- * @frame: The frame to draw the model on
- */
-void draw_sdf(Frame *frame, SDFSphere *sphere);
 
 #endif  // DRAWING_H

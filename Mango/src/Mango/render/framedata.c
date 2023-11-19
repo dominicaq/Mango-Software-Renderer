@@ -11,26 +11,27 @@ struct Display {
 
 float *frame_init_zbuffer(int width, int height) {
     int pixel_count = width * height;
-    float *zbuffer = malloc(sizeof(float) * pixel_count);
-    if (zbuffer == NULL) {
+    float *z_buffer = malloc(sizeof(float) * pixel_count);
+    if (z_buffer == NULL) {
         return NULL;
     }
 
-    // Init zbuffer to be "far away"
+    // Init z_buffer to be "far away"
     for (int i = 0; i < pixel_count; ++i) {
-        zbuffer[i] = 1.0f;
+        z_buffer[i] = 1.0f;
     }
-    return zbuffer;
+    return z_buffer;
 }
 
 void frame_reset(Frame *frame) {
     uint32_t rgb_map = SDL_MapRGB(frame->display->surface->format, 0, 0, 0);
     SDL_FillRect(frame->display->surface, NULL, rgb_map);
     SDL_LockSurface(frame->display->surface);
+
     // Reset zbuffer to be "far away"
     int pixel_count = frame->width * frame->height;
     for (int i = 0; i < pixel_count; ++i) {
-        frame->zBuffer[i] = 1.0f;
+        frame->z_buffer[i] = 1.0f;
     }
 }
 
@@ -94,9 +95,9 @@ Frame *frame_alloc(int width, int height) {
         return NULL;
     }
 
-    frame->zBuffer = frame_init_zbuffer(width, height);
-    if (frame->zBuffer == NULL) {
-        printf("ERROR: Failed to malloc zBuffer\n");
+    frame->z_buffer = frame_init_zbuffer(width, height);
+    if (frame->z_buffer == NULL) {
+        printf("ERROR: Failed to malloc z_buffer\n");
         return NULL;
     }
 
@@ -106,7 +107,7 @@ Frame *frame_alloc(int width, int height) {
 }
 
 void frame_free(Frame *frame) {
-    free(frame->zBuffer);
+    free(frame->z_buffer);
     SDL_DestroyWindow(frame->display->window);
     SDL_Quit();
     free(frame);

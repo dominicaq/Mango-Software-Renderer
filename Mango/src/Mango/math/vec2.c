@@ -26,6 +26,8 @@ MangoReal vec2_dot(Vec2 a, Vec2 b) { return a.x * b.x + a.y * b.y; }
 
 MangoReal vec2_cross(Vec2 a, Vec2 b) { return (a.x * b.y) - (a.y * b.x); }
 
+Vec3 vec2_to_vec3(Vec2 a, float z) { return (Vec3){{a.x, a.y, z}}; }
+
 // Helper Function(s)
 // -----------------------------------------------------------------------------
 void vec2_swap(Vec2 *v1, Vec2 *v2) {
