@@ -54,7 +54,7 @@ void frame_set_pixel(Frame *frame, int x, int y, Vec4 color) {
 }
 
 
-Frame *frame_alloc(int width, int height) {
+Frame *frame_alloc(const char *title, int width, int height) {
     Frame *frame = malloc(sizeof(Frame));
     if (frame == NULL) {
         printf("ERROR: Failed to malloc frame\n");
@@ -71,10 +71,12 @@ Frame *frame_alloc(int width, int height) {
         printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
         return NULL;
     }
+
     // Create window
     frame->display->window = SDL_CreateWindow(
-        "c_software_renderer", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+        title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
         width, height, SDL_WINDOW_SHOWN);
+
     if (frame->display->window == NULL) {
         printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
         return NULL;

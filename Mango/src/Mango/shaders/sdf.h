@@ -7,7 +7,7 @@
 #include "../math/vec4.h"
 #include "../math/mat4.h"
 #include "../math/shader_math.h"
-#include "framedata.h"
+#include "../render/framedata.h"
 
 struct {
     Vec3 position;
@@ -16,6 +16,7 @@ struct {
     Vec3 ndc;
 } typedef SDFSphere;
 
+#define SDF_EPSILON 0.0001
 #define SDF_MAX_MARCH_STEPS 255
 #define SDF_START 0
 #define SDF_END 100
@@ -30,9 +31,9 @@ Vec3 sdf_estimate_normal(Vec3 p);
 
 // SDF Helpers
 
-Vec3 sdf_ray_dir(float fov, Vec2 size, Vec2 frag_coord);
+Vec3 sdf_ray_dir(Vec2 uv, Vec2 size, float fov);
 
-float sdf_ray_march(Vec2 pixel, Vec3 eye, Vec3 view_dir);
+float sdf_ray_march(Vec3 origin, Vec3 direction);
 
 // Signed Distance Field functions
 // Source: https://iquilezles.org/articles/distfunctions/

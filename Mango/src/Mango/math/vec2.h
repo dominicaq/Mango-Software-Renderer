@@ -46,7 +46,7 @@ Vec2 vec2_sub(Vec2 a, Vec2 b);
  * @param a The 2D vector to be scaled.
  * @return The resulting scaled 2D vector.
  */
-Vec2 vec2_scale(MangoReal s, Vec2 a);
+Vec2 vec2_scale(Vec2 a, MangoReal s);
 
 /**
  * Calculate the magnitude (length) of a 2D vector.

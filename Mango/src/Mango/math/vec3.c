@@ -1,7 +1,5 @@
 #include "vec3.h"
 
-#include <stdint.h>
-
 Vec3 UNIT_X = {{1, 0, 0}};
 Vec3 UNIT_Y = {{0, 1, 0}};
 Vec3 UNIT_Z = {{0, 0, 1}};
@@ -112,6 +110,10 @@ Vec3 vec3_min(Vec3 a, Vec3 b) {
         return a;
     }
     return b;
+}
+
+bool vec3_equal(Vec3 a, Vec3 b) {
+    return a.x == b.x && a.y == b.y && a.z == b.z;
 }
 
 // Helper Function(s)

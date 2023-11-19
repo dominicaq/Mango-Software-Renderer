@@ -21,7 +21,7 @@ void frame_update(Frame *frame);
 
 void frame_set_pixel(Frame *, int x, int y, Vec4 color);
 
-Frame *frame_alloc(int width, int height);
+Frame *frame_alloc(const char *title, int width, int height);
 
 void frame_free(Frame *frame);
 

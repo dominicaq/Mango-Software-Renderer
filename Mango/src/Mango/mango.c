@@ -7,7 +7,7 @@
 #include "mango.h"
 #include "render/drawing.h"
 #include "render/framedata.h"
-#include "render/sdf.h"
+#include "shaders/sdf.h"
 
 #ifdef RISCV_CONSOLE
 uint32_t GetTicks(void);
@@ -20,10 +20,9 @@ void (*user_update)(MangoReal dt);
 void mango_on_update(void (*callback)(MangoReal dt)) { user_update = callback; }
 
 typedef struct {
-    Scene *scene;
-    Camera *camera;
-    clock_t last_time;
     Frame *frame;
+    Scene *scene;
+    clock_t last_time;
     UBO ubo;
 } Mango;
 
@@ -34,24 +33,26 @@ void mango_update(Mango *mango) {
     mango->last_time = current_time;
     frame_reset(mango->frame);
 
-    mango->ubo.u_cam_pos = mango->camera->game_object.position;
+    Scene *current_scene = mango->scene;
+    Camera *current_camera = current_scene->camera;
+    mango->ubo.u_cam_pos = current_camera->game_object.position;
 
     // Update scene transforms
-    scene_update_matrices(mango->scene);
-    camera_update_matrix(mango->camera);
+    scene_update_matrices(current_scene);
+    camera_update_matrix(current_camera);
     // idealy later we here we will organize scene into bvh and then add
     // and remove lights from a light stack ad we render objects
 
     // Update MVP Matrix: projection * view * model (multiplication
     // order)
-    Mat4 projection_matrix = perspective(mango->camera);
-    Mat4 view_matrix = mat4_inverse(mango->camera->game_object.world_matrix);
-    for (int i = 0; i < mango->scene->object_count; ++i) {
-        if (mango->scene->attributes[i].type != ATTR_MESH) {
+    Mat4 projection_matrix = perspective(current_camera);
+    Mat4 view_matrix = mat4_inverse(current_camera->game_object.world_matrix);
+    for (int i = 0; i < current_scene->object_count; ++i) {
+        if (current_scene->attributes[i].type != ATTR_MESH) {
             continue;
         }
-        Mesh *target_mesh = &mango->scene->attributes[i].mesh;
-        GameObject *target_object = mango->scene->objects + i;
+        Mesh *target_mesh = &current_scene->attributes[i].mesh;
+        GameObject *target_object = current_scene->objects + i;
 
         // Update matricies
         Mat4 model_matrix = target_object->world_matrix;
@@ -70,16 +71,15 @@ void mango_update(Mango *mango) {
     }
 
     // TODO: Temp
-    sdf_draw(mango->frame, mango->camera);
+    sdf_draw(mango->frame, mango->scene->camera);
 
     frame_update(mango->frame);
 }
 
-void mango_run(Scene *scene, Camera *camera) {
+void mango_run(Scene *scene, const char* title, int width, int height) {
     Mango mango;
-    mango.camera = camera;
     mango.scene = scene;
-    mango.frame = frame_alloc(camera->width, camera->height);
+    mango.frame = frame_alloc(title, width, height);
     if (mango.frame == NULL) {
         return;
     }
@@ -88,15 +88,15 @@ void mango_run(Scene *scene, Camera *camera) {
     clock_t start_time = clock();
     mango.last_time = start_time;
 
-    mango.ubo.num_lights = 0;
+    int num_lights = 0;
     for (int i = 0; i < scene->object_count; ++i) {
         if (scene->attributes[i].type == ATTR_LIGHT) {
-            mango.ubo.lights[mango.ubo.num_lights] =
-                &scene->attributes[i].light;
-            mango.ubo.light_objects[mango.ubo.num_lights] = &scene->objects[i];
-            ++mango.ubo.num_lights;
+            mango.ubo.lights[num_lights] = &scene->attributes[i].light;
+            mango.ubo.light_objects[num_lights] = &scene->objects[i];
+            ++num_lights;
         }
     }
+    mango.ubo.num_lights = num_lights;
 
 #ifdef RISCV_CONSOLE
     SetVideoCallback(mango_update);

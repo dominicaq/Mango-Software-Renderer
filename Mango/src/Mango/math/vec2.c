@@ -14,7 +14,7 @@ Vec2 vec2_sub(Vec2 a, Vec2 b) {
     return a;
 }
 
-Vec2 vec2_scale(MangoReal s, Vec2 a) {
+Vec2 vec2_scale(Vec2 a, MangoReal s) {
     a.x = s * a.x;
     a.y = s * a.y;
     return a;

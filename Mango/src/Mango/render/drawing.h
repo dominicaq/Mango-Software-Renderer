@@ -12,7 +12,7 @@
 #include "../math/vec4.h"
 #include "../shaders/shader.h"
 
-#include "sdf.h"
+#include "../shaders/sdf.h"
 #include "../game/camera.h"
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))

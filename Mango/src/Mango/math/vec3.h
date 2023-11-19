@@ -3,7 +3,8 @@
 
 #include <math.h>
 #include <stdio.h>
-
+#include <stdbool.h>
+#include <stdint.h>
 #include "real.h"
 
 #define EPSILON 1.0e-6
@@ -155,5 +156,7 @@ Vec3 vec3_max(Vec3 a, Vec3 b);
 
 // Returns the vector with the smallest length
 Vec3 vec3_min(Vec3 a, Vec3 b);
+
+bool vec3_equal(Vec3 a, Vec3 b);
 
 #endif  // VEC3_H
