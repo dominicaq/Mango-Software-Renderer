@@ -13,12 +13,53 @@ const char *GAME_TITLE = "Mango Renderer";
 const int SCREEN_WIDTH = 720;
 const int SCREEN_HEIGHT = 440;
 
-// Debug
-const bool USE_WIREFRAME = false;
-const bool USE_RASTERIZE = true;
+// Debugging
+// -----------------------------------------------------------------------------
+
+const bool DEBUG_ENABLE_FPS_COUNT = true;
+const bool DEBUG_USE_WIREFRAME = false;
+const bool DEBUG_USE_RASTERIZE = true;
+
+void fps_counter() {
+    static int frames = 0;
+    static clock_t start, end;
+    static double elapsed_time;
+
+    // Print FPS every second
+    end = clock();
+    elapsed_time = (double) (end - start) / CLOCKS_PER_SEC;
+    if (elapsed_time >= 1.0) {
+        double fps = frames / elapsed_time;
+        printf("FPS: %f\n", fps);
+
+        // Reset counters for the next second
+        start = clock();
+        frames = 0;
+    }
+    ++frames;
+}
+
+// -----------------------------------------------------------------------------
+
+// Lights
+const Vec3 COLLOR_PALLETE[7] = {
+    {{1.0f, 0.0f, 0.0f}},  // Red
+    {{0.0f, 1.0f, 0.0f}},  // Green
+    {{0.0f, 0.0f, 1.0f}},  // Blue
+    {{1.0f, 1.0f, 0.0f}},  // Yellow
+    {{1.0f, 1.0f, 1.0f}},  // White
+    {{0.3f, 0.0f, 0.5f}},  // Indigo
+    {{0.5f, 0.0f, 0.5f}}   // Violet
+};
+
+int POINT_LIGHTS_BEGIN = 3;
+int POINT_LIGHTS_END = 6;
+
+// Scene data
+Scene scene;
+Vec4 slight_right;
 
 Camera init_camera(int frame_width, int frame_height) {
-    // Camera properties
     Camera cam;
     cam.game_object = game_object_default();
     cam.game_object.position = (Vec3){{0.0f, 1.0f, 20.0f}};
@@ -32,21 +73,8 @@ Camera init_camera(int frame_width, int frame_height) {
     return cam;
 }
 
-const Vec3 COLLOR_PALLETE[7] = {
-    {{1.0f, 0.0f, 0.0f}},  // Red
-    {{0.0f, 1.0f, 0.0f}},  // Green
-    {{0.0f, 0.0f, 1.0f}},  // Blue
-    {{1.0f, 1.0f, 0.0f}},  // Yellow
-    {{0.0f, 0.0f, 0.0f}},  // White
-    {{0.3f, 0.0f, 0.5f}},  // Indigo
-    {{0.5f, 0.0f, 0.5f}}   // Violet
-};
-
-int POINT_LIGHTS_BEGIN = 3;
-int POINT_LIGHTS_END = 6;
-
 int alloc_objects(Scene *scene) {
-    Vec3 white = (Vec3){{1.0f, 1.0f, 1.0f}};
+    Vec3 white = COLLOR_PALLETE[4];
     // Vec3 blue = (Vec3){{0.0f, 0.5f, 1.0f}};
 
     // Objects
@@ -54,7 +82,7 @@ int alloc_objects(Scene *scene) {
     scene->object_count = manual_objects + spider_object_amt;
     scene->dirty_locals = malloc(scene->object_count * sizeof(bool));
     if (scene->dirty_locals == NULL) {
-        fprintf(stderr, "ERROR: malloc failed objects");
+        fprintf(stderr, "ERROR: malloc failed dirty_locals\n");
         return 1;
     }
 
@@ -64,21 +92,21 @@ int alloc_objects(Scene *scene) {
 
     scene->attributes = malloc(scene->object_count * sizeof(GameObjectAttr));
     if (scene->attributes == NULL) {
-        fprintf(stderr, "ERROR: malloc failed attributes");
+        fprintf(stderr, "ERROR: malloc failed attributes\n");
         return 1;
     }
 
     scene->objects = malloc(scene->object_count * sizeof(GameObject));
     if (scene->objects == NULL) {
-        fprintf(stderr, "ERROR: malloc failed objects");
+        fprintf(stderr, "ERROR: malloc failed objects\n");
         return 1;
     }
 
     scene->objects[0] = game_object_default();
     scene->objects[0].position = (Vec3){{0.0f, 1.0f, -3.0f}};
-    scene->objects[0].scale = (Vec3){{1.0f, 1.0f, 1.0f}};
+    scene->objects[0].scale = (Vec3){{5.0f, 5.0f, 5.0f}};
     scene->attributes[0].type = ATTR_MESH;
-    scene->attributes[0].mesh = load_obj_mesh("../models/Atlas.obj");
+    scene->attributes[0].mesh = load_obj_mesh("../models/head.obj");
     scene->attributes[0].mesh.color = white;
 
     // scene->objects[1] = game_object_default();
@@ -126,6 +154,7 @@ Vec4 slight_right;
 
 void update(Real dt) {
     static float frames = 0;
+
     // Update object(s)
     // quat_mul(&scene.camera.game_object.quaternion, &slight_right);
     // scene.camera.game_object.needs_update = true;
@@ -136,7 +165,7 @@ void update(Real dt) {
     int num_lights = POINT_LIGHTS_END - POINT_LIGHTS_BEGIN;
     float angle_increment = 2.0f * M_PI / num_lights;
     for (int i = POINT_LIGHTS_BEGIN; i < POINT_LIGHTS_END; ++i) {
-        float angle = angle_increment * (i + (frames / 20));
+        float angle = angle_increment * (i + (frames / 20.0f));
         float x = circle_radius * cosf(angle);
         float z = circle_radius * sinf(angle);
         scene.dirty_locals[i] = true;
@@ -147,9 +176,12 @@ void update(Real dt) {
     quat_mul(&scene.objects[0].quaternion, &slight_right);
     scene.dirty_locals[0] = true;
     ++frames;
+
+    if (DEBUG_ENABLE_FPS_COUNT) {
+        fps_counter();
+    }
 }
 
-// TODO: note: was originally int main(int argc, char *argv[])
 int SDL_main(int argc, char *argv[]) {
     // Start
     printf("Initializing mango renderer...\n");
@@ -164,8 +196,8 @@ int SDL_main(int argc, char *argv[]) {
     scene.camera = &camera;
 
     // Debug options
-    scene.debug.wireframe = USE_WIREFRAME;
-    scene.debug.rasterize = USE_RASTERIZE;
+    scene.debug.wireframe = DEBUG_USE_WIREFRAME;
+    scene.debug.rasterize = DEBUG_USE_RASTERIZE;
 
     printf("Success.\n");
 

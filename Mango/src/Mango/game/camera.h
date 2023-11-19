@@ -8,15 +8,9 @@
 typedef struct {
     GameObject game_object;
     bool dirty_local;
-<<<<<<< Updated upstream
-    MangoReal fov;
-    MangoReal z_near, z_far;
-    MangoReal aspect;
-=======
     Real fov;
-    Real zNear, zFar;
+    Real z_near, z_far;
     Real aspect;
->>>>>>> Stashed changes
     int width, height;
 } Camera;
 

@@ -43,8 +43,7 @@ void mango_update(Mango *mango) {
     // idealy later we here we will organize scene into bvh and then add
     // and remove lights from a light stack ad we render objects
 
-    // Update MVP Matrix: projection * view * model (multiplication
-    // order)
+    // Update MVP Matrix: projection * view * model (multiplication order)
     Mat4 projection_matrix = perspective(current_camera);
     Mat4 view_matrix = mat4_inverse(current_camera->game_object.world_matrix);
     for (int i = 0; i < current_scene->object_count; ++i) {
@@ -66,12 +65,11 @@ void mango_update(Mango *mango) {
         mango->ubo.u_model_view = model_view_matrix;
         mango->ubo.u_color = target_mesh->color;
 
-        // UBO debug options
         draw_mesh(mango->frame, target_mesh, &mango->ubo);
     }
 
-    // TODO: Temp
-    sdf_draw(mango->frame, mango->scene->camera);
+    //
+    sdf_draw(mango->frame, current_camera);
 
     frame_update(mango->frame);
 }
@@ -105,7 +103,6 @@ void mango_run(Scene *scene, const char* title, int width, int height) {
     while (1) {
     }
 #else
-    // populate lights
     SDL_Event e;
     bool quit = false;
     while (!quit) {
