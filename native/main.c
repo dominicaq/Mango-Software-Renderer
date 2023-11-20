@@ -27,7 +27,7 @@ void fps_counter() {
 
     // Print FPS every second
     end = clock();
-    elapsed_time = (double) (end - start) / CLOCKS_PER_SEC;
+    elapsed_time = (double)(end - start) / CLOCKS_PER_SEC;
     if (elapsed_time >= 1.0) {
         double fps = frames / elapsed_time;
         printf("FPS: %f\n", fps);
@@ -182,7 +182,7 @@ void update(Real dt) {
     }
 }
 
-int SDL_main(int argc, char *argv[]) {
+int MAIN(int argc, char *argv[]) {
     // Start
     printf("Initializing mango renderer...\n");
 

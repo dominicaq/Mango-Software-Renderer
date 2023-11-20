@@ -52,79 +52,6 @@ std::ostream &operator<<(std::ostream &os, const ufbx_keyframe &k) {
     return os;
 }
 
-std::ostream &operator<<(std::ostream &os, const ufbx_anim_stack &s) {
-    std::string anim_name = str_sanitized(s.name.data);
-    // build_layer names
-    auto layer_names = std::vector<std::string>();
-    std::transform(
-        s.layers.begin(), s.layers.end(), std::back_inserter(layer_names),
-        [&](auto l) { return anim_name + "_" + str_sanitized(l->name.data); });
-    // build prop names
-    auto prop_names = std::vector<std::vector<std::string>>(s.layers.count);
-    for (int i = 0; i < s.layers.count; ++i) {
-        std::transform(
-            s.layers[i]->anim_props.begin(), s.layers[i]->anim_props.end(),
-            std::back_inserter(prop_names[i]), [&, i](ufbx_anim_prop const &p) {
-                return layer_names[i] + std::to_string(p.element->element_id) +
-                       str_sanitized(p.prop_name.data);
-            });
-    }
-    // write keyframes
-    for (int i = 0; i < s.layers.count; ++i) {
-        auto l = s.layers[i];
-        for (int j = 0; j < l->anim_props.count; ++j) {
-            auto const &p = l->anim_props[j];
-            os << "Keyframe " << prop_names[i][j] + "0"
-               << "[]=";
-            write_list<ufbx_keyframe>(os, p.anim_value->curves[0]->keyframes);
-            os << ";" << std::endl;
-            os << "Keyframe " << prop_names[i][j] + "1"
-               << "[]=";
-            write_list<ufbx_keyframe>(os, p.anim_value->curves[0]->keyframes);
-            os << ";" << std::endl;
-            os << "Keyframe " << prop_names[i][j] + "2"
-               << "[]=";
-            write_list<ufbx_keyframe>(os, p.anim_value->curves[0]->keyframes);
-            os << ";" << std::endl;
-        }
-    }
-    // write props
-    for (int i = 0; i < s.layers.count; ++i) {
-        auto l = s.layers[i];
-        os << "AnimProp " << layer_names[i] << "[]={";
-        for (int j = 0; j < l->anim_props.count; ++j) {
-            auto const &p = l->anim_props[j];
-            os << "{" << p.element->element_id << ", "
-               << p.anim_value->default_value << ", {{"
-               << p.anim_value->curves[0]->keyframes.count << ", "
-               << prop_names[i][j] + "0}, {"
-               << p.anim_value->curves[1]->keyframes.count << ", "
-               << prop_names[i][j] + "1}, {"
-               << p.anim_value->curves[2]->keyframes.count << ",  "
-               << prop_names[i][j] + "2}}}, ";
-        }
-        os << "};" << std::endl;
-    }
-
-    // write layers
-    std::string layer_list_name = anim_name + "_layers";
-    os << "AnimLayer " << layer_list_name << "[]={";
-    for (int i = 0; i < s.layers.count; ++i) {
-        auto l = s.layers[i];
-        os << "{" << l->weight << ", " << l->weight_is_animated << ", "
-           << l->blended << ", " << l->additive << ", " << l->compose_rotation
-           << ", " << l->compose_scale << ", "
-           << "{" << l->anim_props.count << ", " << layer_names[i] << "}}";
-    }
-    // write stack
-    os << "};" << std::endl;
-    os << "AnimStack " << anim_name << "={" << s.time_begin << ", "
-       << s.time_end << ", {" << s.layers.count << ", " << anim_name
-       << "_layers"
-       << "}};";
-    return os;
-}
-
 enum AnimProp {
     ANIM_PROP_LCL_ROT,
     ANIM_PROP_LCL_SCL,
@@ -179,7 +106,7 @@ class FBXWriter {
                << std::endl;
 
         for (auto stack : scene->anim_stacks) {
-            c_ofs_ << *stack << std::endl;
+            write_anim_stack(*stack);
         }
         for (auto node : nodes_) {
             if (node->mesh) {
@@ -208,6 +135,85 @@ class FBXWriter {
         for (auto child : node->children) {
             push_nodes_depth_first(child);
         }
+    }
+    void write_anim_stack(ufbx_anim_stack const &s) {
+        std::string anim_name = str_sanitized(s.name.data);
+        // build_layer names
+        auto layer_names = std::vector<std::string>();
+        std::transform(s.layers.begin(), s.layers.end(),
+                       std::back_inserter(layer_names), [&](auto l) {
+                           return anim_name + "_" + str_sanitized(l->name.data);
+                       });
+        // build prop names
+        auto prop_names = std::vector<std::vector<std::string>>(s.layers.count);
+        for (int i = 0; i < s.layers.count; ++i) {
+            std::transform(s.layers[i]->anim_props.begin(),
+                           s.layers[i]->anim_props.end(),
+                           std::back_inserter(prop_names[i]),
+                           [&, i](ufbx_anim_prop const &p) {
+                               return layer_names[i] +
+                                      std::to_string(p.element->element_id) +
+                                      str_sanitized(p.prop_name.data);
+                           });
+        }
+        // write keyframes
+        for (int i = 0; i < s.layers.count; ++i) {
+            auto l = s.layers[i];
+            for (int j = 0; j < l->anim_props.count; ++j) {
+                auto const &p = l->anim_props[j];
+                c_ofs_ << "Keyframe " << prop_names[i][j] + "0"
+                       << "[]=";
+                write_list<ufbx_keyframe>(c_ofs_,
+                                          p.anim_value->curves[0]->keyframes);
+                c_ofs_ << ";" << std::endl;
+                c_ofs_ << "Keyframe " << prop_names[i][j] + "1"
+                       << "[]=";
+                write_list<ufbx_keyframe>(c_ofs_,
+                                          p.anim_value->curves[0]->keyframes);
+                c_ofs_ << ";" << std::endl;
+                c_ofs_ << "Keyframe " << prop_names[i][j] + "2"
+                       << "[]=";
+                write_list<ufbx_keyframe>(c_ofs_,
+                                          p.anim_value->curves[0]->keyframes);
+                c_ofs_ << ";" << std::endl;
+            }
+        }
+        // write props
+        for (int i = 0; i < s.layers.count; ++i) {
+            auto l = s.layers[i];
+            c_ofs_ << "AnimProp " << layer_names[i] << "[]={";
+            for (int j = 0; j < l->anim_props.count; ++j) {
+                auto const &p = l->anim_props[j];
+                c_ofs_ << "{" << p.element->element_id << ", "
+                       << p.anim_value->default_value << ", {{"
+                       << p.anim_value->curves[0]->keyframes.count << ", "
+                       << prop_names[i][j] + "0}, {"
+                       << p.anim_value->curves[1]->keyframes.count << ", "
+                       << prop_names[i][j] + "1}, {"
+                       << p.anim_value->curves[2]->keyframes.count << ",  "
+                       << prop_names[i][j] + "2}}}, ";
+            }
+            c_ofs_ << "};" << std::endl;
+        }
+
+        // write layers
+        std::string layer_list_name = anim_name + "_layers";
+        c_ofs_ << "AnimLayer " << layer_list_name << "[]={";
+        for (int i = 0; i < s.layers.count; ++i) {
+            auto l = s.layers[i];
+            c_ofs_ << "{" << l->weight << ", " << l->weight_is_animated << ", "
+                   << l->blended << ", " << l->additive << ", "
+                   << l->compose_rotation << ", " << l->compose_scale << ", "
+                   << "{" << l->anim_props.count << ", " << layer_names[i]
+                   << "}}";
+        }
+        // write stack
+        c_ofs_ << "};" << std::endl;
+        h_ofs_ << "extern AnimStack " << anim_name << ";" << std::endl;
+        c_ofs_ << "AnimStack " << anim_name << "={" << s.time_begin << ", "
+               << s.time_end << ", {" << s.layers.count << ", " << anim_name
+               << "_layers"
+               << "}};";
     }
 
     void write_game_objects() {
