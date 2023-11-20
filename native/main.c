@@ -20,6 +20,7 @@ const bool DEBUG_ENABLE_FPS_COUNT = true;
 const bool DEBUG_USE_WIREFRAME = false;
 const bool DEBUG_USE_RASTERIZE = true;
 const bool DEBUG_VIEW_NORMALS = false;
+const bool DEBUG_SDF_ENABLE = true;
 
 void fps_counter() {
     static int frames = 0;
@@ -139,13 +140,13 @@ int alloc_objects(Scene *scene) {
     // scene->attributes[6].light.color = (Vec3){{0.4f, 0.4f, 0.4f}};
     // scene->attributes[6].light.intensity = light_intensity;
 
-    memcpy(scene->objects + manual_objects, spider_game_objects,
-           spider_object_amt * sizeof(GameObject));
-    memcpy(scene->attributes + manual_objects, spider_attrs,
-           spider_object_amt * sizeof(GameObjectAttr));
-    scene->max_depth = MAX(scene->max_depth, spider_max_depth);
+    // memcpy(scene->objects + manual_objects, spider_game_objects,
+    //        spider_object_amt * sizeof(GameObject));
+    // memcpy(scene->attributes + manual_objects, spider_attrs,
+    //        spider_object_amt * sizeof(GameObjectAttr));
+    // scene->max_depth = MAX(scene->max_depth, spider_max_depth);
 
-    scene->objects[manual_objects].scale = (Vec3){{0.1f, 0.1f, 0.1f}};
+    // scene->objects[manual_objects].scale = (Vec3){{0.1f, 0.1f, 0.1f}};
 
     return 0;
 }
@@ -207,6 +208,7 @@ int MAIN(int argc, char *argv[]) {
     scene.debug.use_wireframe = DEBUG_USE_WIREFRAME;
     scene.debug.use_rasterize = DEBUG_USE_RASTERIZE;
     scene.debug.view_normals = DEBUG_VIEW_NORMALS;
+    scene.debug.sdf_enable = DEBUG_SDF_ENABLE;
 
     printf("Success.\n");
 

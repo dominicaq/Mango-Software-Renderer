@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "real.h"
+#include "shader_math.h"
 
 #define EPSILON 1.0e-6
 
@@ -158,5 +159,7 @@ Vec3 vec3_max(Vec3 a, Vec3 b);
 Vec3 vec3_min(Vec3 a, Vec3 b);
 
 bool vec3_equal(Vec3 a, Vec3 b);
+
+Vec3 vec3_clamp(Vec3 a, Real min, Real max);
 
 #endif  // VEC3_H

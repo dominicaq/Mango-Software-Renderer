@@ -43,9 +43,13 @@ float sdf_box(Vec3 p, Vec3 b);
 
 float sdf_torus(Vec3 p, Vec2 t);
 
+float sdf_plane(Vec3 p, Vec3 n, float h);
+
 // Signed Distance Field Operations
 // Source: https://iquilezles.org/articles/distfunctions/
 // -----------------------------------------------------------------------------
+
+float smin( float a, float b, float k );
 
 float sdf_op_union(float d1, float d2);
 

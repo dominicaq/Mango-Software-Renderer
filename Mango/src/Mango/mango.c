@@ -27,21 +27,21 @@ void mango_play_anim(Mango *mango, int object_index, AnimStack *stack) {
 }
 
 void mango_update_anim(Mango *mango, Anim *anim, Real dt) {
-    if (anim->time_progress >= anim->stack.time_end) {
-        return;
-    }
-    anim->time_progress += dt;
-    if (anim->time_progress < anim->stack.time_begin) {
-        return;
-    }
-    for (int i = 0; i < anim->stack.layers.len; ++i) {
-        AnimLayer *layer = &anim->stack.layers.arr[i];
-        for (int j = 0; j < layer->anim_props.len; ++j) {
-            AnimProp *prop = &layer->anim_props.arr[i];
-            GameObject *obj = &mango->scene->objects[prop->node_index];
-            prop_update(prop, obj, anim->time_progress);
-        }
-    }
+    // if (anim->time_progress >= anim->stack.time_end) {
+    //     return;
+    // }
+    // anim->time_progress += dt;
+    // if (anim->time_progress < anim->stack.time_begin) {
+    //     return;
+    // }
+    // for (int i = 0; i < anim->stack.layers.len; ++i) {
+    //     AnimLayer *layer = &anim->stack.layers.arr[i];
+    //     for (int j = 0; j < layer->anim_props.len; ++j) {
+    //         AnimProp *prop = &layer->anim_props.arr[i];
+    //         GameObject *obj = &mango->scene->objects[prop->node_index];
+    //         prop_update(prop, obj, anim->time_progress);
+    //     }
+    // }
 }
 
 clock_t mango_update(Mango *mango, clock_t last_time) {
@@ -89,18 +89,20 @@ clock_t mango_update(Mango *mango, clock_t last_time) {
         draw_mesh(mango->frame, target_mesh, &mango->ubo);
     }
 
-    // TODO: Temp
-    // Create data
-    // Vec3 sphere_position = (Vec3){{0,0,-5}};
-    // Mat4 sdf_model = sdf_model_matrix(sphere_position);
-    // Mat4 sdf_mv = mat4_mul(view_matrix, sdf_model);
-    // Mat4 sdf_mvp = mat4_mul(projection_matrix, sdf_mv);
 
-    // // Apply transformation
-    // Vec4 sdf_pos = vec3_to_vec4(sphere_position, 1.0f);
-    // Vec4 sdf_cs = mat_mul_vec4(sdf_mvp, sdf_pos);
-    // Vec3 sdf_ndc = vec4_homogenize(sdf_cs);
-    // sdf_draw(mango->frame, current_camera, sdf_ndc);
+    // Draw SDF scene
+    if (mango->ubo.debug.sdf_enable) {
+        Vec3 sphere_position = (Vec3){{0, 0,-5}};
+        Mat4 sdf_model = sdf_model_matrix(sphere_position);
+        Mat4 sdf_mv = mat4_mul(view_matrix, sdf_model);
+        Mat4 sdf_mvp = mat4_mul(projection_matrix, sdf_mv);
+
+        // Apply transformation
+        Vec4 sdf_pos = vec3_to_vec4(sphere_position, 1.0f);
+        Vec4 sdf_clip_space = mat_mul_vec4(sdf_mvp, sdf_pos);
+        Vec3 sdf_ndc = vec4_homogenize(sdf_clip_space);
+        sdf_draw(mango->frame, current_camera, sdf_ndc);
+    }
 
     frame_update(mango->frame);
     return current_time;

@@ -13,6 +13,7 @@ typedef struct {
     bool use_wireframe;
     bool use_rasterize;
     bool view_normals;
+    bool sdf_enable;
 } DebugOptions;
 
 typedef struct {

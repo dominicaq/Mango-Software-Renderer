@@ -114,6 +114,13 @@ bool vec3_equal(Vec3 a, Vec3 b) {
     return a.x == b.x && a.y == b.y && a.z == b.z;
 }
 
+Vec3 vec3_clamp(Vec3 a, Real min, Real max) {
+    a.x = clamp(a.x, min, max);
+    a.y = clamp(a.y, min, max);
+    a.z = clamp(a.z, min, max);
+    return a;
+}
+
 // Helper Function(s)
 // -----------------------------------------------------------------------------
 void vec3_swap(Vec3 *v1, Vec3 *v2) {

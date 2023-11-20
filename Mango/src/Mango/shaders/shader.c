@@ -26,9 +26,7 @@ void fragment_shader(UBO *ubo, Vec3 frag_coord) {
     Vec3 V = vec3_normalize(view_vec);
     if (ubo->debug.view_normals == true) {
         N = vec3_scale(N, 255.0f);
-        N.x = clamp(N.x, 0.0f, 255.0f);
-        N.y = clamp(N.y, 0.0f, 255.0f);
-        N.z = clamp(N.z, 0.0f, 255.0f);
+        N = vec3_clamp(N, 0.0f, 255.0f);
         ubo->f_data.gl_frag_color = vec3_to_vec4(N, 255.0f);
         return;
     }
@@ -72,9 +70,6 @@ void fragment_shader(UBO *ubo, Vec3 frag_coord) {
     // Scale to RGB to TGA format
     Vec3 lighting = vec3_add(total_diffuse, total_specular);
     lighting = vec3_scale(lighting, 255.0f / ubo->num_lights);
-    lighting.x = clamp(lighting.x, 0.0f, 255.0f);
-    lighting.y = clamp(lighting.y, 0.0f, 255.0f);
-    lighting.z = clamp(lighting.z, 0.0f, 255.0f);
-
+    lighting = vec3_clamp(lighting, 0.0f, 255.0f);
     ubo->f_data.gl_frag_color = vec3_to_vec4(lighting, 255.0f);  // TGA RGBA
 }
