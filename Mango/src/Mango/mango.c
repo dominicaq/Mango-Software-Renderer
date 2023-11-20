@@ -16,26 +16,47 @@ uint32_t SetVideoCallback(void (*on_video)());
 
 uint32_t mango_get_controller() { return GetController(); }
 #endif
-void (*user_update)(Real dt);
-void mango_on_update(void (*callback)(Real dt)) { user_update = callback; }
 
-typedef struct {
-    Frame *frame;
-    Scene *scene;
-    clock_t last_time;
-    UBO ubo;
-} Mango;
+void mango_play_anim(Mango *mango, int object_index, AnimStack *stack) {
+    for (int i = 0; i < mango->running_anims.len; ++i) {
+        Anim *anim = mango->running_anims.arr + i;
+        if (anim->time_progress >= anim->stack.time_end) {
+            *anim = (Anim){0, object_index, *stack};
+        }
+    }
+}
 
-void mango_update(Mango *mango) {
+void mango_update_anim(Mango *mango, Anim *anim, Real dt) {
+    if (anim->time_progress >= anim->stack.time_end) {
+        return;
+    }
+    anim->time_progress += dt;
+    if (anim->time_progress < anim->stack.time_begin) {
+        return;
+    }
+    for (int i = 0; i < anim->stack.layers.len; ++i) {
+        AnimLayer *layer = &anim->stack.layers.arr[i];
+        for (int j = 0; j < layer->anim_props.len; ++j) {
+            AnimProp *prop = &layer->anim_props.arr[i];
+            GameObject *obj = &mango->scene->objects[prop->node_index];
+            prop_update(prop, obj, anim->time_progress);
+        }
+    }
+}
+
+clock_t mango_update(Mango *mango, clock_t last_time) {
     clock_t current_time = clock();
-    double dt = current_time - mango->last_time;
-    user_update(dt);
-    mango->last_time = current_time;
+    Real dt = current_time - last_time;
+    mango->user_update(dt);
     frame_reset(mango->frame);
 
     Scene *current_scene = mango->scene;
     Camera *current_camera = current_scene->camera;
     mango->ubo.u_cam_pos = current_camera->game_object.position;
+
+    for (int i = 0; i < mango->running_anims.len; ++i) {
+        mango_update_anim(mango, &mango->running_anims.arr[i], dt);
+    }
 
     // Update scene transforms
     scene_update_matrices(current_scene);
@@ -82,30 +103,46 @@ void mango_update(Mango *mango) {
     // sdf_draw(mango->frame, current_camera, sdf_ndc);
 
     frame_update(mango->frame);
+    return current_time;
 }
 
-void mango_run(Scene *scene, const char* title, int width, int height) {
-    Mango mango;
-    mango.scene = scene;
-    mango.frame = frame_alloc(title, width, height);
-    if (mango.frame == NULL) {
-        return;
+Mango *mango_alloc(Scene *scene, const char *title, int width, int height) {
+    Mango *mango = (Mango *)malloc(sizeof(Mango));
+    if (mango == NULL) {
+        exit(1);
+    }
+    mango->scene = scene;
+    mango->frame = frame_alloc(title, width, height);
+    if (mango->frame == NULL) {
+        exit(1);
     }
 
-    mango.ubo.debug = scene->debug;
-    clock_t start_time = clock();
-    mango.last_time = start_time;
+    mango->ubo.debug = scene->debug;
+    mango->running_anims.len = 64;
+    mango->running_anims.arr =
+        (Anim *)malloc(mango->running_anims.len * sizeof(Anim));
+    if (mango->running_anims.arr == NULL) {
+        exit(1);
+    }
+    for (int i = 0; i < mango->running_anims.len; ++i) {
+        mango->running_anims.arr[i].time_progress = 1;
+        mango->running_anims.arr[i].stack.time_end = 0;
+    }
 
     int num_lights = 0;
     for (int i = 0; i < scene->object_count; ++i) {
         if (scene->attributes[i].type == ATTR_LIGHT) {
-            mango.ubo.lights[num_lights] = &scene->attributes[i].light;
-            mango.ubo.light_objects[num_lights] = &scene->objects[i];
+            mango->ubo.lights[num_lights] = &scene->attributes[i].light;
+            mango->ubo.light_objects[num_lights] = &scene->objects[i];
             ++num_lights;
         }
     }
-    mango.ubo.num_lights = num_lights;
+    mango->ubo.num_lights = num_lights;
+    return mango;
+}
 
+void mango_run(Mango *mango) {
+    clock_t last_time = clock();
 #ifdef RISCV_CONSOLE
     SetVideoCallback(mango_update);
     SetTimerCallback(onTimer, 10000);
@@ -125,9 +162,9 @@ void mango_run(Scene *scene, const char* title, int width, int height) {
                 break;
             }
         }
-        mango_update(&mango);
+        last_time = mango_update(mango, last_time);
     }
 #endif
-
-    frame_free(mango.frame);
 }
+
+void mango_free(Mango *mango) { frame_free(mango->frame); }

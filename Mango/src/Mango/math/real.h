@@ -1,20 +1,20 @@
-#ifndef MANGO_REAL
-#define MANGO_REAL
+#ifndef REAL
+#define REAL
 #include <math.h>
 #include <stdio.h>
 typedef float Real;
 
-extern const Real MANGO_FOUR_DIV_PI;
-extern const Real MANGO_FOUR_DIV_PI2;
-extern const Real MANGO_X4_CORRECTION_COMPONENT;
-extern const Real MANGO_PI_DIV_4;
-extern const Real MANGO_THREE_PI_DIV_4;
-extern const Real MANGO_REAL_MAX;
-extern const Real MANGO_REAL_MIN;
-extern const Real MANGO_PI;
-extern const Real MANGO_E;
-extern const Real MANGO_ONE;
-extern const Real MANGO_EPS;
+extern const Real REAL_FOUR_DIV_PI;
+extern const Real REAL_FOUR_DIV_PI2;
+extern const Real REAL_X4_CORRECTION_COMPONENT;
+extern const Real REAL_PI_DIV_4;
+extern const Real REAL_THREE_PI_DIV_4;
+extern const Real REAL_REAL_MAX;
+extern const Real REAL_REAL_MIN;
+extern const Real REAL_PI;
+extern const Real REAL_E;
+extern const Real REAL_ONE;
+extern const Real REAL_EPS;
 Real real_from_int(int a);
 Real real_from_float(float a);
 Real real_abs(Real x);

@@ -2,17 +2,17 @@
 
 #include <float.h>
 
-const Real MANGO_FOUR_DIV_PI = (float)0x3fa2f983;
-const Real MANGO_FOUR_DIV_PI2 = (float)0xbecf817b;
-const Real MANGO_X4_CORRECTION_COMPONENT = (float)0x3e666666;
-const Real MANGO_PI_DIV_4 = (float)0x3f490fdb;
-const Real MANGO_THREE_PI_DIV_4 = (float)0x4016cbe4;
-const Real MANGO_REAL_MAX = FLT_MAX;
-const Real MANGO_REAL_MIN = FLT_MIN;
-const Real MANGO_PI = (float)0x40490fdb;
-const Real MANGO_E = (float)0x402df854;
-const Real MANGO_ONE = 1.0f;
-const Real MANGO_EPS = FLT_EPSILON;
+const Real REAL_FOUR_DIV_PI = (float)0x3fa2f983;
+const Real REAL_FOUR_DIV_PI2 = (float)0xbecf817b;
+const Real REAL_X4_CORRECTION_COMPONENT = (float)0x3e666666;
+const Real REAL_PI_DIV_4 = (float)0x3f490fdb;
+const Real REAL_THREE_PI_DIV_4 = (float)0x4016cbe4;
+const Real REAL_REAL_MAX = FLT_MAX;
+const Real REAL_REAL_MIN = FLT_MIN;
+const Real REAL_PI = (float)0x40490fdb;
+const Real REAL_E = (float)0x402df854;
+const Real REAL_ONE = 1.0f;
+const Real REAL_EPS = FLT_EPSILON;
 
 /* Conversion functions between Real and Real/integer.
  * These are inlined to allow compiler to optimize away constant numbers

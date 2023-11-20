@@ -6,11 +6,12 @@
 
 #include "../math/vec3.h"
 #include "../math/vec4.h"
+#include "gameobject.h"
 
 #define LIST_TYPE(p_name, p_type) \
-    typedef struct p_name {       \
-        size_t count;             \
-        p_type *data;             \
+    typedef struct {              \
+        size_t len;               \
+        p_type *arr;              \
     } p_name
 
 typedef enum interpolation {
@@ -33,14 +34,24 @@ typedef struct {
     Tangent right;
 } Keyframe;
 
+Real keyframe_lerp(Keyframe *next, Keyframe *prev, Real alpha);
+
 LIST_TYPE(KeyframeList, Keyframe);
+
+typedef enum {
+    PROP_TSL,
+    PROP_ROT,
+    PROP_SCL,
+} PropType;
 
 typedef struct {
     int node_index;
     Vec3 default_value;
+    PropType type;
     KeyframeList curves[3];
 } AnimProp;
 
+void prop_update(AnimProp *prop, GameObject *obj, Real time_prog);
 LIST_TYPE(AnimPropList, AnimProp);
 
 typedef struct {
@@ -51,7 +62,7 @@ typedef struct {
     bool compose_rotation;
     bool compose_scale;
 
-    AnimPropList anim_values;
+    AnimPropList anim_props;
 } AnimLayer;
 
 LIST_TYPE(AnimLayerList, AnimLayer);
@@ -61,5 +72,11 @@ typedef struct {
     Real time_end;
     AnimLayerList layers;
 } AnimStack;
+
+typedef struct {
+    Real time_progress;
+    int object_index;
+    AnimStack stack;
+} Anim;
 
 #endif

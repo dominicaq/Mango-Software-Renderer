@@ -1,5 +1,7 @@
 #include "obj_parser.h"
 
+#include <stdlib.h>
+
 Mesh load_obj_mesh(const char *filename) {
     FILE *file = fopen(filename, "r");
     if (file == NULL) {

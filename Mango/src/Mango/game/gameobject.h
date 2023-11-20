@@ -4,7 +4,6 @@
 #include <math.h>
 #include <stdbool.h>
 
-#include "../game/animation.h"
 #include "../math/mat4.h"
 #include "../math/vec2.h"
 #include "../math/vec3.h"

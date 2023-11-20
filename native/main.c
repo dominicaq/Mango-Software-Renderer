@@ -75,7 +75,7 @@ Camera init_camera(int frame_width, int frame_height) {
 }
 
 int alloc_objects(Scene *scene) {
-    Vec3 white = COLLOR_PALLETE[4];
+    // Vec3 white = COLLOR_PALLETE[4];
     // Vec3 blue = (Vec3){{0.0f, 0.5f, 1.0f}};
 
     // Objects
@@ -103,12 +103,12 @@ int alloc_objects(Scene *scene) {
         return 1;
     }
 
-    scene->objects[0] = game_object_default();
-    scene->objects[0].position = (Vec3){{0.0f, 1.0f, -3.0f}};
-    scene->objects[0].scale = (Vec3){{10.0f, 10.0f, 10.0f}};
-    scene->attributes[0].type = ATTR_MESH;
-    scene->attributes[0].mesh = load_obj_mesh("../models/head.obj");
-    scene->attributes[0].mesh.color = white;
+    // scene->objects[0] = game_object_default();
+    // scene->objects[0].position = (Vec3){{0.0f, 1.0f, -3.0f}};
+    // scene->objects[0].scale = (Vec3){{10.0f, 10.0f, 10.0f}};
+    // scene->attributes[0].type = ATTR_MESH;
+    // scene->attributes[0].mesh = load_obj_mesh("../models/head.obj");
+    // scene->attributes[0].mesh.color = white;
 
     // scene->objects[1] = game_object_default();
     // scene->objects[1].quaternion = quat_from_units(UNIT_X, UNIT_Z);
@@ -139,27 +139,34 @@ int alloc_objects(Scene *scene) {
     // scene->attributes[6].light.color = (Vec3){{0.4f, 0.4f, 0.4f}};
     // scene->attributes[6].light.intensity = light_intensity;
 
-    // memcpy(scene->objects + manual_objects, spider_game_objects,
-    //        spider_object_amt * sizeof(GameObject));
-    // memcpy(scene->attributes + manual_objects, spider_attrs,
-    //        spider_object_amt * sizeof(GameObjectAttr));
-    // scene->max_depth = MAX(scene->max_depth, spider_max_depth);
+    memcpy(scene->objects + manual_objects, spider_game_objects,
+           spider_object_amt * sizeof(GameObject));
+    memcpy(scene->attributes + manual_objects, spider_attrs,
+           spider_object_amt * sizeof(GameObjectAttr));
+    scene->max_depth = MAX(scene->max_depth, spider_max_depth);
 
-    // scene->objects[manual_objects].scale = (Vec3){{0.1f, 0.1f, 0.1f}};
+    scene->objects[manual_objects].scale = (Vec3){{0.1f, 0.1f, 0.1f}};
 
     return 0;
 }
 
-Scene scene;
+Mango *mango;
 Vec4 slight_right;
+Real attack_cd = 0;
 
 void update(Real dt) {
     static float frames = 0;
+    attack_cd += dt;
+    if (attack_cd > 3000) {
+        mango_play_anim(mango, 7, &spider_Attack_anim);
+        attack_cd = 0;
+    }
 
     // Update object(s)
     // quat_mul(&scene.camera.game_object.quaternion, &slight_right);
     // scene.camera.game_object.needs_update = true;
     // End
+
     quat_mul(&scene.objects[7].quaternion, &slight_right);
     scene.dirty_locals[7] = true;
     float circle_radius = 10.0f;
@@ -206,8 +213,9 @@ int MAIN(int argc, char *argv[]) {
     // Update loop
     printf("%s running...\n", GAME_TITLE);
 
-    mango_on_update(&update);
-    mango_run(&scene, GAME_TITLE, SCREEN_WIDTH, SCREEN_HEIGHT);
+    mango = mango_alloc(&scene, GAME_TITLE, SCREEN_WIDTH, SCREEN_HEIGHT);
+    mango->user_update = &update;
+    mango_run(mango);
 
     printf("Mango closed successfully\n");
 

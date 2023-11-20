@@ -52,10 +52,10 @@ std::ostream &operator<<(std::ostream &os, const ufbx_keyframe &k) {
     return os;
 }
 
-enum AnimProp {
-    ANIM_PROP_LCL_ROT,
-    ANIM_PROP_LCL_SCL,
-    ANIM_PROP_LCL_TSL,
+std::vector<std::string> prop_types = {
+    "Lcl Translation",
+    "Lcl Rotation",
+    "Lcl Scaling",
 };
 
 struct BoneWeight {
@@ -93,7 +93,7 @@ class FBXWriter {
         h_ofs_ << "#define " << upper_model_path << "_H" << std::endl;
         h_ofs_ << "#include <Mango/math/vec3.h>" << std::endl;
         h_ofs_ << "#include <Mango/math/vec2.h>" << std::endl;
-        h_ofs_ << "#include <Mango/game/gameobject.h>" << std::endl;
+        h_ofs_ << "#include <Mango/game/animation.h>" << std::endl;
         c_ofs_ << "#include \"" << h_filename << "\"" << std::endl;
         c_ofs_ << "#include <Mango/game/animation.h>" << std::endl;
         c_ofs_ << "#include \"" << h_filename << "\"" << std::endl;
@@ -183,14 +183,23 @@ class FBXWriter {
             auto l = s.layers[i];
             c_ofs_ << "AnimProp " << layer_names[i] << "[]={";
             for (int j = 0; j < l->anim_props.count; ++j) {
-                auto const &p = l->anim_props[j];
-                c_ofs_ << "{" << p.element->element_id << ", "
-                       << p.anim_value->default_value << ", {{"
+                ufbx_anim_prop const &p = l->anim_props[j];
+                int node_i =
+                    std::find_if(nodes_.begin(), nodes_.end(),
+                                 [&](auto node) {
+                                     return &node->element == p.element;
+                                 }) -
+                    nodes_.begin();
+                int prop_type = std::find(prop_types.begin(), prop_types.end(),
+                                          p.prop_name.data) -
+                                prop_types.begin();
+                c_ofs_ << "{" << node_i << ", " << p.anim_value->default_value
+                       << ", " << prop_type << ", {{"
                        << p.anim_value->curves[0]->keyframes.count << ", "
                        << prop_names[i][j] + "0}, {"
                        << p.anim_value->curves[1]->keyframes.count << ", "
                        << prop_names[i][j] + "1}, {"
-                       << p.anim_value->curves[2]->keyframes.count << ",  "
+                       << p.anim_value->curves[2]->keyframes.count << ", "
                        << prop_names[i][j] + "2}}}, ";
             }
             c_ofs_ << "};" << std::endl;
@@ -200,7 +209,7 @@ class FBXWriter {
         std::string layer_list_name = anim_name + "_layers";
         c_ofs_ << "AnimLayer " << layer_list_name << "[]={";
         for (int i = 0; i < s.layers.count; ++i) {
-            auto l = s.layers[i];
+            ufbx_anim_layer *l = s.layers[i];
             c_ofs_ << "{" << l->weight << ", " << l->weight_is_animated << ", "
                    << l->blended << ", " << l->additive << ", "
                    << l->compose_rotation << ", " << l->compose_scale << ", "
@@ -208,9 +217,10 @@ class FBXWriter {
                    << "}}";
         }
         // write stack
+        std::string stack_name = name_ + "_" + anim_name + "_anim";
         c_ofs_ << "};" << std::endl;
-        h_ofs_ << "extern AnimStack " << anim_name << ";" << std::endl;
-        c_ofs_ << "AnimStack " << anim_name << "={" << s.time_begin << ", "
+        h_ofs_ << "extern AnimStack " << stack_name << ";" << std::endl;
+        c_ofs_ << "AnimStack " << stack_name << "={" << s.time_begin << ", "
                << s.time_end << ", {" << s.layers.count << ", " << anim_name
                << "_layers"
                << "}};";
