@@ -1,6 +1,6 @@
 #include "drawing.h"
 
-const Vec4 WIREFRAME_COLOR = (Vec4){{255, 165, 0, 255}};
+const Vec4 WIREFRAME_COLOR = (Vec4){{255, 165, 0, 255}}; // Orange
 
 // Rasterizer
 // -----------------------------------------------------------------------------
@@ -112,11 +112,11 @@ void draw_triangle(Frame *frame, Vec3 ndc[3], Vec3 normals[3], UBO *ubo) {
         model_space[i] = vec4_homogenize(view_space);
     }
 
-    if (ubo->debug.wireframe == true) {
+    if (ubo->debug.use_wireframe == true) {
         wire_frame(frame, screen_space);
     }
 
-    if (ubo->debug.rasterize == true) {
+    if (ubo->debug.use_rasterize == true) {
         rasterize(frame, screen_space, model_space, normals, ubo);
     }
 }

@@ -8,6 +8,7 @@
 #include "../math/mat4.h"
 #include "../math/shader_math.h"
 #include "../render/framedata.h"
+#include "../math/geometry.h"
 
 struct {
     Vec3 position;
@@ -18,20 +19,17 @@ struct {
 
 #define SDF_EPSILON 0.0001
 #define SDF_MAX_MARCH_STEPS 255
-#define SDF_START 0
-#define SDF_END 100
+#define SDF_MAX 100
 
 // Render Pipeline
 // -----------------------------------------------------------------------------
 float scene_sdf(Vec3 sample_point);
 
-void sdf_draw(Frame *frame, const Camera *camera);
+void sdf_draw(Frame *frame, const Camera *camera, Vec3 sdf_ndc);
 
 Vec3 sdf_estimate_normal(Vec3 p);
 
-// SDF Helpers
-
-Vec3 sdf_ray_dir(Vec2 uv, Vec2 size, float fov);
+Mat4 sdf_model_matrix(Vec3 position);
 
 float sdf_ray_march(Vec3 origin, Vec3 direction);
 

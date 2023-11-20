@@ -24,6 +24,14 @@ void fragment_shader(UBO *ubo, Vec3 frag_coord) {
     Vec3 view_vec = vec3_sub(ubo->u_cam_pos, frag_pos);
     Vec3 N = vec3_normalize(ubo->f_data.gl_normal);
     Vec3 V = vec3_normalize(view_vec);
+    if (ubo->debug.view_normals == true) {
+        N = vec3_scale(N, 255.0f);
+        N.x = clamp(N.x, 0.0f, 255.0f);
+        N.y = clamp(N.y, 0.0f, 255.0f);
+        N.z = clamp(N.z, 0.0f, 255.0f);
+        ubo->f_data.gl_frag_color = vec3_to_vec4(N, 255.0f);
+        return;
+    }
 
     // Multiple lights
     Vec3 total_diffuse = ubo->u_color;

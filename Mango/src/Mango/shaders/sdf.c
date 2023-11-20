@@ -3,16 +3,24 @@
 // SDF Render
 // -----------------------------------------------------------------------------
 
-float scene_sdf(Vec3 sample_point) {
-    return sdf_sphere(sample_point, 5.0f);
+Mat4 sdf_model_matrix(Vec3 position) {
+    Mat4 IDENTITY = {{
+        {1.0f, 0.0f, 0.0f, position.x},
+        {0.0f, 1.0f, 0.0f, position.y},
+        {0.0f, 0.0f, 1.0f, position.z},
+        {0.0f, 0.0f, 0.0f, 1.0f}}};
+    return IDENTITY;
 }
 
-Vec3 sdf_ray_dir(Vec2 uv, Vec2 size, float fov) {
-    Vec2 xy;
-    xy.x = uv.x - 0.5f * size.x;
-    xy.y = uv.y - 0.5f * size.y;
+float scene_sdf(Vec3 sample_point) {
+    return sdf_sphere(vec3_sub(sample_point, (Vec3){{0,0,0}}), 1.0f);
+}
 
-    float z = size.y / tan((fov * DEG2RAD) / 2.0f);
+Vec3 sdf_ray(float fov, Vec2 uv) {
+    Vec2 xy = uv;
+    xy.x -= 0.5f;
+    xy.y -= 0.5f;
+    float z = 1.0 / tan((fov * DEG2RAD) / 2.0f);
     return vec3_normalize(vec2_to_vec3(xy, -z));
 }
 
@@ -20,30 +28,31 @@ Vec3 sdf_ray_dir(Vec2 uv, Vec2 size, float fov) {
 // If the result is negative, the point is inside the sphere.
 // If the result is zero, the point is on the sphere's surface.
 // If the result is positive, the point is outside the sphere.
-void sdf_draw(Frame *frame, const Camera *camera) {
-    Vec3 eye = camera->game_object.position;
+void sdf_draw(Frame *frame, const Camera *camera, Vec3 sdf_ndc) {
     Vec2 inv_size = (Vec2){{1.0f / frame->width, 1.0f / frame->height}};
+
+    Vec3 eye = camera->game_object.position;
+    // Vec3 sdf_ss = ndc_to_screen(frame->width, frame->height, sdf_ndc);
 
     // Loop over entire frame
     for (int x = 0; x < frame->width; ++x) {
         for (int y = 0; y < frame->height; ++y) {
-            Vec2 frag_coord = (Vec2){{x, y}};
-            Vec2 uv = (Vec2){{x * inv_size.x, y * inv_size.y}};
-            // Vec2 uv = (Vec2){{2.0f * x - frame->width, 2.0f * y - frame->height}};
+            float u = x * camera->aspect * inv_size.x;
+            float v = y * inv_size.y;
+            Vec2 uv = (Vec2){{u, v}};
 
-            // Ray marching
-            Vec3 ray_dir = vec3_normalize(vec2_to_vec3(frag_coord, -1.0f));
-            float dist = sdf_ray_march(eye, ray_dir);
-
-            // Alpha background
-            if (dist > SDF_END - EPSILON) {
+            Vec3 rd = sdf_ray(camera->fov, uv);
+            float dist = sdf_ray_march(eye, rd);
+            if (dist >= SDF_MAX) {
                 continue;
             }
 
-            Vec3 n = sdf_estimate_normal(vec2_to_vec3(uv, -1.0f));
-            // Vec3 pixel = vec2_to_vec3(n, 1.0f);
+            Vec3 p = vec3_add(eye, vec3_scale(rd, dist));
+            Vec3 n = sdf_estimate_normal(p);
             Vec3 pixel = vec3_scale(n, 255.0f);
-
+            pixel.x = clamp(pixel.x, 0.0, 255.0f);
+            pixel.y = clamp(pixel.y, 0.0, 255.0f);
+            pixel.z = clamp(pixel.z, 0.0, 255.0f);
             Vec4 pixel_color = vec3_to_vec4(pixel, 1.0f);
             frame_set_pixel(frame, x, y, pixel_color);
         }
@@ -74,23 +83,23 @@ Vec3 sdf_estimate_normal(Vec3 p) {
 }
 
 float sdf_ray_march(Vec3 origin, Vec3 direction) {
-    float depth = 0.0f;
+    float dist = 0.0f;
     for (int i = 0; i < SDF_MAX_MARCH_STEPS; ++i) {
-        Vec3 ray = vec3_add(origin, vec3_scale(direction, depth));
-        float distance_to_closest = scene_sdf(ray);
+        Vec3 ray = vec3_add(origin, vec3_scale(direction, dist));
+        float sdf_dist = scene_sdf(ray);
 
-        if (distance_to_closest < SDF_EPSILON) {
-            // Inside SDF surface
-            return distance_to_closest;
+        // Inside SDF
+        if (sdf_dist < SDF_EPSILON) {
+            break;
         }
 
-        depth += distance_to_closest;
+        dist += sdf_dist;
 
-        if (depth > SDF_END) {
+        if (sdf_dist > SDF_MAX) {
             break;
         }
     }
-    return SDF_END;
+    return dist;
 }
 
 // SDF Functions

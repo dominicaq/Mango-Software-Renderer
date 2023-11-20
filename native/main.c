@@ -19,6 +19,7 @@ const int SCREEN_HEIGHT = 440;
 const bool DEBUG_ENABLE_FPS_COUNT = true;
 const bool DEBUG_USE_WIREFRAME = false;
 const bool DEBUG_USE_RASTERIZE = true;
+const bool DEBUG_VIEW_NORMALS = false;
 
 void fps_counter() {
     static int frames = 0;
@@ -104,7 +105,7 @@ int alloc_objects(Scene *scene) {
 
     scene->objects[0] = game_object_default();
     scene->objects[0].position = (Vec3){{0.0f, 1.0f, -3.0f}};
-    scene->objects[0].scale = (Vec3){{5.0f, 5.0f, 5.0f}};
+    scene->objects[0].scale = (Vec3){{10.0f, 10.0f, 10.0f}};
     scene->attributes[0].type = ATTR_MESH;
     scene->attributes[0].mesh = load_obj_mesh("../models/head.obj");
     scene->attributes[0].mesh.color = white;
@@ -196,8 +197,9 @@ int MAIN(int argc, char *argv[]) {
     scene.camera = &camera;
 
     // Debug options
-    scene.debug.wireframe = DEBUG_USE_WIREFRAME;
-    scene.debug.rasterize = DEBUG_USE_RASTERIZE;
+    scene.debug.use_wireframe = DEBUG_USE_WIREFRAME;
+    scene.debug.use_rasterize = DEBUG_USE_RASTERIZE;
+    scene.debug.view_normals = DEBUG_VIEW_NORMALS;
 
     printf("Success.\n");
 

@@ -68,8 +68,18 @@ void mango_update(Mango *mango) {
         draw_mesh(mango->frame, target_mesh, &mango->ubo);
     }
 
-    //
-    sdf_draw(mango->frame, current_camera);
+    // TODO: Temp
+    // Create data
+    // Vec3 sphere_position = (Vec3){{0,0,-5}};
+    // Mat4 sdf_model = sdf_model_matrix(sphere_position);
+    // Mat4 sdf_mv = mat4_mul(view_matrix, sdf_model);
+    // Mat4 sdf_mvp = mat4_mul(projection_matrix, sdf_mv);
+
+    // // Apply transformation
+    // Vec4 sdf_pos = vec3_to_vec4(sphere_position, 1.0f);
+    // Vec4 sdf_cs = mat_mul_vec4(sdf_mvp, sdf_pos);
+    // Vec3 sdf_ndc = vec4_homogenize(sdf_cs);
+    // sdf_draw(mango->frame, current_camera, sdf_ndc);
 
     frame_update(mango->frame);
 }

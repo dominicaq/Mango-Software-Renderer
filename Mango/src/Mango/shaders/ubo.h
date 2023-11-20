@@ -10,8 +10,9 @@
 #include "../math/vec4.h"
 
 typedef struct {
-    bool wireframe;
-    bool rasterize;
+    bool use_wireframe;
+    bool use_rasterize;
+    bool view_normals;
 } DebugOptions;
 
 typedef struct {
