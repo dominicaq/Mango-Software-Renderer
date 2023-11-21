@@ -5,12 +5,16 @@
 
 #include "../math/vec4.h"
 
-typedef struct Display Display;
+#ifdef RISCV_CONSOLE
+#include "display_rvc.h"
+#else
+#include "display_SDL.h"
+#endif
 
 typedef struct {
     int width, height;
-    float *z_buffer;
-    Display *display;
+    Real *z_buffer;
+    Display display;
 } Frame;
 
 float *frame_init_zbuffer(int width, int height);

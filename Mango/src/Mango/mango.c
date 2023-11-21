@@ -10,11 +10,10 @@
 #include "shaders/sdf.h"
 
 #ifdef RISCV_CONSOLE
-uint32_t GetTicks(void);
-uint32_t GetController(void);
-uint32_t SetVideoCallback(void (*on_video)());
+uint32_t get_controller(void);
+uint32_t get_mtime();
 
-uint32_t mango_get_controller() { return GetController(); }
+uint32_t mango_get_controller() { return get_controller(); }
 #endif
 
 void mango_play_anim(Mango *mango, int object_index, AnimStack *stack) {
@@ -89,10 +88,9 @@ clock_t mango_update(Mango *mango, clock_t last_time) {
         draw_mesh(mango->frame, target_mesh, &mango->ubo);
     }
 
-
     // Draw SDF scene
     if (mango->ubo.debug.sdf_enable) {
-        Vec3 sphere_position = (Vec3){{0, 0,-5}};
+        Vec3 sphere_position = (Vec3){{0, 0, -5}};
         Mat4 sdf_model = sdf_model_matrix(sphere_position);
         Mat4 sdf_mv = mat4_mul(view_matrix, sdf_model);
         Mat4 sdf_mvp = mat4_mul(projection_matrix, sdf_mv);
@@ -144,14 +142,13 @@ Mango *mango_alloc(Scene *scene, const char *title, int width, int height) {
 }
 
 void mango_run(Mango *mango) {
-    clock_t last_time = clock();
 #ifdef RISCV_CONSOLE
-    SetVideoCallback(mango_update);
-    SetTimerCallback(onTimer, 10000);
-
+    uint32_t last_time = get_mtime();
     while (1) {
+        last_time = mango_update(mango, last_time);
     }
 #else
+    clock_t last_time = clock();
     SDL_Event e;
     bool quit = false;
     while (!quit) {

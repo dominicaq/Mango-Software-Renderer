@@ -1,13 +1,7 @@
 #include "framedata.h"
-#include <SDL.h>
+
 #include <stdio.h>
 #include <stdlib.h>
-
-struct Display {
-    SDL_Window *window;
-    SDL_Surface *surface;
-    SDL_PixelFormat *format;
-};
 
 float *frame_init_zbuffer(int width, int height) {
     int pixel_count = width * height;
@@ -24,10 +18,7 @@ float *frame_init_zbuffer(int width, int height) {
 }
 
 void frame_reset(Frame *frame) {
-    uint32_t rgb_map = SDL_MapRGB(frame->display->surface->format, 0, 0, 0);
-    SDL_FillRect(frame->display->surface, NULL, rgb_map);
-    SDL_LockSurface(frame->display->surface);
-
+    display_reset(&frame->display);
     // Reset zbuffer to be "far away"
     int pixel_count = frame->width * frame->height;
     for (int i = 0; i < pixel_count; ++i) {
@@ -35,24 +26,11 @@ void frame_reset(Frame *frame) {
     }
 }
 
-void frame_update(Frame *frame) {
-    SDL_UnlockSurface(frame->display->surface);
-    SDL_UpdateWindowSurface(frame->display->window);
-}
+void frame_update(Frame *frame) { display_update(&frame->display); }
 
 void frame_set_pixel(Frame *frame, int x, int y, Vec4 color) {
-    // Calculate the address of the target pixel
-    int pitch = y * frame->display->surface->pitch;
-    int bytes_per_pixel = x * frame->display->surface->format->BytesPerPixel;
-    Uint8 *pixel_base = (Uint8 *)frame->display->surface->pixels;
-    Uint32 *target_pixel = (Uint32 *)(pixel_base + pitch + bytes_per_pixel);
-
-    // Set the pixel color using SDL_MapRGBA
-    *target_pixel = SDL_MapRGBA(frame->display->format,
-                                color.elem[0], color.elem[1],
-                                color.elem[2], color.elem[3]);
+    display_set_pixel(&frame->display, x, y, color);
 }
-
 
 Frame *frame_alloc(const char *title, int width, int height) {
     Frame *frame = malloc(sizeof(Frame));
@@ -61,41 +39,7 @@ Frame *frame_alloc(const char *title, int width, int height) {
         return NULL;
     }
 
-    frame->display = malloc(sizeof(Display));
-    if (frame->display == NULL) {
-        printf("ERROR: Failed to malloc frame\n");
-        return NULL;
-    }
-
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-        printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
-        return NULL;
-    }
-
-    // Create window
-    frame->display->window = SDL_CreateWindow(
-        title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-        width, height, SDL_WINDOW_SHOWN);
-
-    if (frame->display->window == NULL) {
-        printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
-        return NULL;
-    }
-
-    Uint32 format = SDL_GetWindowPixelFormat(frame->display->window);
-    frame->display->format = SDL_AllocFormat(format);
-    if (frame->display->format == NULL) {
-        printf("Format could not be created! SDL_Error: %s\n", SDL_GetError());
-        return NULL;
-    }
-
-    // Get window surface
-    frame->display->surface = SDL_GetWindowSurface(frame->display->window);
-
-    if (frame == NULL) {
-        printf("ERROR: Failed to malloc frame\n");
-        return NULL;
-    }
+    display_init(&frame->display, title, width, height);
 
     frame->z_buffer = frame_init_zbuffer(width, height);
     if (frame->z_buffer == NULL) {
@@ -109,8 +53,7 @@ Frame *frame_alloc(const char *title, int width, int height) {
 }
 
 void frame_free(Frame *frame) {
+    display_stop(&frame->display);
     free(frame->z_buffer);
-    SDL_DestroyWindow(frame->display->window);
-    SDL_Quit();
     free(frame);
 }

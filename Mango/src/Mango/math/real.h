@@ -1,6 +1,7 @@
 #ifndef REAL
 #define REAL
 #include <math.h>
+#include <stdint.h>
 #include <stdio.h>
 typedef float Real;
 
@@ -15,8 +16,9 @@ extern const Real REAL_PI;
 extern const Real REAL_E;
 extern const Real REAL_ONE;
 extern const Real REAL_EPS;
-Real real_from_int(int a);
+Real real_from_i32(int32_t a);
 Real real_from_float(float a);
+int32_t real_to_i32(Real a);
 Real real_abs(Real x);
 Real real_floor(Real x);
 Real real_ceil(Real x);

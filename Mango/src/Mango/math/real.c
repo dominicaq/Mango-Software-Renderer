@@ -17,8 +17,9 @@ const Real REAL_EPS = FLT_EPSILON;
 /* Conversion functions between Real and Real/integer.
  * These are inlined to allow compiler to optimize away constant numbers
  */
-Real real_from_int(int a) { return (Real)a; }
+Real real_from_i32(int32_t a) { return (Real)a; }
 Real real_from_float(float a) { return (Real)a; }
+int32_t real_to_i32(Real a) { return (int32_t)a; }
 
 Real real_abs(Real x) { return (x < 0.0f ? -x : x); }
 Real real_floor(Real x) { return floorf(x); }
