@@ -18,7 +18,7 @@ float *frame_init_zbuffer(int width, int height) {
 }
 
 void frame_reset(Frame *frame) {
-    display_reset(&frame->display);
+    display_reset(frame->display);
     // Reset zbuffer to be "far away"
     int pixel_count = frame->width * frame->height;
     for (int i = 0; i < pixel_count; ++i) {
@@ -26,10 +26,10 @@ void frame_reset(Frame *frame) {
     }
 }
 
-void frame_update(Frame *frame) { display_update(&frame->display); }
+void frame_update(Frame *frame) { display_update(frame->display); }
 
 void frame_set_pixel(Frame *frame, int x, int y, Vec4 color) {
-    display_set_pixel(&frame->display, x, y, color);
+    display_set_pixel(frame->display, x, y, color);
 }
 
 Frame *frame_alloc(const char *title, int width, int height) {
@@ -39,7 +39,11 @@ Frame *frame_alloc(const char *title, int width, int height) {
         return NULL;
     }
 
-    display_init(&frame->display, title, width, height);
+    frame->display = display_init(title, width, height);
+    if (frame->display == NULL) {
+        printf("ERROR: Failed to create display\n");
+        return NULL;
+    }
 
     frame->z_buffer = frame_init_zbuffer(width, height);
     if (frame->z_buffer == NULL) {
@@ -53,7 +57,7 @@ Frame *frame_alloc(const char *title, int width, int height) {
 }
 
 void frame_free(Frame *frame) {
-    display_stop(&frame->display);
+    display_stop(frame->display);
     free(frame->z_buffer);
     free(frame);
 }

@@ -14,7 +14,7 @@
 typedef struct {
     int width, height;
     Real *z_buffer;
-    Display display;
+    Display *display;
 } Frame;
 
 float *frame_init_zbuffer(int width, int height);

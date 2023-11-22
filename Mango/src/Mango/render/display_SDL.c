@@ -23,11 +23,10 @@ void display_set_pixel(Display *display, int x, int y, Vec4 color) {
                                 color.elem[2], color.elem[3]);
 }
 
-void display_init(Display *display, const char *title, int width, int height) {
-    display_init(frame->display);
-    frame->display = malloc(sizeof(Display));
-    if (frame->display == NULL) {
-        printf("ERROR: Failed to malloc frame\n");
+Display *display_init(const char *title, int width, int height) {
+    Display *display = malloc(sizeof(Display));
+    if (display == NULL) {
+        printf("ERROR: Failed to malloc display\n");
         return NULL;
     }
 
@@ -35,25 +34,34 @@ void display_init(Display *display, const char *title, int width, int height) {
         printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
         return NULL;
     }
+
     // Create window
-    frame->display->window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED,
+    display->window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED,
                                               SDL_WINDOWPOS_UNDEFINED, width,
                                               height, SDL_WINDOW_SHOWN);
-    if (frame->display->window == NULL) {
+    if (display->window == NULL) {
         printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
         return NULL;
     }
 
-    Uint32 format = SDL_GetWindowPixelFormat(frame->display->window);
-    frame->display->format = SDL_AllocFormat(format);
-    if (frame->display->format == NULL) {
+    Uint32 format = SDL_GetWindowPixelFormat(display->window);
+    display->format = SDL_AllocFormat(format);
+    if (display->format == NULL) {
         printf("Format could not be created! SDL_Error: %s\n", SDL_GetError());
         return NULL;
     }
+
     // Get window surface
-    frame->display->surface = SDL_GetWindowSurface(frame->display->window);
+    display->surface = SDL_GetWindowSurface(display->window);
+    if (display->surface == NULL) {
+        printf("Surface could not be created! SDL_Error: %s\n", SDL_GetError());
+        return NULL;
+    }
+
+    return display;
 }
-display_stop(Display *display) {
-    SDL_DestroyWindow(frame->display->window);
+
+void display_stop(Display *display) {
+    SDL_DestroyWindow(display->window);
     SDL_Quit();
 }
