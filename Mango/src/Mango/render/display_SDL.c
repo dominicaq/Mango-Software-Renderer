@@ -1,12 +1,20 @@
 #include "display_SDL.h"
 
+#include <SDL.h>
+
+struct Display {
+    SDL_Window *window;
+    SDL_Surface *surface;
+    SDL_PixelFormat *format;
+};
+
 void display_reset(Display *display) {
     uint32_t rgb_map = SDL_MapRGB(display->surface->format, 0, 0, 0);
     SDL_FillRect(display->surface, NULL, rgb_map);
     SDL_LockSurface(display->surface);
 }
 
-void display_udpate(Display *display) {
+void display_update(Display *display) {
     SDL_UnlockSurface(display->surface);
     SDL_UpdateWindowSurface(display->window);
 }
@@ -37,8 +45,8 @@ Display *display_init(const char *title, int width, int height) {
 
     // Create window
     display->window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED,
-                                              SDL_WINDOWPOS_UNDEFINED, width,
-                                              height, SDL_WINDOW_SHOWN);
+                                       SDL_WINDOWPOS_UNDEFINED, width, height,
+                                       SDL_WINDOW_SHOWN);
     if (display->window == NULL) {
         printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
         return NULL;
