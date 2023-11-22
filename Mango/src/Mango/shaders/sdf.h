@@ -10,16 +10,21 @@
 #include "../render/framedata.h"
 #include "../math/geometry.h"
 
-struct {
-    Vec3 position;
-    float radius;
-    Vec3 color;
-    Vec3 ndc;
-} typedef SDFSphere;
-
 #define SDF_EPSILON 0.0001
-#define SDF_MAX_MARCH_STEPS 255
+#define SDF_MAX_MARCH_STEPS 255 // 255
 #define SDF_MAX 100
+#define SDF_MIN 0
+
+enum {
+    SPHERE,
+    PLANE,
+    TORUS
+} typedef SDFShape;
+
+struct {
+    SDFShape shape;
+    Vec3 position;
+} typedef SDFObject;
 
 // Render Pipeline
 // -----------------------------------------------------------------------------
@@ -32,6 +37,10 @@ Vec3 sdf_estimate_normal(Vec3 p);
 Mat4 sdf_model_matrix(Vec3 position);
 
 float sdf_ray_march(Vec3 origin, Vec3 direction);
+
+Vec3 sdf_ray(float fov, Vec2 uv);
+
+Vec4 sdf_fragment_shader(Vec3 p);
 
 // Signed Distance Field functions
 // Source: https://iquilezles.org/articles/distfunctions/

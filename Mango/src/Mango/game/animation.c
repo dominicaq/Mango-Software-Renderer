@@ -78,7 +78,7 @@ Real find_cubic_bezier(Real p1, Real p2, Real x0) {
 }
 
 Real keyframe_lerp(Keyframe *next, Keyframe *prev, Real t) {
-    Real res;
+    Real res = 0.0f;
     switch (next->interpolation) {
     case INTERPOLATION_CONSTANT_PREV:
         return prev->value;

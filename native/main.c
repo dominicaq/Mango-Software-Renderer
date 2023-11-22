@@ -10,8 +10,8 @@
 
 // Window data
 const char *GAME_TITLE = "Mango Renderer";
-const int SCREEN_WIDTH = 720;
-const int SCREEN_HEIGHT = 440;
+const int SCREEN_WIDTH = 854;
+const int SCREEN_HEIGHT = 480;
 
 // Debugging
 // -----------------------------------------------------------------------------
@@ -76,7 +76,7 @@ Camera init_camera(int frame_width, int frame_height) {
 }
 
 int alloc_objects(Scene *scene) {
-    // Vec3 white = COLLOR_PALLETE[4];
+    Vec3 white = COLLOR_PALLETE[4];
     // Vec3 blue = (Vec3){{0.0f, 0.5f, 1.0f}};
 
     // Objects
@@ -104,12 +104,12 @@ int alloc_objects(Scene *scene) {
         return 1;
     }
 
-    // scene->objects[0] = game_object_default();
-    // scene->objects[0].position = (Vec3){{0.0f, 1.0f, -3.0f}};
-    // scene->objects[0].scale = (Vec3){{10.0f, 10.0f, 10.0f}};
-    // scene->attributes[0].type = ATTR_MESH;
-    // scene->attributes[0].mesh = load_obj_mesh("../models/head.obj");
-    // scene->attributes[0].mesh.color = white;
+    scene->objects[0] = game_object_default();
+    scene->objects[0].position = (Vec3){{0.0f, -3.0f, -12.0f}};
+    scene->objects[0].scale = (Vec3){{10.0f, 10.0f, 10.0f}};
+    scene->attributes[0].type = ATTR_MESH;
+    scene->attributes[0].mesh = load_obj_mesh("../models/head.obj");
+    scene->attributes[0].mesh.color = white;
 
     // scene->objects[1] = game_object_default();
     // scene->objects[1].quaternion = quat_from_units(UNIT_X, UNIT_Z);
