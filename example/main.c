@@ -18,7 +18,7 @@ const bool DEBUG_ENABLE_FPS_COUNT = true;
 const bool DEBUG_USE_WIREFRAME = false;
 const bool DEBUG_USE_RASTERIZE = true;
 const bool DEBUG_VIEW_NORMALS = false;
-const bool DEBUG_SDF_ENABLE = true;
+const bool DEBUG_SDF_ENABLE = false;
 
 void fps_counter() {
     static int frames = 0;
@@ -170,6 +170,10 @@ void update(Real dt) {
 
     quat_mul(&scene.objects[7].quaternion, &slight_right);
     scene.dirty_locals[7] = true;
+
+    quat_mul(&scene.camera->game_object.quaternion, &slight_right);
+    scene.camera->dirty_local = true;
+
     float circle_radius = 10.0f;
     int num_lights = POINT_LIGHTS_END - POINT_LIGHTS_BEGIN;
     float angle_increment = 2.0f * M_PI / num_lights;

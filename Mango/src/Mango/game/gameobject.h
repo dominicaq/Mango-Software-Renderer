@@ -20,12 +20,26 @@ typedef struct {
 } BoneWeight;
 
 typedef struct {
+    char *data;
+    int width;
+    int height;
+} Texture;
+
+// PBR
+typedef struct {
+    Vec3 color;
+    Texture *albedo_map;
+    Texture *normal_map;
+} Material;
+
+typedef struct {
     int ind_count;
     int vert_count;
     int norm_count;
     int uv_count;
 
-    Vec3 color;
+    Vec3 color; // I dont want to edit the spider code. color wont be used.
+    Material material;
 
     BoneWeight (*weights)[MAX_VERT_WEIGHTS];
     Vec3 *verts;

@@ -90,7 +90,7 @@ clock_t mango_update(Mango *mango, clock_t last_time) {
 
     // Draw SDF scene
     if (mango->ubo.debug.sdf_enable) {
-        Vec3 sphere_position = (Vec3){{0, 0, -5}};
+        Vec3 sphere_position = (Vec3){{0, 5.0f, -5.0f}};
         Mat4 sdf_model = sdf_model_matrix(sphere_position);
         Mat4 sdf_mv = mat4_mul(view_matrix, sdf_model);
         Mat4 sdf_mvp = mat4_mul(projection_matrix, sdf_mv);

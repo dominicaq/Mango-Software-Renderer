@@ -21,17 +21,23 @@ Vec3 barycentric_coords(Vec3 p, Vec3 a, Vec3 b, Vec3 c) {
     return (Vec3){{u, v, w}};
 }
 
-Vec3 lerp_bc_coords(Vec3 bc_coords, Vec3 data[3]) {
+Vec3 lerp_bc_coords(Vec3 bc_coords, Vec3 points[3]) {
     // Interpolate the color using barycentric coordinates
     return (Vec3){{
-        data[0].x * bc_coords.x + data[1].x * bc_coords.y +
-            data[2].x * bc_coords.z,
-        data[0].y * bc_coords.x + data[1].y * bc_coords.y +
-            data[2].y * bc_coords.z,
-        data[0].z * bc_coords.x + data[1].z * bc_coords.y +
-            data[2].z * bc_coords.z,
-
+        points[0].x * bc_coords.x + points[1].x * bc_coords.y + points[2].x
+                                                              * bc_coords.z,
+        points[0].y * bc_coords.x + points[1].y * bc_coords.y + points[2].y
+                                                              * bc_coords.z,
+        points[0].z * bc_coords.x + points[1].z * bc_coords.y + points[2].z
+                                                              * bc_coords.z,
     }};
+}
+
+Vec2 calculate_uv(Vec3 bc_coords, Vec3 uv_coords[3]) {
+    Vec3 uv_w = lerp_bc_coords(bc_coords, uv_coords);
+    float wt = uv_w.z;
+
+    return (Vec2){{uv_w.x / wt, uv_w.y / wt}};
 }
 
 // Normalized device coordinates to screen coordinates
