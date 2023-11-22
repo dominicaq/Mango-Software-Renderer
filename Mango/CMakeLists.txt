@@ -7,7 +7,7 @@ file(GLOB_RECURSE ALL_SOURCES
 )
 
 if (RISCV_CONSOLE)
-    set(EXCLUDE "display_SDL.")
+  set(EXCLUDE "(display_SDL.|obj_parser.)")
 else () 
     set(EXCLUDE "display_rvc.")
 endif()

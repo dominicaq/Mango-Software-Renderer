@@ -2,9 +2,9 @@
 #define VEC3_H
 
 #include <math.h>
-#include <stdio.h>
 #include <stdbool.h>
 #include <stdint.h>
+
 #include "real.h"
 #include "shader_math.h"
 

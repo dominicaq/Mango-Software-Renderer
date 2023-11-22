@@ -1,13 +1,13 @@
 #include "framedata.h"
 
-#include <stdio.h>
-
 float *frame_init_zbuffer(int width, int height) {
     int pixel_count = width * height;
-    float *z_buffer = malloc(sizeof(float) * pixel_count);
+    Real *z_buffer = (Real *)malloc(sizeof(float) * pixel_count);
     if (z_buffer == NULL) {
+        printf("frame_init_zbuffer z_buffer malloc failed\n");
         return NULL;
     }
+    printf("allocated z_buffer\n");
 
     // Init z_buffer to be "far away"
     for (int i = 0; i < pixel_count; ++i) {
@@ -32,21 +32,23 @@ void frame_set_pixel(Frame *frame, int x, int y, Vec4 color) {
 }
 
 Frame *frame_alloc(const char *title, int width, int height) {
-    Frame *frame = malloc(sizeof(Frame));
+    Frame *frame = (Frame *)malloc(sizeof(Frame));
     if (frame == NULL) {
-        printf("ERROR: Failed to malloc frame\n");
+        printf("frame_alloc frame malloc failed\n");
         return NULL;
     }
+    printf("allocated frame\n");
 
     frame->display = display_alloc(title, width, height);
     if (frame->display == NULL) {
-        printf("ERROR: Failed to create display\n");
+        printf("frame_alloc display malloc failed\n");
         return NULL;
     }
+    printf("allocated display\n");
 
     frame->z_buffer = frame_init_zbuffer(width, height);
     if (frame->z_buffer == NULL) {
-        printf("ERROR: Failed to malloc z_buffer\n");
+        printf("frame_alloc z_buffer malloc failed\n");
         return NULL;
     }
 

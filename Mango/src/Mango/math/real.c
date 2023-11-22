@@ -64,7 +64,3 @@ Real real_exp(Real inValue) { return expf(inValue); }
 Real real_log(Real inValue) { return logf(inValue); }
 
 Real real_log2(Real x) { return log2f(x); }
-
-void real_to_str(Real value, char *buf, int decimals) {
-    snprintf(buf, decimals, "%f", value);
-}

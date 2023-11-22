@@ -2,8 +2,6 @@
 #include <Mango/mesh/obj_parser.h>
 #include <Mango/render/drawing.h>
 #include <Mango/render/framedata.h>
-#include <stdlib.h>
-#include <string.h>
 #include <time.h>
 
 #include "models/spider.h"
@@ -82,9 +80,9 @@ int alloc_objects(Scene *scene) {
     // Objects
     int manual_objects = 7;
     scene->object_count = manual_objects + spider_object_amt;
-    scene->dirty_locals = malloc(scene->object_count * sizeof(bool));
+    scene->dirty_locals = (bool *)malloc(scene->object_count * sizeof(bool));
     if (scene->dirty_locals == NULL) {
-        fprintf(stderr, "ERROR: malloc failed dirty_locals\n");
+        printf("ERROR: malloc failed dirty_locals\n");
         return 1;
     }
 
@@ -92,15 +90,17 @@ int alloc_objects(Scene *scene) {
         scene->dirty_locals[i] = true;
     }
 
-    scene->attributes = malloc(scene->object_count * sizeof(GameObjectAttr));
+    scene->attributes =
+        (GameObjectAttr *)malloc(scene->object_count * sizeof(GameObjectAttr));
     if (scene->attributes == NULL) {
-        fprintf(stderr, "ERROR: malloc failed attributes\n");
+        printf("ERROR: malloc failed attributes\n");
         return 1;
     }
 
-    scene->objects = malloc(scene->object_count * sizeof(GameObject));
+    scene->objects =
+        (GameObject *)malloc(scene->object_count * sizeof(GameObject));
     if (scene->objects == NULL) {
-        fprintf(stderr, "ERROR: malloc failed objects\n");
+        printf("ERROR: malloc failed objects\n");
         return 1;
     }
 

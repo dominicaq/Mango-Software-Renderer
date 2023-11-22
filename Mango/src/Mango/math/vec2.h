@@ -2,7 +2,6 @@
 #define VEC_2_H
 
 #include <math.h>
-#include <stdio.h>
 
 #include "real.h"
 #include "vec3.h"

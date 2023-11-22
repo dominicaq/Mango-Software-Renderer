@@ -109,21 +109,27 @@ clock_t mango_update(Mango *mango, clock_t last_time) {
 Mango *mango_alloc(Scene *scene, const char *title, int width, int height) {
     Mango *mango = (Mango *)malloc(sizeof(Mango));
     if (mango == NULL) {
+        printf("mango_alloc mango malloc failed\n");
         return NULL;
     }
+    printf("allocated mango\n");
     mango->scene = scene;
     mango->frame = frame_alloc(title, width, height);
     if (mango->frame == NULL) {
+        printf("mango_alloc frame malloc failed\n");
         return NULL;
     }
+    printf("allocated frame\n");
 
     mango->ubo.debug = scene->debug;
     mango->running_anims.len = 64;
     mango->running_anims.arr =
         (Anim *)malloc(mango->running_anims.len * sizeof(Anim));
     if (mango->running_anims.arr == NULL) {
+        printf("mango_alloc anims malloc failed\n");
         return NULL;
     }
+    printf("allocated animations\n");
     for (int i = 0; i < mango->running_anims.len; ++i) {
         mango->running_anims.arr[i].time_progress = 1;
         mango->running_anims.arr[i].stack.time_end = 0;
@@ -142,6 +148,7 @@ Mango *mango_alloc(Scene *scene, const char *title, int width, int height) {
 }
 
 void mango_run(Mango *mango) {
+    printf("running mango\n");
 #ifdef RISCV_CONSOLE
     uint32_t last_time = get_mtime();
     while (1) {

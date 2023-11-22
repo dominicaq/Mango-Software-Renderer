@@ -1,7 +1,6 @@
 #ifndef MAX4_H
 #define MAX4_H
 
-#include <stdio.h>
 #include "vec3.h"
 
 typedef struct {
@@ -63,7 +62,6 @@ Mat4 mat4_transpose(const Mat4 a);
  * @return The inverse of the input matrix.
  */
 Mat4 mat4_inverse(const Mat4 m);
-
 
 /**
  * Print the components of a 4x4 matrix to the console.
