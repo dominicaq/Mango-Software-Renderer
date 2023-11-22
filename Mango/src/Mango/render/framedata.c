@@ -1,7 +1,6 @@
 #include "framedata.h"
 
 #include <stdio.h>
-#include <stdlib.h>
 
 float *frame_init_zbuffer(int width, int height) {
     int pixel_count = width * height;
@@ -39,7 +38,7 @@ Frame *frame_alloc(const char *title, int width, int height) {
         return NULL;
     }
 
-    frame->display = display_init(title, width, height);
+    frame->display = display_alloc(title, width, height);
     if (frame->display == NULL) {
         printf("ERROR: Failed to create display\n");
         return NULL;
@@ -58,6 +57,6 @@ Frame *frame_alloc(const char *title, int width, int height) {
 
 void frame_free(Frame *frame) {
     display_stop(frame->display);
-    free(frame->z_buffer);
-    free(frame);
+    // free(frame->z_buffer);
+    // free(frame);
 }

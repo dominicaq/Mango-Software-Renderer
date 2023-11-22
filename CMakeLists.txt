@@ -10,7 +10,7 @@ set( BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE )
 
 
 add_subdirectory(Mango)
-add_executable(c_software_renderer native/main.c native/models/spider.c native/models/spider.h)
+add_executable(c_software_renderer example/main.c example/models/spider.c example/models/spider.h)
 if (UNIX)
     target_compile_definitions(c_software_renderer PRIVATE MAIN=main)
 else()

@@ -2,7 +2,6 @@
 #define ANIMATION_H
 #include <stdbool.h>
 #include <stdint.h>
-#include <stdlib.h>
 
 #include "../math/vec3.h"
 #include "../math/vec4.h"

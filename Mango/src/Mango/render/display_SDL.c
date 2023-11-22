@@ -31,7 +31,7 @@ void display_set_pixel(Display *display, int x, int y, Vec4 color) {
                                 color.elem[2], color.elem[3]);
 }
 
-Display *display_init(const char *title, int width, int height) {
+Display *display_alloc(const char *title, int width, int height) {
     Display *display = malloc(sizeof(Display));
     if (display == NULL) {
         printf("ERROR: Failed to malloc display\n");

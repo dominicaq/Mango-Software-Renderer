@@ -1,4 +1,3 @@
-
 option(RISCV_CONSOLE "compile for riscv console" OFF)
 
 # Recursivley get all files in

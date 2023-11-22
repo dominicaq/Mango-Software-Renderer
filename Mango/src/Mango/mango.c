@@ -109,12 +109,12 @@ clock_t mango_update(Mango *mango, clock_t last_time) {
 Mango *mango_alloc(Scene *scene, const char *title, int width, int height) {
     Mango *mango = (Mango *)malloc(sizeof(Mango));
     if (mango == NULL) {
-        exit(1);
+        return NULL;
     }
     mango->scene = scene;
     mango->frame = frame_alloc(title, width, height);
     if (mango->frame == NULL) {
-        exit(1);
+        return NULL;
     }
 
     mango->ubo.debug = scene->debug;
@@ -122,7 +122,7 @@ Mango *mango_alloc(Scene *scene, const char *title, int width, int height) {
     mango->running_anims.arr =
         (Anim *)malloc(mango->running_anims.len * sizeof(Anim));
     if (mango->running_anims.arr == NULL) {
-        exit(1);
+        return NULL;
     }
     for (int i = 0; i < mango->running_anims.len; ++i) {
         mango->running_anims.arr[i].time_progress = 1;

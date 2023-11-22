@@ -3,17 +3,15 @@
 
 #include <float.h>
 #include <stdbool.h>
-#include <stdlib.h>
 
-#include "framedata.h"
+#include "../game/camera.h"
 #include "../game/gameobject.h"
 #include "../math/geometry.h"
 #include "../math/vec3.h"
 #include "../math/vec4.h"
-#include "../shaders/shader.h"
-
 #include "../shaders/sdf.h"
-#include "../game/camera.h"
+#include "../shaders/shader.h"
+#include "framedata.h"
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))

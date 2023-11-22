@@ -2,6 +2,16 @@
 #define BG_SIZE 147456
 #define DEFAULT_PALETTE_DELTA 0xffff
 
+struct Display {
+    uint8_t *background_data0;
+    uint8_t *background_data1;
+    uint32_t *palette;
+    bool data0;
+    uint32_t palette_i;
+    uint32_t bg_i0;
+    uint32_t bg_i1;
+};
+
 uint32_t uint_print(uint32_t);
 uint32_t set_mode(uint32_t);
 uint32_t get_controller();
@@ -26,7 +36,8 @@ void display_set_pixel(Display *display, int32_t x, int32_t y, Vec4 color) {
                     : display->background_data1)[y * BG_W + x] = palette_i;
 }
 
-void display_init(Display *display, const char *title, int32_t _0, int32_t _1) {
+Display *display_alloc(const char *title, int32_t _0, int32_t _1) {
+    Display *display = (Display *)malloc(sizeof(Display));
     display->palette_i = 0;
     display->palette = (uint32_t *)get_bg_palette(display->palette_i);
 
