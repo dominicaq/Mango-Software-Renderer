@@ -11,8 +11,8 @@ void vertex_shader(UBO *ubo, Vec4 a_position) {
     mv_no_trans.elem[0][3] = 0.0f;
     mv_no_trans.elem[1][3] = 0.0f;
     mv_no_trans.elem[2][3] = 0.0f;
-    Vec4 mv_normal =
-        mat_mul_vec4(mv_no_trans, vec3_to_vec4(ubo->v_data.in_normal, 0.0f));
+    Vec4 normal_homogeneous = vec3_to_vec4(ubo->v_data.in_normal, 0.0f);
+    Vec4 mv_normal = mat_mul_vec4(mv_no_trans, normal_homogeneous);
 
     // Don't homogenize
     ubo->v_data.out_normal = vec3_normalize(vec4_to_vec3(mv_normal));
@@ -24,6 +24,12 @@ void fragment_shader(UBO *ubo, Vec3 frag_coord) {
     Vec3 view_vec = vec3_sub(ubo->u_cam_pos, frag_pos);
     Vec3 N = vec3_normalize(ubo->f_data.gl_normal);
     Vec3 V = vec3_normalize(view_vec);
+    if (ubo->debug.view_normals == true) {
+        N = vec3_scale(N, 255.0f);
+        N = vec3_clamp(N, 0.0f, 255.0f);
+        ubo->f_data.gl_frag_color = vec3_to_vec4(N, 255.0f);
+        return;
+    }
 
     // Multiple lights
     Vec3 total_diffuse = ubo->u_color;
@@ -47,7 +53,7 @@ void fragment_shader(UBO *ubo, Vec3 frag_coord) {
             // Specular
             Vec3 half_angle = vec3_normalize(vec3_add(L, V));
             float blinn = clamp(vec3_dot(N, half_angle), 0.0f, 1.0f);
-            blinn = pow(blinn, 512.0f);
+            blinn = pow(blinn, 2.0f);
 
             Vec3 specular = intensity;
             specular = vec3_scale(specular, blinn);
@@ -63,20 +69,7 @@ void fragment_shader(UBO *ubo, Vec3 frag_coord) {
 
     // Scale to RGB to TGA format
     Vec3 lighting = vec3_add(total_diffuse, total_specular);
-    lighting = vec3_scale(
-        lighting, 255.0f / ubo->num_lights);  // this does not look right
-    lighting.x = clamp(lighting.x, 0.0f, 255.0f);
-    lighting.y = clamp(lighting.y, 0.0f, 255.0f);
-    lighting.z = clamp(lighting.z, 0.0f, 255.0f);
-
+    lighting = vec3_scale(lighting, 255.0f / ubo->num_lights);
+    lighting = vec3_clamp(lighting, 0.0f, 255.0f);
     ubo->f_data.gl_frag_color = vec3_to_vec4(lighting, 255.0f);  // TGA RGBA
-}
-
-float clamp(float value, float min, float max) {
-    if (value > max) {
-        return max;
-    } else if (value < min) {
-        return min;
-    }
-    return value;
 }

@@ -8,9 +8,9 @@
 typedef struct {
     GameObject game_object;
     bool dirty_local;
-    MangoReal fov;
-    MangoReal zNear, zFar;
-    MangoReal aspect;
+    Real fov;
+    Real z_near, z_far;
+    Real aspect;
     int width, height;
 } Camera;
 

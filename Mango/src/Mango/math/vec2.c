@@ -3,28 +3,36 @@
 #include "real.h"
 
 Vec2 vec2_add(Vec2 a, Vec2 b) {
-    a.x = a.x + b.x;
-    a.y = a.y + b.y;
+    a.x = real_add(a.x, b.x);
+    a.y = real_add(a.y, b.y);
     return a;
 }
 
 Vec2 vec2_sub(Vec2 a, Vec2 b) {
-    a.x = a.x - b.x;
-    a.y = a.y - b.y;
+    a.x = real_sub(a.x, b.x);
+    a.y = real_sub(a.y, b.y);
     return a;
 }
 
-Vec2 vec2_scale(MangoReal s, Vec2 a) {
-    a.x = s * a.x;
-    a.y = s * a.y;
+Vec2 vec2_scale(Vec2 a, Real s) {
+    a.x = real_mul(s, a.x);
+    a.y = real_mul(s, a.y);
     return a;
 }
 
-MangoReal vec2_magnitude(Vec2 a) { return sqrt(a.x * a.x + a.y * a.y); }
+Real vec2_magnitude(Vec2 a) {
+    return real_sqrt(real_add(real_mul(a.x, a.x), real_mul(a.y, a.y)));
+}
 
-MangoReal vec2_dot(Vec2 a, Vec2 b) { return a.x * b.x + a.y * b.y; }
+Real vec2_dot(Vec2 a, Vec2 b) {
+    return real_add(real_mul(a.x, b.x), real_mul(a.y, b.y));
+}
 
-MangoReal vec2_cross(Vec2 a, Vec2 b) { return (a.x * b.y) - (a.y * b.x); }
+Real vec2_cross(Vec2 a, Vec2 b) {
+    return real_sub(real_mul(a.x, b.y), real_mul(a.y, b.x));
+}
+
+Vec3 vec2_to_vec3(Vec2 a, float z) { return (Vec3){{a.x, a.y, z}}; }
 
 // Helper Function(s)
 // -----------------------------------------------------------------------------

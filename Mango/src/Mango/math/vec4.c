@@ -6,8 +6,8 @@ Vec4 mat_mul_vec4(const Mat4 m, const Vec4 v) {
     Vec4 ret = (Vec4){{0.0f, 0.0f, 0.0f, 0.0f}};
     for (int i = 0; i < 4; ++i) {
         for (int j = 0; j < 4; ++j) {
-            ret.elem[i] = mango_real_add(
-                ret.elem[i], mango_real_mul(m.elem[i][j], v.elem[j]));
+            ret.elem[i] =
+                real_add(ret.elem[i], real_mul(m.elem[i][j], v.elem[j]));
         }
     }
     return ret;

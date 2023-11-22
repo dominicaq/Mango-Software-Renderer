@@ -6,11 +6,12 @@
 
 #include "../math/vec3.h"
 #include "../math/vec4.h"
+#include "gameobject.h"
 
 #define LIST_TYPE(p_name, p_type) \
-    typedef struct p_name {       \
-        p_type *data;             \
-        size_t count;             \
+    typedef struct {              \
+        size_t len;               \
+        p_type *arr;              \
     } p_name
 
 typedef enum interpolation {
@@ -21,43 +22,61 @@ typedef enum interpolation {
 } Interpolation;
 
 typedef struct {
-    float dx;  // < Derivative in the time axis
-    float dy;  // < Derivative in the (curve specific) value axis
+    Real dx;  // < Derivative in the time axis
+    Real dy;  // < Derivative in the (curve specific) value axis
 } Tangent;
 
 typedef struct {
-    float time;
-    float value;
+    Real time;
+    Real value;
     Interpolation interpolation;
     Tangent left;
     Tangent right;
 } Keyframe;
 
+Real keyframe_lerp(Keyframe *next, Keyframe *prev, Real alpha);
+
 LIST_TYPE(KeyframeList, Keyframe);
 
-typedef struct {
-    Vec3 default_value;
-    KeyframeList curves[3];
-} AnimValue;
+typedef enum {
+    PROP_TSL,
+    PROP_ROT,
+    PROP_SCL,
+} PropType;
 
 typedef struct {
-    float weight;
+    int node_index;
+    Vec3 default_value;
+    PropType type;
+    KeyframeList curves[3];
+} AnimProp;
+
+void prop_update(AnimProp *prop, GameObject *obj, Real time_prog);
+LIST_TYPE(AnimPropList, AnimProp);
+
+typedef struct {
+    Real weight;
     bool weight_is_animated;
     bool blended;
     bool additive;
     bool compose_rotation;
     bool compose_scale;
 
-    AnimValue *anim_values;
-    int *bone_inds;
+    AnimPropList anim_props;
 } AnimLayer;
 
 LIST_TYPE(AnimLayerList, AnimLayer);
 
 typedef struct {
-    float time_begin;
-    float time_end;
-    AnimLayer layers;
+    Real time_begin;
+    Real time_end;
+    AnimLayerList layers;
 } AnimStack;
+
+typedef struct {
+    Real time_progress;
+    int object_index;
+    AnimStack stack;
+} Anim;
 
 #endif

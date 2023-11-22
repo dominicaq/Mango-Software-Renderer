@@ -1,37 +1,37 @@
 #include "gameobject.h"
 
-const float DEG2RAD = M_PI / 180.0f;
+const Real DEG2RAD = M_PI / 180.0f;
 
 Mat4 rotate(Vec3 angles) {
     // Z = Roll
     // X = Pitch
     // Y = Yaw
-    float x = angles.x * DEG2RAD;
-    float y = angles.y * DEG2RAD;
-    float z = angles.z * DEG2RAD;
+    Real x = angles.x * DEG2RAD;
+    Real y = angles.y * DEG2RAD;
+    Real z = angles.z * DEG2RAD;
 
-    float a = cosf(x);
-    float b = sinf(x);
+    Real a = cosf(x);
+    Real b = sinf(x);
 
-    float c = cosf(y);
-    float d = sinf(y);
+    Real c = cosf(y);
+    Real d = sinf(y);
 
-    float e = cosf(z);
-    float f = sinf(z);
+    Real e = cosf(z);
+    Real f = sinf(z);
 
-    float ae = a * e, af = a * f, be = b * e, bf = b * f;
+    Real ae = a * e, af = a * f, be = b * e, bf = b * f;
 
-    float m1 = c * e;
-    float m2 = -c * f;
-    float m3 = d;
+    Real m1 = c * e;
+    Real m2 = -c * f;
+    Real m3 = d;
 
-    float m4 = af + be * d;
-    float m5 = ae - bf * d;
-    float m6 = -b * c;
+    Real m4 = af + be * d;
+    Real m5 = ae - bf * d;
+    Real m6 = -b * c;
 
-    float m7 = bf - ae * d;
-    float m8 = be + af * d;
-    float m9 = a * c;
+    Real m7 = bf - ae * d;
+    Real m8 = be + af * d;
+    Real m9 = a * c;
 
     Mat4 result = {
         {{m1, m2, m3, 0.0f},
@@ -53,14 +53,15 @@ Mesh mesh_empty() {
 }
 
 void game_object_update_local_matrix(GameObject *go) {
-    float x = go->quaternion.x, y = go->quaternion.y, z = go->quaternion.z,
-          w = go->quaternion.w;
-    float x2 = x + x, y2 = y + y, z2 = z + z;
-    float xx = x * x2, xy = x * y2, xz = x * z2;
-    float yy = y * y2, yz = y * z2, zz = z * z2;
-    float wx = w * x2, wy = w * y2, wz = w * z2;
+    // go = game object
+    Real x = go->quaternion.x, y = go->quaternion.y, z = go->quaternion.z,
+         w = go->quaternion.w;
+    Real x2 = x + x, y2 = y + y, z2 = z + z;
+    Real xx = x * x2, xy = x * y2, xz = x * z2;
+    Real yy = y * y2, yz = y * z2, zz = z * z2;
+    Real wx = w * x2, wy = w * y2, wz = w * z2;
 
-    float sx = go->scale.x, sy = go->scale.y, sz = go->scale.z;
+    Real sx = go->scale.x, sy = go->scale.y, sz = go->scale.z;
 
     go->local_matrix.elem[0][0] = (1 - (yy + zz)) * sx;
     go->local_matrix.elem[1][0] = (xy + wz) * sx;
@@ -81,6 +82,21 @@ void game_object_update_local_matrix(GameObject *go) {
     go->local_matrix.elem[1][3] = go->position.y;
     go->local_matrix.elem[2][3] = go->position.z;
     go->local_matrix.elem[3][3] = 1;
+
+    // Extract the forward direction (third column)
+    go->forward.x = go->local_matrix.elem[0][2];
+    go->forward.y = go->local_matrix.elem[1][2];
+    go->forward.z = go->local_matrix.elem[2][2];
+
+    // Extract the right direction (first column)
+    go->right.x = go->local_matrix.elem[0][0];
+    go->right.y = go->local_matrix.elem[1][0];
+    go->right.z = go->local_matrix.elem[2][0];
+
+    // Extract the up direction (second column)
+    go->up.x = go->local_matrix.elem[0][1];
+    go->up.y = go->local_matrix.elem[1][1];
+    go->up.z = go->local_matrix.elem[2][1];
 }
 
 GameObject game_object_default() {

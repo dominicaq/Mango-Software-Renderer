@@ -10,7 +10,11 @@ set( BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE )
 
 
 add_subdirectory(Mango)
-add_executable(c_software_renderer src/main.c src/models/spider.c src/models/spider.h)
-target_link_libraries(c_software_renderer PRIVATE Mango)
+add_executable(c_software_renderer native/main.c native/models/spider.c native/models/spider.h)
+if (UNIX)
+    target_compile_definitions(c_software_renderer PRIVATE MAIN=main)
+else()
+    target_compile_definitions(c_software_renderer PRIVATE MAIN=SDL_main)
+endif()
 
-# Link Math
+target_link_libraries(c_software_renderer PRIVATE Mango)

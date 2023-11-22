@@ -1,11 +1,24 @@
 #ifndef MANGO_H
 #define MANGO_H
 
+#include "game/animation.h"
 #include "game/camera.h"
 #include "game/scene.h"
 #include "math/real.h"
+#include "render/framedata.h"
 
-void mango_on_update(void (*)(MangoReal dt));
-void mango_run(Scene *, Camera *);
+LIST_TYPE(AnimList, Anim);
+typedef struct {
+    Frame *frame;
+    Scene *scene;
+    AnimList running_anims;
+    void (*user_update)(Real dt);
+    UBO ubo;
+} Mango;
+
+Mango *mango_alloc(Scene *scene, const char *title, int width, int height);
+void mango_run(Mango *);
+void mango_play_anim(Mango *, int object_index, AnimStack *);
+void mango_free(Mango *);
 
 #endif

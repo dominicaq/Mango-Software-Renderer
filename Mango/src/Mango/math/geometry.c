@@ -7,21 +7,17 @@ Vec3 barycentric_coords(Vec3 p, Vec3 a, Vec3 b, Vec3 c) {
     Vec3 v1 = vec3_sub(c, a);
     Vec3 v2 = vec3_sub(p, a);
 
-    MangoReal d00 = vec3_dot(v0, v0);
-    MangoReal d01 = vec3_dot(v0, v1);
-    MangoReal d11 = vec3_dot(v1, v1);
-    MangoReal d20 = vec3_dot(v2, v0);
-    MangoReal d21 = vec3_dot(v2, v1);
-    MangoReal invDenom = mango_real_div(
-        mango_real_from_float(1.0f),
-        mango_real_sub(mango_real_mul(d00, d11), mango_real_mul(d01, d01)));
-    MangoReal v =
-        mango_real_sub(mango_real_mul(d11, d20), mango_real_mul(d01, d21)) *
-        invDenom;
-    MangoReal w = mango_real_mul(
-        mango_real_sub(mango_real_mul(d00, d21), mango_real_mul(d01, d20)),
-        invDenom);
-    MangoReal u = mango_real_sub(mango_real_sub(1.0f, v), w);
+    Real d00 = vec3_dot(v0, v0);
+    Real d01 = vec3_dot(v0, v1);
+    Real d11 = vec3_dot(v1, v1);
+    Real d20 = vec3_dot(v2, v0);
+    Real d21 = vec3_dot(v2, v1);
+    Real invDenom = real_div(real_from_float(1.0f),
+                             real_sub(real_mul(d00, d11), real_mul(d01, d01)));
+    Real v = real_sub(real_mul(d11, d20), real_mul(d01, d21)) * invDenom;
+    Real w =
+        real_mul(real_sub(real_mul(d00, d21), real_mul(d01, d20)), invDenom);
+    Real u = real_sub(real_sub(1.0f, v), w);
     return (Vec3){{u, v, w}};
 }
 

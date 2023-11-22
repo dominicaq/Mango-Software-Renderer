@@ -8,6 +8,26 @@
 
 #include "ufbx/ufbx.h"
 
+std::string str_sanitized(std::string const &name) {
+    std::string sub = name;
+    auto iter = std::find(name.rbegin(), name.rend(), '|');
+    if (iter != name.rend()) {
+        sub = name.substr(name.size() - (iter - name.rbegin()));
+    }
+    std::string res;
+    std::copy_if(sub.begin(), sub.end(), std::back_inserter(res), isalnum);
+    return res;
+}
+
+template <typename T, typename C>
+void write_list(std::ostream &os, C const &list) {
+    os << "{";
+    for (T const &e : list) {
+        os << e << ", ";
+    }
+    os << "}";
+}
+
 std::ostream &operator<<(std::ostream &os, const ufbx_vec2 &v) {
     os << "{{" << v.x << ", " << v.y << "}}";
     return os;
@@ -32,29 +52,11 @@ std::ostream &operator<<(std::ostream &os, const ufbx_keyframe &k) {
     return os;
 }
 
-enum AnimProp {
-    ANIM_PROP_LCL_ROT,
-    ANIM_PROP_LCL_SCL,
-    ANIM_PROP_LCL_TSL,
+std::vector<std::string> prop_types = {
+    "Lcl Translation",
+    "Lcl Rotation",
+    "Lcl Scaling",
 };
-
-std::string str_to_var_name(std::string const &name) {
-    std::string res;
-    std::copy_if(name.begin(), name.end(), std::back_inserter(res), isalnum);
-    std::transform(res.begin(), res.end(), res.begin(), tolower);
-    return res;
-}
-
-std::string str_parse_anim(std::string const &name) {
-    auto iter = std::find(name.rbegin(), name.rend(), '|');
-    if (iter == name.rend()) {
-        return name;
-    }
-    std::string sub = name.substr(name.size() - (iter - name.rbegin()));
-    std::string res;
-    std::copy_if(sub.begin(), sub.end(), std::back_inserter(res), isalnum);
-    return res;
-}
 
 struct BoneWeight {
     int bone_index;
@@ -91,7 +93,7 @@ class FBXWriter {
         h_ofs_ << "#define " << upper_model_path << "_H" << std::endl;
         h_ofs_ << "#include <Mango/math/vec3.h>" << std::endl;
         h_ofs_ << "#include <Mango/math/vec2.h>" << std::endl;
-        h_ofs_ << "#include <Mango/game/gameobject.h>" << std::endl;
+        h_ofs_ << "#include <Mango/game/animation.h>" << std::endl;
         c_ofs_ << "#include \"" << h_filename << "\"" << std::endl;
         c_ofs_ << "#include <Mango/game/animation.h>" << std::endl;
         c_ofs_ << "#include \"" << h_filename << "\"" << std::endl;
@@ -104,7 +106,7 @@ class FBXWriter {
                << std::endl;
 
         for (auto stack : scene->anim_stacks) {
-            write_anim_stack(stack);
+            write_anim_stack(*stack);
         }
         for (auto node : nodes_) {
             if (node->mesh) {
@@ -134,51 +136,94 @@ class FBXWriter {
             push_nodes_depth_first(child);
         }
     }
-
-    void write_anim_stack(ufbx_anim_stack *stack) {
-        std::string anim_name = str_parse_anim(stack->name.data);
-        std::cout << stack->time_begin << std::endl;
-        std::cout << stack->time_end << std::endl;
-        for (auto layer : stack->layers) {
-            for (int i = 0; i < layer->anim_props.count; ++i) {
-                auto node_iter =
-                    std::find_if(nodes_.begin(), nodes_.end(), [=](auto node) {
-                        return node->name.data ==
-                               layer->anim_props[i].element->name.data;
-                    });
-                int32_t node_i = node_iter - nodes_.begin();
-                std::string prop_name =
-                    anim_name + "_" + std::to_string(node_i) +
-                    str_to_var_name(layer->anim_props[i].prop_name.data);
-                write_list<ufbx_keyframe>(
-                    "Keyframe " + prop_name + "X_curve",
-                    layer->anim_values[i]->curves[0]->keyframes);
-                write_list<ufbx_keyframe>(
-                    "Keyframe " + prop_name + "Y_curve",
-                    layer->anim_values[i]->curves[1]->keyframes);
-                write_list<ufbx_keyframe>(
-                    "Keyframe " + prop_name + "Z_curve",
-                    layer->anim_values[i]->curves[2]->keyframes);
-                c_ofs_ << "AnimValue " << prop_name << "_anim_value = {"
-                       << layer->anim_values[i]->default_value << ", {{"
-                       << prop_name << "X_curve,"
-                       << layer->anim_values[i]->curves[0]->keyframes.count
-                       << "}, {" << prop_name << "Y_curve,"
-                       << layer->anim_values[i]->curves[1]->keyframes.count
-                       << "}, {" << prop_name << "Z_curve,"
-                       << layer->anim_values[i]->curves[2]->keyframes.count
-                       << "}}};" << std::endl;
+    void write_anim_stack(ufbx_anim_stack const &s) {
+        std::string anim_name = str_sanitized(s.name.data);
+        // build_layer names
+        auto layer_names = std::vector<std::string>();
+        std::transform(s.layers.begin(), s.layers.end(),
+                       std::back_inserter(layer_names), [&](auto l) {
+                           return anim_name + "_" + str_sanitized(l->name.data);
+                       });
+        // build prop names
+        auto prop_names = std::vector<std::vector<std::string>>(s.layers.count);
+        for (int i = 0; i < s.layers.count; ++i) {
+            std::transform(s.layers[i]->anim_props.begin(),
+                           s.layers[i]->anim_props.end(),
+                           std::back_inserter(prop_names[i]),
+                           [&, i](ufbx_anim_prop const &p) {
+                               return layer_names[i] +
+                                      std::to_string(p.element->element_id) +
+                                      str_sanitized(p.prop_name.data);
+                           });
+        }
+        // write keyframes
+        for (int i = 0; i < s.layers.count; ++i) {
+            auto l = s.layers[i];
+            for (int j = 0; j < l->anim_props.count; ++j) {
+                auto const &p = l->anim_props[j];
+                c_ofs_ << "Keyframe " << prop_names[i][j] + "0"
+                       << "[]=";
+                write_list<ufbx_keyframe>(c_ofs_,
+                                          p.anim_value->curves[0]->keyframes);
+                c_ofs_ << ";" << std::endl;
+                c_ofs_ << "Keyframe " << prop_names[i][j] + "1"
+                       << "[]=";
+                write_list<ufbx_keyframe>(c_ofs_,
+                                          p.anim_value->curves[0]->keyframes);
+                c_ofs_ << ";" << std::endl;
+                c_ofs_ << "Keyframe " << prop_names[i][j] + "2"
+                       << "[]=";
+                write_list<ufbx_keyframe>(c_ofs_,
+                                          p.anim_value->curves[0]->keyframes);
+                c_ofs_ << ";" << std::endl;
             }
         }
-    }
-
-    template <typename T, typename C>
-    void write_list(std::string name, C const &list) {
-        c_ofs_ << name << '[' << list.count << "] = {";
-        for (T const &e : list) {
-            c_ofs_ << e << ", ";
+        // write props
+        for (int i = 0; i < s.layers.count; ++i) {
+            auto l = s.layers[i];
+            c_ofs_ << "AnimProp " << layer_names[i] << "[]={";
+            for (int j = 0; j < l->anim_props.count; ++j) {
+                ufbx_anim_prop const &p = l->anim_props[j];
+                int node_i =
+                    std::find_if(nodes_.begin(), nodes_.end(),
+                                 [&](auto node) {
+                                     return &node->element == p.element;
+                                 }) -
+                    nodes_.begin();
+                int prop_type = std::find(prop_types.begin(), prop_types.end(),
+                                          p.prop_name.data) -
+                                prop_types.begin();
+                c_ofs_ << "{" << node_i << ", " << p.anim_value->default_value
+                       << ", " << prop_type << ", {{"
+                       << p.anim_value->curves[0]->keyframes.count << ", "
+                       << prop_names[i][j] + "0}, {"
+                       << p.anim_value->curves[1]->keyframes.count << ", "
+                       << prop_names[i][j] + "1}, {"
+                       << p.anim_value->curves[2]->keyframes.count << ", "
+                       << prop_names[i][j] + "2}}}, ";
+            }
+            c_ofs_ << "};" << std::endl;
         }
+
+        // write layers
+        std::string layer_list_name = anim_name + "_layers";
+        c_ofs_ << "AnimLayer " << layer_list_name << "[]={";
+        for (int i = 0; i < s.layers.count; ++i) {
+            ufbx_anim_layer *l = s.layers[i];
+            c_ofs_ << "{" << l->weight << ", " << l->weight_is_animated << ", "
+                   << l->blended << ", " << l->additive << ", "
+                   << l->compose_rotation << ", " << l->compose_scale << ", "
+                   << "{" << l->anim_props.count << ", " << layer_names[i]
+                   << "}}";
+        }
+        // write stack
+        std::string stack_name = name_ + "_" + anim_name + "_anim";
         c_ofs_ << "};" << std::endl;
+        h_ofs_ << "extern AnimStack " << stack_name << ";" << std::endl;
+        c_ofs_ << "AnimStack " << stack_name << "={" << s.time_begin << ", "
+               << s.time_end << ", {" << s.layers.count << ", " << anim_name
+               << "_layers"
+               << "}};";
     }
 
     void write_game_objects() {
@@ -188,7 +233,7 @@ class FBXWriter {
                << "] = {" << std::endl;
         for (auto node : nodes_) {
             std::string name =
-                node->is_root ? "root" : str_to_var_name(node->name.data);
+                node->is_root ? "root" : str_sanitized(node->name.data);
             c_ofs_ << "{.position = " << node->local_transform.translation
                    << ", .quaternion = " << node->local_transform.rotation
                    << ", .scale = " << node->local_transform.scale
@@ -203,7 +248,7 @@ class FBXWriter {
         c_ofs_ << "GameObjectAttr " << name_ << "_attrs[" << nodes_.size()
                << "] = {";
         for (auto node : nodes_) {
-            std::string name = str_to_var_name(node->name.data);
+            std::string name = str_sanitized(node->name.data);
 
             if (node->mesh) {
                 c_ofs_ << "{ATTR_MESH, "
@@ -249,7 +294,7 @@ class FBXWriter {
     }
 
     void write_mesh_buffers(const ufbx_node *node) {
-        std::string name = str_to_var_name(node->name.data);
+        std::string name = str_sanitized(node->name.data);
         int32_t vert_count = node->mesh->vertices.count;
         std::vector<std::vector<BoneWeight>> bone_weights;
         bone_weights.resize(node->mesh->vertices.count);
@@ -271,22 +316,29 @@ class FBXWriter {
         }
         c_ofs_ << "};" << std::endl;
 
-        write_list<ufbx_vec3>("Vec3 " + name + "_verts", node->mesh->vertices);
+        c_ofs_ << "Vec3 " + name + "_verts[]=";
+        write_list<ufbx_vec3>(c_ofs_, node->mesh->vertices);
+        c_ofs_ << ";" << std::endl;
 
-        write_list<uint32_t>("int " + name + "_vert_inds",
-                             node->mesh->vertex_indices);
+        c_ofs_ << "int " + name + "_vert_inds[]=";
+        write_list<uint32_t>(c_ofs_, node->mesh->vertex_indices);
+        c_ofs_ << ";" << std::endl;
 
-        write_list<ufbx_vec3>("Vec3 " + name + "_norms",
-                              node->mesh->vertex_normal.values);
+        c_ofs_ << "Vec3 " + name + "_norms[]=";
+        write_list<ufbx_vec3>(c_ofs_, node->mesh->vertex_normal.values);
+        c_ofs_ << ";" << std::endl;
 
-        write_list<uint32_t>("int " + name + "_norm_inds",
-                             node->mesh->vertex_normal.indices);
+        c_ofs_ << "int " + name + "_norm_inds[]=",
+            write_list<uint32_t>(c_ofs_, node->mesh->vertex_normal.indices);
+        c_ofs_ << ";" << std::endl;
 
-        write_list<ufbx_vec2>("Vec2 " + name + "_uvs",
-                              node->mesh->vertex_uv.values);
+        c_ofs_ << "Vec2 " + name + "_uvs[]=";
+        write_list<ufbx_vec2>(c_ofs_, node->mesh->vertex_uv.values);
+        c_ofs_ << ";" << std::endl;
 
-        write_list<uint32_t>("int " + name + "_uv_inds",
-                             node->mesh->vertex_uv.indices);
+        c_ofs_ << "int " + name + "_uv_inds[]=";
+        write_list<uint32_t>(c_ofs_, node->mesh->vertex_uv.indices);
+        c_ofs_ << ";" << std::endl;
     }
 };
 

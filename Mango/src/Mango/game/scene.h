@@ -5,8 +5,10 @@
 
 #include "../shaders/shader.h"
 #include "gameobject.h"
+#include "camera.h"
 
 typedef struct {
+    Camera *camera;
     bool *dirty_locals;
     GameObject *objects;
     GameObjectAttr *attributes;

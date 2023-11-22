@@ -4,7 +4,6 @@
 #include <math.h>
 #include <stdbool.h>
 
-#include "../game/animation.h"
 #include "../math/mat4.h"
 #include "../math/vec2.h"
 #include "../math/vec3.h"
@@ -13,11 +12,11 @@
 #define MAX_VERT_WEIGHTS 8
 
 const extern Vec3 COLLOR_PALLETE[7];
-extern const MangoReal DEG2RAD;
+extern const Real DEG2RAD;
 
 typedef struct {
     int boneIndex;
-    MangoReal weight;
+    Real weight;
 } BoneWeight;
 
 typedef struct {
@@ -41,8 +40,8 @@ typedef struct {
 Mesh mesh_empty();
 
 typedef struct {
-    MangoReal radius;
-    MangoReal length;
+    Real radius;
+    Real length;
 } Bone;
 
 typedef struct {
@@ -51,14 +50,15 @@ typedef struct {
         LIGHT_AMBIENT,
     } type;
     Vec3 color;
-    MangoReal intensity;
+    Real intensity;
 } Light;
 
 typedef struct {
     enum {
         ATTR_NONE,
-        ATTR_MESH,
         ATTR_LIGHT,
+        ATTR_SDF,
+        ATTR_MESH,
         ATTR_BONE,
     } type;
     union {
@@ -69,9 +69,14 @@ typedef struct {
 } GameObjectAttr;
 
 typedef struct GameObject {
+    Vec3 forward;
+    Vec3 right;
+    Vec3 up;
+
     Vec3 position;
     Vec4 quaternion;
     Vec3 scale;
+
     int num_children;
     Mat4 local_matrix;
     Mat4 world_matrix;
