@@ -115,6 +115,5 @@ Mesh init_mesh_data() {
     mesh.norm_count = 0;
     mesh.uv_count = 0;
     mesh.ind_count = 0;
-
     return mesh;
 }

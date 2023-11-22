@@ -110,6 +110,8 @@ int alloc_objects(Scene *scene) {
     scene->attributes[0].type = ATTR_MESH;
     scene->attributes[0].mesh = load_obj_mesh("../models/head.obj");
     scene->attributes[0].mesh.color = white;
+    // Material mat0;
+    // scene->attributes[0].mesh.material = mat0;
 
     // scene->objects[1] = game_object_default();
     // scene->objects[1].quaternion = quat_from_units(UNIT_X, UNIT_Z);

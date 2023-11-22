@@ -33,6 +33,15 @@ Vec3 lerp_bc_coords(Vec3 bc_coords, Vec3 points[3]) {
     }};
 }
 
+Vec2 uv_lerp_bc_coords(Vec3 bc_coords, Vec2 uvs[3]) {
+    Vec2 result;
+    result.x = bc_coords.x * uvs[0].x + bc_coords.y * uvs[1].x + bc_coords.z
+                                                               * uvs[2].x;
+    result.y = bc_coords.x * uvs[0].y + bc_coords.y * uvs[1].y + bc_coords.z
+                                                               * uvs[2].y;
+    return result;
+}
+
 Vec2 calculate_uv(Vec3 bc_coords, Vec3 uv_coords[3]) {
     Vec3 uv_w = lerp_bc_coords(bc_coords, uv_coords);
     float wt = uv_w.z;

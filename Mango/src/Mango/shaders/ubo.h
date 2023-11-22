@@ -3,6 +3,7 @@
 
 #define MAX_LIGHTS 16
 
+#include "../game/material.h"
 #include "../game/gameobject.h"
 #include "../math/geometry.h"
 #include "../math/mat4.h"
@@ -23,6 +24,10 @@ typedef struct {
 } VertexData;
 
 typedef struct {
+    // PBR
+    Vec3 tex_albedo;
+    Vec3 tex_normal;
+
     Vec3 frag_pos;
     Vec3 gl_normal;
     Vec4 gl_frag_color;
@@ -37,7 +42,9 @@ typedef struct {
     Vec3 u_cam_pos;
     Vec3 u_color;
     Vec3 u_ambient;
+    Material *u_mat;
 
+    // Light data
     GameObject *light_objects[MAX_LIGHTS];
     Light *lights[MAX_LIGHTS];
     int num_lights;

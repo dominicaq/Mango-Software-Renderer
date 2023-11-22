@@ -2,57 +2,6 @@
 
 const Vec4 WIREFRAME_COLOR = (Vec4){{255, 165, 0, 255}};  // Orange
 
-// Rasterizer
-// -----------------------------------------------------------------------------
-void rasterize(Frame *frame, Vec3 ss[3], Vertex verts[3], UBO *ubo) {
-    // Bounding box around triangle (in screen space) (ss = screen space)
-    int x_min = MAX(0, MIN(MIN(ss[0].x, ss[1].x), ss[2].x));
-    int y_min = MAX(0, MIN(MIN(ss[0].y, ss[1].y), ss[2].y));
-    int x_max = MIN(frame->width - 1, MAX(MAX(ss[0].x, ss[1].x), ss[2].x));
-    int y_max = MIN(frame->height - 1, MAX(MAX(ss[0].y, ss[1].y), ss[2].y));
-
-    Vec3 normals[3];
-    Vec3 model_space[3];
-    for (int i = 0; i < 3; ++i) {
-        normals[i] = verts[i].normal;
-        model_space[i] = verts[i].position;
-    }
-
-    // Loop through the bounding box
-    for (int y = y_min; y <= y_max; ++y) {
-        for (int x = x_min; x <= x_max; ++x) {
-            Vec3 P = (Vec3){{x, y, 0.0f}};
-            Vec3 bc_coords = barycentric_coords(P, ss[0], ss[1], ss[2]);
-            // Not within triangle
-            if (bc_coords.x < 0 || bc_coords.y < 0 || bc_coords.z < 0) {
-                continue;
-            }
-
-            // Calculate depth of triangle
-            P.z += bc_coords.x * ss[0].z;
-            P.z += bc_coords.y * ss[1].z;
-            P.z += bc_coords.z * ss[2].z;
-
-            // Determine if triangle is on top
-            int buffer_index = x + y * frame->width;
-            if (P.z < frame->z_buffer[buffer_index]) {
-                // Update depth
-                frame->z_buffer[buffer_index] = P.z;
-
-                // Lerp data
-                ubo->f_data.gl_normal = lerp_bc_coords(bc_coords, normals);
-                ubo->f_data.frag_pos = lerp_bc_coords(bc_coords, model_space);
-
-                // Calculate UV
-                // Vec3 uv = lerp_bc_coords(bc_coords, )
-                fragment_shader(ubo, P);
-
-                frame_set_pixel(frame, P.x, P.y, ubo->f_data.gl_frag_color);
-            }
-        }
-    }
-}
-
 // Wireframe mode
 // -----------------------------------------------------------------------------
 void swap_ints(int *a, int *b) {
@@ -103,28 +52,108 @@ void wire_frame(Frame *frame, Vec3 screen_space[3]) {
     line(frame, screen_space[2], screen_space[0]);
 }
 
-void draw_triangle(Frame *frame, Vertex verts[3], UBO *ubo) {
-    // Check if triangle is backface
-    // TEMP reassign:
-    Vec3 ndc[3];
-    for (int i = 0; i < 3; ++i) {
-        ndc[i] = verts[i].position;
+
+// Rasterizer
+// -----------------------------------------------------------------------------
+Vec3 texture_color(Vec2 uv, Texture *texture) {
+    if (texture == NULL) {
+        return VEC3_ZERO;
     }
+
+    // Convert to texture space
+    int tx = uv.x * texture->width;
+    int ty = uv.y * texture->height;
+    int index = ty * texture->width * texture->bpp + tx * texture->bpp;
+    if (index > texture->data_size) {
+        return VEC3_ZERO;
+    }
+
+    Vec3 rgb;
+    rgb.x = texture->data[index];
+    rgb.y = texture->data[index + 1];
+    rgb.z = texture->data[index + 2];
+    return rgb;
+}
+
+void rasterize(Frame *frame, Vec3 ss[3], Vertex verts[3], UBO *ubo) {
+    // Bounding box around triangle (in screen space) (ss = screen space)
+    int x_min = MAX(0, MIN(MIN(ss[0].x, ss[1].x), ss[2].x));
+    int y_min = MAX(0, MIN(MIN(ss[0].y, ss[1].y), ss[2].y));
+    int x_max = MIN(frame->width - 1, MAX(MAX(ss[0].x, ss[1].x), ss[2].x));
+    int y_max = MIN(frame->height - 1, MAX(MAX(ss[0].y, ss[1].y), ss[2].y));
+
+    // Extract vertex data
+    Vec2 uvs[3];
+    Vec3 normals[3];
+    Vec3 view_space[3];
+    for (int i = 0; i < 3; ++i) {
+        uvs[i] = verts[i].uv;
+        normals[i] = verts[i].normal;
+        view_space[i] = verts[i].position;
+    }
+
+    // Loop through the bounding box
+    for (int y = y_min; y <= y_max; ++y) {
+        for (int x = x_min; x <= x_max; ++x) {
+            Vec3 P = (Vec3){{x, y, 0.0f}};
+            Vec3 bc_coords = barycentric_coords(P, ss[0], ss[1], ss[2]);
+            // Not within triangle
+            if (bc_coords.x < 0 || bc_coords.y < 0 || bc_coords.z < 0) {
+                continue;
+            }
+
+            // Calculate depth of triangle
+            P.z += bc_coords.x * ss[0].z;
+            P.z += bc_coords.y * ss[1].z;
+            P.z += bc_coords.z * ss[2].z;
+
+            // Determine if triangle is on top
+            int buffer_index = x + y * frame->width;
+            if (P.z < frame->z_buffer[buffer_index]) {
+                // Update depth
+                frame->z_buffer[buffer_index] = P.z;
+
+                // Interpolate vertex data
+                ubo->f_data.gl_normal = lerp_bc_coords(bc_coords, normals);
+                ubo->f_data.frag_pos = lerp_bc_coords(bc_coords, view_space);
+                Vec2 uv = uv_lerp_bc_coords(bc_coords, uvs);
+
+                // PBR material
+                Material *mat = ubo->u_mat;
+                if (mat != NULL) {
+                    ubo->f_data.tex_albedo = texture_color(uv, mat->albedo_map);
+                    ubo->f_data.tex_normal = texture_color(uv, mat->normal_map);
+                }
+
+                fragment_shader(ubo, P);
+
+                frame_set_pixel(frame, P.x, P.y, ubo->f_data.gl_frag_color);
+            }
+        }
+    }
+}
+
+void draw_triangle(Frame *frame, Vertex verts[3], UBO *ubo) {
+    // Cull triangle if backface
+    Vec3 ndc[3] = {verts[0].position, verts[1].position, verts[2].position};
     if (is_backface(ndc) == true) {
-        // Cull triangle
         return;
     }
 
     // Get coordinate spaces
     Vec3 screen_space[3];
-    Vertex *model_verts = verts;
+    Vertex *view_verts = verts;
     for (int i = 0; i < 3; ++i) {
         Vec3 ndc = verts[i].position;
-        screen_space[i] = ndc_to_screen(frame->width, frame->height, ndc);
 
-        Vec4 ndc_vec4 = vec3_to_vec4(ndc, 1.0f);
-        Vec4 view_space = mat_mul_vec4(ubo->u_vp_inv, ndc_vec4);
-        model_verts[i].position = vec4_homogenize(view_space);
+        screen_space[i] = ndc_to_screen(frame->width, frame->height, ndc);
+        Vec4 view_space = mat_mul_vec4(ubo->u_vp_inv, vec3_to_vec4(ndc, 1.0f));
+
+        // Perspective divide
+        float inv_w = 1.0f / view_space.z;
+        view_verts[i].uv.x *= inv_w;
+        view_verts[i].uv.y *= inv_w;
+        view_verts[i].position = vec4_homogenize(view_space);
     }
 
     if (ubo->debug.use_wireframe == true) {
@@ -132,7 +161,7 @@ void draw_triangle(Frame *frame, Vertex verts[3], UBO *ubo) {
     }
 
     if (ubo->debug.use_rasterize == true) {
-        rasterize(frame, screen_space, model_verts, ubo);
+        rasterize(frame, screen_space, view_verts, ubo);
     }
 }
 

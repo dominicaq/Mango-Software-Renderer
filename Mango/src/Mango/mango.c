@@ -84,6 +84,7 @@ clock_t mango_update(Mango *mango, clock_t last_time) {
         mango->ubo.u_vp_inv = mat4_inverse(vp);
         mango->ubo.u_model_view = model_view_matrix;
         mango->ubo.u_color = target_mesh->color;
+        mango->ubo.u_mat = target_mesh->material;
 
         draw_mesh(mango->frame, target_mesh, &mango->ubo);
     }

@@ -1,5 +1,5 @@
-#ifndef CAMERA_h
-#define CAMERA_h
+#ifndef CAMERA_H
+#define CAMERA_H
 
 #include "../math/mat4.h"
 #include "../math/vec3.h"
