@@ -14,6 +14,8 @@ typedef struct {
     bool use_wireframe;
     bool use_rasterize;
     bool view_normals;
+    bool view_uv_map;
+    bool view_depth;
     bool sdf_enable;
 } DebugOptions;
 
@@ -28,6 +30,7 @@ typedef struct {
     Vec3 tex_albedo;
     Vec3 tex_normal;
 
+    Vec2 uv;
     Vec3 frag_pos;
     Vec3 gl_normal;
     Vec4 gl_frag_color;

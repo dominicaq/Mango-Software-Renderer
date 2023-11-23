@@ -42,4 +42,4 @@ void vec2_swap(Vec2 *v1, Vec2 *v2) {
     *v1 = temp;
 }
 
-void print_vec2(Vec2 v) { printf("x: %f, y: %f \n", v.x, v.y); }
+void vec2_print(Vec2 v) { printf("x: %f, y: %f \n", v.x, v.y); }

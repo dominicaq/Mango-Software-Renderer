@@ -33,13 +33,21 @@ Vec3 lerp_bc_coords(Vec3 bc_coords, Vec3 points[3]) {
     }};
 }
 
-Vec2 uv_lerp_bc_coords(Vec3 bc_coords, Vec2 uvs[3]) {
-    Vec2 result;
-    result.x = bc_coords.x * uvs[0].x + bc_coords.y * uvs[1].x + bc_coords.z
-                                                               * uvs[2].x;
-    result.y = bc_coords.x * uvs[0].y + bc_coords.y * uvs[1].y + bc_coords.z
-                                                               * uvs[2].y;
-    return result;
+Vec2 lerp_uv_coords(Vec3 bc_coords, float perps_w[3], Vec2 uvs[3]) {
+    // Perps = perspective
+    // Correct barycentric coordinates
+    float bc_x = bc_coords.x / perps_w[0];
+    float bc_y = bc_coords.y / perps_w[1];
+    float bc_z = bc_coords.z / perps_w[2];
+    float inv_w = 1.0f / (bc_x + bc_y + bc_z);
+
+    Vec2 corrected_uv;
+    corrected_uv.x = (bc_x * inv_w) * uvs[0].x + (bc_y * inv_w) * uvs[1].x
+                                               + (bc_z * inv_w) * uvs[2].x;
+
+    corrected_uv.y = (bc_x * inv_w) * uvs[0].y + (bc_y * inv_w) * uvs[1].y
+                                               + (bc_z * inv_w) * uvs[2].y;
+    return corrected_uv;
 }
 
 Vec2 calculate_uv(Vec3 bc_coords, Vec3 uv_coords[3]) {

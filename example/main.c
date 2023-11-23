@@ -4,6 +4,9 @@
 #include <Mango/render/framedata.h>
 #include <time.h>
 
+// Pre parsed game data
+#include "textures/tex_head_diffuse.h"
+#include "textures/tex_head_nm.h"
 #include "models/spider.h"
 
 // Window data
@@ -15,21 +18,22 @@ const int SCREEN_HEIGHT = 480;
 // -----------------------------------------------------------------------------
 
 const bool DEBUG_ENABLE_FPS_COUNT = true;
-const bool DEBUG_USE_WIREFRAME = false;
 const bool DEBUG_USE_RASTERIZE = true;
+const bool DEBUG_USE_WIREFRAME = false;
 const bool DEBUG_VIEW_NORMALS = false;
+const bool DEBUG_VIEW_UV_MAP = true;
 const bool DEBUG_SDF_ENABLE = false;
 
 void fps_counter() {
     static int frames = 0;
     static clock_t start, end;
-    static double elapsed_time;
+    static float elapsed_time;
 
     // Print FPS every second
     end = clock();
-    elapsed_time = (double)(end - start) / CLOCKS_PER_SEC;
+    elapsed_time = (float)(end - start) / CLOCKS_PER_SEC;
     if (elapsed_time >= 1.0) {
-        double fps = frames / elapsed_time;
+        float fps = frames / elapsed_time;
         printf("FPS: %f\n", fps);
 
         // Reset counters for the next second
@@ -67,7 +71,7 @@ Camera init_camera(int frame_width, int frame_height) {
     cam.fov = 50.0f;
     cam.aspect = (float)(frame_width) / frame_height;
     cam.z_near = 0.1f;
-    cam.z_far = 1000.0f;
+    cam.z_far = 100.0f;
     cam.width = frame_width;
     cam.height = frame_height;
     return cam;
@@ -106,12 +110,29 @@ int alloc_objects(Scene *scene) {
 
     scene->objects[0] = game_object_default();
     scene->objects[0].position = (Vec3){{0.0f, -3.0f, -12.0f}};
-    scene->objects[0].scale = (Vec3){{10.0f, 10.0f, 10.0f}};
+    scene->objects[0].scale = (Vec3){{14.0f, 14.0f, 14.0f}};
     scene->attributes[0].type = ATTR_MESH;
     scene->attributes[0].mesh = load_obj_mesh("../models/head.obj");
     scene->attributes[0].mesh.color = white;
-    // Material mat0;
-    // scene->attributes[0].mesh.material = mat0;
+    Material *mat0 = malloc(sizeof(Material));
+    if (mat0 == NULL) {
+        printf("ERROR: malloc failed mat0\n");
+    }
+    Texture head_diffuse;
+    head_diffuse.data = head_diffuse_jpg;
+    head_diffuse.width = head_diffuse_jpg_width;
+    head_diffuse.height = head_diffuse_jpg_height;
+    head_diffuse.data_size = head_diffuse_jpg_len;
+    head_diffuse.bpp = 3;
+    Texture head_normal;
+    head_normal.data = tex_head_nm;
+    head_normal.width = tex_head_nm_jpg_width;
+    head_normal.height = tex_head_nm_jpg_height;
+    head_normal.data_size = tex_head_nm_width_jpg_len;
+    head_normal.bpp = 3;
+    mat0->albedo_map = &head_diffuse;
+    mat0->normal_map = &head_normal;
+    scene->attributes[0].mesh.material = mat0;
 
     // scene->objects[1] = game_object_default();
     // scene->objects[1].quaternion = quat_from_units(UNIT_X, UNIT_Z);
@@ -173,8 +194,8 @@ void update(Real dt) {
     quat_mul(&scene.objects[7].quaternion, &slight_right);
     scene.dirty_locals[7] = true;
 
-    quat_mul(&scene.camera->game_object.quaternion, &slight_right);
-    scene.camera->dirty_local = true;
+    // quat_mul(&scene.camera->game_object.quaternion, &slight_right);
+    // scene.camera->dirty_local = true;
 
     float circle_radius = 10.0f;
     int num_lights = POINT_LIGHTS_END - POINT_LIGHTS_BEGIN;
@@ -211,9 +232,10 @@ int MAIN(int argc, char *argv[]) {
     scene.camera = &camera;
 
     // Debug options
-    scene.debug.use_wireframe = DEBUG_USE_WIREFRAME;
     scene.debug.use_rasterize = DEBUG_USE_RASTERIZE;
+    scene.debug.use_wireframe = DEBUG_USE_WIREFRAME;
     scene.debug.view_normals = DEBUG_VIEW_NORMALS;
+    scene.debug.view_uv_map = DEBUG_VIEW_UV_MAP;
     scene.debug.sdf_enable = DEBUG_SDF_ENABLE;
 
     printf("Success.\n");

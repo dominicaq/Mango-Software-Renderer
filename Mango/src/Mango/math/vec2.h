@@ -99,6 +99,6 @@ Vec3 vec2_to_vec3(Vec2 a, float z);
  *
  * @param v The 2D vector to print.
  */
-void print_vec2(Vec2 v);
+void vec2_print(Vec2 v);
 
 #endif  // VEC_2_H

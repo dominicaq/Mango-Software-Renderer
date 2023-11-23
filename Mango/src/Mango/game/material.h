@@ -4,7 +4,7 @@
 #include "../math/vec3.h"
 
 typedef struct {
-    char *data;
+    unsigned char *data;
     int data_size;
     int bpp; // Bytes per pixel
     int width;

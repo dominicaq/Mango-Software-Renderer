@@ -52,30 +52,9 @@ void wire_frame(Frame *frame, Vec3 screen_space[3]) {
     line(frame, screen_space[2], screen_space[0]);
 }
 
-
 // Rasterizer
 // -----------------------------------------------------------------------------
-Vec3 texture_color(Vec2 uv, Texture *texture) {
-    if (texture == NULL) {
-        return VEC3_ZERO;
-    }
-
-    // Convert to texture space
-    int tx = uv.x * texture->width;
-    int ty = uv.y * texture->height;
-    int index = ty * texture->width * texture->bpp + tx * texture->bpp;
-    if (index > texture->data_size) {
-        return VEC3_ZERO;
-    }
-
-    Vec3 rgb;
-    rgb.x = texture->data[index];
-    rgb.y = texture->data[index + 1];
-    rgb.z = texture->data[index + 2];
-    return rgb;
-}
-
-void rasterize(Frame *frame, Vec3 ss[3], Vertex verts[3], UBO *ubo) {
+void rasterize(Frame *frame, Vertex verts[3], Vec3 ss[3], float perspective_w[3], UBO *ubo) {
     // Bounding box around triangle (in screen space) (ss = screen space)
     int x_min = MAX(0, MIN(MIN(ss[0].x, ss[1].x), ss[2].x));
     int y_min = MAX(0, MIN(MIN(ss[0].y, ss[1].y), ss[2].y));
@@ -116,14 +95,7 @@ void rasterize(Frame *frame, Vec3 ss[3], Vertex verts[3], UBO *ubo) {
                 // Interpolate vertex data
                 ubo->f_data.gl_normal = lerp_bc_coords(bc_coords, normals);
                 ubo->f_data.frag_pos = lerp_bc_coords(bc_coords, view_space);
-                Vec2 uv = uv_lerp_bc_coords(bc_coords, uvs);
-
-                // PBR material
-                Material *mat = ubo->u_mat;
-                if (mat != NULL) {
-                    ubo->f_data.tex_albedo = texture_color(uv, mat->albedo_map);
-                    ubo->f_data.tex_normal = texture_color(uv, mat->normal_map);
-                }
+                ubo->f_data.uv = lerp_uv_coords(bc_coords, perspective_w, uvs);
 
                 fragment_shader(ubo, P);
 
@@ -142,18 +114,15 @@ void draw_triangle(Frame *frame, Vertex verts[3], UBO *ubo) {
 
     // Get coordinate spaces
     Vec3 screen_space[3];
+    float perspective_w[3];
     Vertex *view_verts = verts;
     for (int i = 0; i < 3; ++i) {
         Vec3 ndc = verts[i].position;
 
         screen_space[i] = ndc_to_screen(frame->width, frame->height, ndc);
         Vec4 view_space = mat_mul_vec4(ubo->u_vp_inv, vec3_to_vec4(ndc, 1.0f));
-
-        // Perspective divide
-        float inv_w = 1.0f / view_space.z;
-        view_verts[i].uv.x *= inv_w;
-        view_verts[i].uv.y *= inv_w;
         view_verts[i].position = vec4_homogenize(view_space);
+        perspective_w[i] = view_space.z;
     }
 
     if (ubo->debug.use_wireframe == true) {
@@ -161,7 +130,7 @@ void draw_triangle(Frame *frame, Vertex verts[3], UBO *ubo) {
     }
 
     if (ubo->debug.use_rasterize == true) {
-        rasterize(frame, screen_space, view_verts, ubo);
+        rasterize(frame, view_verts, screen_space, perspective_w, ubo);
     }
 }
 
@@ -227,7 +196,6 @@ void transform_triangle(Frame *frame, Vertex *verts, UBO *ubo) {
         // Apply vertex shader
         vertex_shader(ubo, a_position);
 
-        // clip_space[i] = ubo->v_data.gl_position;
         ndc_verts[i].position = vec4_homogenize(ubo->v_data.gl_position);
         ndc_verts[i].normal = ubo->v_data.out_normal;
         ndc_verts[i].uv = verts[i].uv;
