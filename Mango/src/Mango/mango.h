@@ -2,9 +2,7 @@
 #define MANGO_H
 
 #include "game/animation.h"
-#include "game/camera.h"
 #include "game/scene.h"
-#include "math/real.h"
 #include "render/framedata.h"
 
 LIST_TYPE(AnimList, Anim);

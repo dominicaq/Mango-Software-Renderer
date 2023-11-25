@@ -3,7 +3,7 @@
 
 #include <math.h>
 
-#include "real.h"
+#include "../system/system.h"
 #include "vec3.h"
 
 typedef union {
@@ -89,7 +89,7 @@ Real vec2_cross(Vec2 a, Vec2 b);
  */
 void vec2_swap(Vec2 *v1, Vec2 *v2);
 
-Vec3 vec2_to_vec3(Vec2 a, float z);
+Vec3 vec2_to_vec3(Vec2 a, Real z);
 
 /**
  * Print the components of a 2D vector to the standard output.

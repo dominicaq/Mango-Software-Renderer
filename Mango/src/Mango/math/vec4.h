@@ -1,6 +1,7 @@
 #ifndef VEC4_H
 #define VEC4_H
 
+#include "../system/system.h"
 #include "mat4.h"
 #include "vec3.h"
 
@@ -33,7 +34,7 @@ Vec4 mat_mul_vec4(Mat4 m, Vec4 v);
  * @param w The 'w' component of the resulting 4D vector.
  * @return The 4D vector.
  */
-Vec4 vec3_to_vec4(Vec3 v, float w);
+Vec4 vec3_to_vec4(Vec3 v, Real w);
 
 /**
  * Homogenize a 4D vector to a 3D vector by dividing by its 'w' component.
@@ -76,7 +77,7 @@ Vec4 vec4_add(Vec4 a, Vec4 b);
  * @param a The 4D vector.
  * @return The magnitude of the vector.
  */
-float vec4_magnitude(Vec4 a);
+Real vec4_magnitude(Vec4 a);
 
 /**
  * Normalize a 4D vector, making it a unit vector.
@@ -126,7 +127,7 @@ Vec4 *quat_mul(Vec4 *q1, const Vec4 *q2);
  * @source
  * http://www.euclideanspace.com/maths/geometry/rotations/conversions/angleToQuaternion/index.htm
  */
-Vec4 quat_from_axis(Vec3 axis, float angle);
+Vec4 quat_from_axis(Vec3 axis, Real angle);
 
 /**
  * Create a quaternion from an euler.

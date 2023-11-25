@@ -1,7 +1,7 @@
-#include <time.h>
 
 #ifndef RISCV_CONSOLE
 #include <SDL.h>
+#include <time.h>
 #endif
 
 #include "mango.h"
@@ -43,8 +43,8 @@ void mango_update_anim(Mango *mango, Anim *anim, Real dt) {
     // }
 }
 
-clock_t mango_update(Mango *mango, clock_t last_time) {
-    clock_t current_time = clock();
+Real mango_update(Mango *mango, Real last_time) {
+    Real current_time = clock();
     Real dt = current_time - last_time;
     mango->user_update(dt);
     frame_reset(mango->frame);
@@ -86,11 +86,12 @@ clock_t mango_update(Mango *mango, clock_t last_time) {
         mango->ubo.u_color = target_mesh->color;
         mango->ubo.u_mat = target_mesh->material;
 
+        printf("rendering mesh %d", i);
         draw_mesh(mango->frame, target_mesh, &mango->ubo);
     }
 
     // Draw SDF scene
-    if (mango->ubo.debug.sdf_enable) {
+    if (mango->ubo.options & OPT_SDF_ENABLE) {
         Vec3 sphere_position = (Vec3){{0, 5.0f, -5.0f}};
         Mat4 sdf_model = sdf_model_matrix(sphere_position);
         Mat4 sdf_mv = mat4_mul(view_matrix, sdf_model);
@@ -122,7 +123,7 @@ Mango *mango_alloc(Scene *scene, const char *title, int width, int height) {
     }
     printf("allocated frame\n");
 
-    mango->ubo.debug = scene->debug;
+    mango->ubo.options = scene->options;
     mango->running_anims.len = 64;
     mango->running_anims.arr =
         (Anim *)malloc(mango->running_anims.len * sizeof(Anim));
@@ -151,12 +152,13 @@ Mango *mango_alloc(Scene *scene, const char *title, int width, int height) {
 void mango_run(Mango *mango) {
     printf("running mango\n");
 #ifdef RISCV_CONSOLE
-    uint32_t last_time = get_mtime();
+    uint32_t last_time = clock();
+    printf("running mango %d", last_time);
     while (1) {
         last_time = mango_update(mango, last_time);
     }
 #else
-    clock_t last_time = clock();
+    Real last_time = clock();
     SDL_Event e;
     bool quit = false;
     while (!quit) {

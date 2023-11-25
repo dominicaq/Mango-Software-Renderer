@@ -3,20 +3,6 @@
 #include <math.h>
 #include <stdint.h>
 
-#ifndef RISCV_CONSOLE
-#include <stdio.h>
-#include <stdlib.h>
-#else
-uint32_t printf(const char *, ...);
-uint32_t set_mode(uint32_t);
-uint32_t malloc(uint32_t);
-uint32_t memcpy(void *, void *, uint32_t);
-uint32_t get_controller();
-uint32_t get_pixel_bg_data(uint32_t index);
-uint32_t set_pixel_bg_controls(uint32_t index, uint32_t controls);
-uint32_t get_bg_palette(uint32_t);
-#endif
-
 typedef float Real;
 extern const Real REAL_FOUR_DIV_PI;
 extern const Real REAL_FOUR_DIV_PI2;

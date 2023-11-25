@@ -1,7 +1,5 @@
 #include "vec2.h"
 
-#include "real.h"
-
 Vec2 vec2_add(Vec2 a, Vec2 b) {
     a.x = real_add(a.x, b.x);
     a.y = real_add(a.y, b.y);
@@ -32,7 +30,7 @@ Real vec2_cross(Vec2 a, Vec2 b) {
     return real_sub(real_mul(a.x, b.y), real_mul(a.y, b.x));
 }
 
-Vec3 vec2_to_vec3(Vec2 a, float z) { return (Vec3){{a.x, a.y, z}}; }
+Vec3 vec2_to_vec3(Vec2 a, Real z) { return (Vec3){{a.x, a.y, z}}; }
 
 // Helper Function(s)
 // -----------------------------------------------------------------------------

@@ -5,24 +5,14 @@
 #include <time.h>
 
 // Pre parsed game data
+#include "models/spider.h"
 #include "textures/tex_head_diffuse.h"
 #include "textures/tex_head_nm.h"
-#include "models/spider.h"
 
 // Window data
 const char *GAME_TITLE = "Mango Renderer";
 const int SCREEN_WIDTH = 854;
 const int SCREEN_HEIGHT = 480;
-
-// Debugging
-// -----------------------------------------------------------------------------
-
-const bool DEBUG_ENABLE_FPS_COUNT = true;
-const bool DEBUG_USE_RASTERIZE = true;
-const bool DEBUG_USE_WIREFRAME = false;
-const bool DEBUG_VIEW_NORMALS = false;
-const bool DEBUG_VIEW_UV_MAP = true;
-const bool DEBUG_SDF_ENABLE = false;
 
 void fps_counter() {
     static int frames = 0;
@@ -71,14 +61,14 @@ Camera init_camera(int frame_width, int frame_height) {
     cam.fov = 50.0f;
     cam.aspect = (float)(frame_width) / frame_height;
     cam.z_near = 0.1f;
-    cam.z_far = 100.0f;
+    cam.z_far = 1000.0f;
     cam.width = frame_width;
     cam.height = frame_height;
     return cam;
 }
 
 int alloc_objects(Scene *scene) {
-    Vec3 white = COLLOR_PALLETE[4];
+    // Vec3 white = COLLOR_PALLETE[4];
     // Vec3 blue = (Vec3){{0.0f, 0.5f, 1.0f}};
 
     // Objects
@@ -108,31 +98,31 @@ int alloc_objects(Scene *scene) {
         return 1;
     }
 
-    scene->objects[0] = game_object_default();
-    scene->objects[0].position = (Vec3){{0.0f, -3.0f, -12.0f}};
-    scene->objects[0].scale = (Vec3){{14.0f, 14.0f, 14.0f}};
-    scene->attributes[0].type = ATTR_MESH;
-    scene->attributes[0].mesh = load_obj_mesh("../models/head.obj");
-    scene->attributes[0].mesh.color = white;
-    Material *mat0 = malloc(sizeof(Material));
-    if (mat0 == NULL) {
-        printf("ERROR: malloc failed mat0\n");
-    }
-    Texture head_diffuse;
-    head_diffuse.data = head_diffuse_jpg;
-    head_diffuse.width = head_diffuse_jpg_width;
-    head_diffuse.height = head_diffuse_jpg_height;
-    head_diffuse.data_size = head_diffuse_jpg_len;
-    head_diffuse.bpp = 3;
-    Texture head_normal;
-    head_normal.data = tex_head_nm;
-    head_normal.width = tex_head_nm_jpg_width;
-    head_normal.height = tex_head_nm_jpg_height;
-    head_normal.data_size = tex_head_nm_width_jpg_len;
-    head_normal.bpp = 3;
-    mat0->albedo_map = &head_diffuse;
-    mat0->normal_map = &head_normal;
-    scene->attributes[0].mesh.material = mat0;
+    // scene->objects[0] = game_object_default();
+    // scene->objects[0].position = (Vec3){{0.0f, -3.0f, -12.0f}};
+    // scene->objects[0].scale = (Vec3){{14.0f, 14.0f, 14.0f}};
+    // scene->attributes[0].type = ATTR_MESH;
+    // scene->attributes[0].mesh = load_obj_mesh("../models/head.obj");
+    // scene->attributes[0].mesh.color = white;
+    // Material *mat0 = malloc(sizeof(Material));
+    // if (mat0 == NULL) {
+    // printf("ERROR: malloc failed mat0\n");
+    // }
+    // Texture head_diffuse;
+    // head_diffuse.data = head_diffuse_jpg;
+    // head_diffuse.width = head_diffuse_jpg_width;
+    // head_diffuse.height = head_diffuse_jpg_height;
+    // head_diffuse.data_size = head_diffuse_jpg_len;
+    // head_diffuse.bpp = 3;
+    // Texture head_normal;
+    // head_normal.data = tex_head_nm;
+    // head_normal.width = tex_head_nm_jpg_width;
+    // head_normal.height = tex_head_nm_jpg_height;
+    // head_normal.data_size = tex_head_nm_width_jpg_len;
+    // head_normal.bpp = 3;
+    // mat0->albedo_map = &head_diffuse;
+    // mat0->normal_map = &head_normal;
+    // scene->attributes[0].mesh.material = mat0;
 
     // scene->objects[1] = game_object_default();
     // scene->objects[1].quaternion = quat_from_units(UNIT_X, UNIT_Z);
@@ -163,13 +153,13 @@ int alloc_objects(Scene *scene) {
     // scene->attributes[6].light.color = (Vec3){{0.4f, 0.4f, 0.4f}};
     // scene->attributes[6].light.intensity = light_intensity;
 
-    // memcpy(scene->objects + manual_objects, spider_game_objects,
-    //        spider_object_amt * sizeof(GameObject));
-    // memcpy(scene->attributes + manual_objects, spider_attrs,
-    //        spider_object_amt * sizeof(GameObjectAttr));
-    // scene->max_depth = MAX(scene->max_depth, spider_max_depth);
+    memcpy(scene->objects + manual_objects, spider_game_objects,
+           spider_object_amt * sizeof(GameObject));
+    memcpy(scene->attributes + manual_objects, spider_attrs,
+           spider_object_amt * sizeof(GameObjectAttr));
+    scene->max_depth = MAX(scene->max_depth, spider_max_depth);
 
-    // scene->objects[manual_objects].scale = (Vec3){{0.1f, 0.1f, 0.1f}};
+    scene->objects[manual_objects].scale = (Vec3){{0.1f, 0.1f, 0.1f}};
 
     return 0;
 }
@@ -191,8 +181,8 @@ void update(Real dt) {
     // scene.camera.game_object.needs_update = true;
     // End
 
-    quat_mul(&scene.objects[7].quaternion, &slight_right);
-    scene.dirty_locals[7] = true;
+    // quat_mul(&scene.objects[7].quaternion, &slight_right);
+    // scene.dirty_locals[7] = true;
 
     // quat_mul(&scene.camera->game_object.quaternion, &slight_right);
     // scene.camera->dirty_local = true;
@@ -212,10 +202,6 @@ void update(Real dt) {
     quat_mul(&scene.objects[0].quaternion, &slight_right);
     scene.dirty_locals[0] = true;
     ++frames;
-
-    if (DEBUG_ENABLE_FPS_COUNT) {
-        fps_counter();
-    }
 }
 
 int MAIN(int argc, char *argv[]) {
@@ -232,11 +218,7 @@ int MAIN(int argc, char *argv[]) {
     scene.camera = &camera;
 
     // Debug options
-    scene.debug.use_rasterize = DEBUG_USE_RASTERIZE;
-    scene.debug.use_wireframe = DEBUG_USE_WIREFRAME;
-    scene.debug.view_normals = DEBUG_VIEW_NORMALS;
-    scene.debug.view_uv_map = DEBUG_VIEW_UV_MAP;
-    scene.debug.sdf_enable = DEBUG_SDF_ENABLE;
+    scene.options = OPT_USE_RASTERIZE | OPT_USE_WIREFRAME;
 
     printf("Success.\n");
 

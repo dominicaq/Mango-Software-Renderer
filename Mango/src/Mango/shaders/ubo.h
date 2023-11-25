@@ -3,21 +3,21 @@
 
 #define MAX_LIGHTS 16
 
-#include "../game/material.h"
 #include "../game/gameobject.h"
+#include "../game/material.h"
 #include "../math/geometry.h"
 #include "../math/mat4.h"
 #include "../math/vec3.h"
 #include "../math/vec4.h"
 
-typedef struct {
-    bool use_wireframe;
-    bool use_rasterize;
-    bool view_normals;
-    bool view_uv_map;
-    bool view_depth;
-    bool sdf_enable;
-} DebugOptions;
+typedef enum {
+    OPT_USE_WIREFRAME = 1,
+    OPT_USE_RASTERIZE = 2,
+    OPT_VIEW_NORMALS = 4,
+    OPT_VIEW_UV_MAP = 8,
+    OPT_VIEW_DEPTH = 16,
+    OPT_SDF_ENABLE = 32,
+} Options;
 
 typedef struct {
     Vec3 in_normal;
@@ -55,7 +55,7 @@ typedef struct {
     // Pipeline data
     VertexData v_data;
     FragmentData f_data;
-    DebugOptions debug;
+    Options options;
 } UBO;
 
 #endif

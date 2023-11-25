@@ -4,8 +4,8 @@
 #include <math.h>
 
 #include "../shaders/shader.h"
-#include "gameobject.h"
 #include "camera.h"
+#include "gameobject.h"
 
 typedef struct {
     Camera *camera;
@@ -14,7 +14,7 @@ typedef struct {
     GameObjectAttr *attributes;
     int object_count;
     int max_depth;
-    DebugOptions debug;
+    Options options;
 } Scene;
 
 void scene_update(Scene *scene, UBO *ubo, float delta_time);

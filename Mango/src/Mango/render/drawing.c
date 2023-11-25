@@ -17,7 +17,7 @@ void line(Frame *frame, Vec3 v0, Vec3 v1) {
     int y1 = (int)v1.y;
 
     int steep = 0;
-    if (fabs(x0 - x1) < fabs(y0 - y1)) {
+    if (abs(x0 - x1) < abs(y0 - y1)) {
         swap_ints(&x0, &y0);
         swap_ints(&x1, &y1);
         steep = 1;
@@ -29,7 +29,7 @@ void line(Frame *frame, Vec3 v0, Vec3 v1) {
 
     int dx = x1 - x0;
     int dy = y1 - y0;
-    int derror2 = fabs(dy) * 2;
+    int derror2 = abs(dy) * 2;
     int error2 = 0;
     int y = y0;
     for (int x = x0; x <= x1; x++) {
@@ -54,7 +54,8 @@ void wire_frame(Frame *frame, Vec3 screen_space[3]) {
 
 // Rasterizer
 // -----------------------------------------------------------------------------
-void rasterize(Frame *frame, Vertex verts[3], Vec3 ss[3], float perspective_w[3], UBO *ubo) {
+void rasterize(Frame *frame, Vertex verts[3], Vec3 ss[3],
+               float perspective_w[3], UBO *ubo) {
     // Bounding box around triangle (in screen space) (ss = screen space)
     int x_min = MAX(0, MIN(MIN(ss[0].x, ss[1].x), ss[2].x));
     int y_min = MAX(0, MIN(MIN(ss[0].y, ss[1].y), ss[2].y));
@@ -125,11 +126,11 @@ void draw_triangle(Frame *frame, Vertex verts[3], UBO *ubo) {
         perspective_w[i] = view_space.z;
     }
 
-    if (ubo->debug.use_wireframe == true) {
+    if (ubo->options & OPT_USE_WIREFRAME) {
         wire_frame(frame, screen_space);
     }
 
-    if (ubo->debug.use_rasterize == true) {
+    if (ubo->options & OPT_USE_RASTERIZE) {
         rasterize(frame, view_verts, screen_space, perspective_w, ubo);
     }
 }

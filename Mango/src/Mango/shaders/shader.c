@@ -40,12 +40,12 @@ void fragment_shader(UBO *ubo, Vec3 frag_coord) {
     Vec3 V = vec3_normalize(view_vec);
 
     // DEBUG OPTIONS
-    if (ubo->debug.view_normals == true) {
+    if (ubo->options & OPT_VIEW_NORMALS) {
         N = vec3_scale(N, 255.0f);
         N = vec3_clamp(N, 0.0f, 255.0f);
         ubo->f_data.gl_frag_color = vec3_to_vec4(N, 255.0f);
         return;
-    } else if (ubo->debug.view_uv_map == true) {
+    } else if (ubo->options & OPT_VIEW_UV_MAP) {
         Vec3 uv_color = vec2_to_vec3(ubo->f_data.uv, 1.0f);
         uv_color = vec3_scale(uv_color, 255.0f);
         uv_color = vec3_clamp(uv_color, 0.0f, 255.0f);
@@ -101,6 +101,7 @@ void fragment_shader(UBO *ubo, Vec3 frag_coord) {
     ubo->f_data.gl_frag_color = vec3_to_vec4(lighting, 255.0f);
 
     // DEBUG
-    // ubo->f_data.tex_albedo = sample_tex(ubo->f_data.uv, ubo->u_mat->albedo_map);
-    // ubo->f_data.gl_frag_color = vec3_to_vec4(ubo->f_data.tex_albedo, 255.0f);
+    // ubo->f_data.tex_albedo = sample_tex(ubo->f_data.uv,
+    // ubo->u_mat->albedo_map); ubo->f_data.gl_frag_color =
+    // vec3_to_vec4(ubo->f_data.tex_albedo, 255.0f);
 }

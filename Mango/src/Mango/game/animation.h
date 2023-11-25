@@ -1,7 +1,6 @@
 #ifndef ANIMATION_H
 #define ANIMATION_H
 #include <stdbool.h>
-#include <stdint.h>
 
 #include "../math/vec3.h"
 #include "../math/vec4.h"
