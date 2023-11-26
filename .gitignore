@@ -1,9 +1,10 @@
-build/
+build*/
 output.*
 .vscode/
 .cache/
 node_modules/
 compile_commands.json
 *.DS_Store
+CMakeUserPresets.json
 
 

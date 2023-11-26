@@ -1,0 +1,8 @@
+[submodule "Mango/SDL"]
+	path = Mango/SDL
+	url = https://github.com/libsdl-org/SDL.git
+        ignore = all
+[submodule "Mango/libfixmath"]
+	path = Mango/libfixmath
+	url = git@github.com:PetteriAimonen/libfixmath.git
+        ignore = all
