@@ -1,5 +1,5 @@
-# PureC Software renderer
-The **PureC Software Renderer** is an educational piece that provides a deep
+# Mango Software renderer
+The **Mango Software Renderer** is an educational piece that provides a deep
 dive into the inner workings of the 3D rendering pipeline. This project showcases
 the rendering pipeline typically abstracted by graphics APIs like OpenGL, Vulkan,
 etc. This project expands further and implements features that you would
@@ -21,6 +21,14 @@ CPU-bound nature. In contrast, modern rendering APIs leverage the GPU for high-p
 - Model View Perspective transformations (MVP)
 - Blinn-Phong shader for realistic lighting
 - Multi-light fragment shader
+- Signed Distance Fields
+
+# Options
+- View Normals
+- View UV map
+- Enable/Disable rasterization
+- Wireframe
+- Enable/Disable Signed Distance Field rendering (SDF)
 
 # Prerequisites
 - **CMake 3.27.7** A cross-platform build system. You can download it [here.](https://cmake.org/download/)
