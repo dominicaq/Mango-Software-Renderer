@@ -1,4 +1,4 @@
-# Mango Software renderer
+# Mango Software Renderer
 The **Mango Software Renderer** is an educational piece that provides a deep
 dive into the inner workings of the 3D rendering pipeline. This project showcases
 the rendering pipeline typically abstracted by graphics APIs like OpenGL, Vulkan,
