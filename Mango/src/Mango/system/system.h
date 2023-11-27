@@ -32,7 +32,7 @@
     high degree of customization and flexibility in game design, essential for
     creating a visually engaging 2D maze game. The ability to manipulate
     individual pixels and canvas elements will enable developers to create
-    intricate and dynamic game environments. 
+    intricate and dynamic game environments.
 
     Group 4: The introduction of a new Graphics API, including functions like
     set_background and init_sprites_palettes, is a great addition. This could be
@@ -54,7 +54,7 @@
 
     Group 7: For the Video Controller API, including advanced features such as
     support for 3D graphics, hardware acceleration, or shader programming could
-    enhance the system's capabilities for more graphically demanding games. 
+    enhance the system's capabilities for more graphically demanding games.
 
     Group 8: The detailed approach to threading, including mechanisms for
     creation, termination, and process identification, shows a robust
@@ -104,7 +104,27 @@
     than wireframe mode and the game might appear frozen or broken. It's not,
     it's just slow.
 
-    The whole API was revised to minimize overhead of the OS, so every function is new  .
+    The whole API was revised to minimize overhead of the OS, so every function
+    is new.
+
+
+    Shape Orienter - The 3D Game
+
+    Game Description / Control Scheme:
+    Our game is called "Shape Orienter". To play, orient the red shape to the
+    green shapes orientation. Once you successfuly oririent the shape to the
+    target shape a new shape orientation will appear. This will go on
+    indefinitely. Scoring is not stored or displayed.
+
+    Control Scheme:
+    W - Forward rotation
+    A - Left rotation
+    D - Right rotation
+    X - Backwards rotation
+
+    ** WARNING, SUPER SLOW. WILL APPEAR TO BE FROZEN BUT ITS NOT FROZEN! **
+    ** FILLING TRIANGLES CAN RANGE BETWEEN 1 MINUTE TO A VERY LONG TIME **
+    U - Rasterize triangles (Fill in triangles) and show surface normals.
 */
 
 // "Real" is a type representing decimal numbers, either as floats or as fixed
@@ -141,7 +161,7 @@ uint32_t set_pixel_bg_controls(uint32_t index, uint32_t controls);
 uint32_t get_bg_palette(uint32_t index);
 
 // The malloc() function allocates size bytes and returns a pointer to the
-// allocated memory. The memory is not initialized. 
+// allocated memory. The memory is not initialized.
 void *malloc(size_t size);
 
 #else
