@@ -45,22 +45,36 @@ Vec4 vec4_add(const Vec4 a, const Vec4 b) {
     result.elem[3] = a.elem[3] + b.elem[3];
     return result;
 }
+Vec4 vec4_sub(Vec4 a, Vec4 b) {
+    Vec4 result;
+    result.elem[0] = a.elem[0] - b.elem[0];
+    result.elem[1] = a.elem[1] - b.elem[1];
+    result.elem[2] = a.elem[2] - b.elem[2];
+    result.elem[3] = a.elem[3] - b.elem[3];
+    return result;
+}
 
 Real vec4_magnitude(Vec4 a) {
     return sqrt(a.x * a.x + a.y * a.y + a.z * a.z + a.w * a.w);
 }
 
-Vec4 vec4_normalize(Vec4 a) {
+Vec4 quat_normalize(Vec4 a) {
     Real len = vec4_magnitude(a);
     if (len == 0.0f) {
-        return (Vec4){{0.0f, 0.0f, 0.0f}};
+        return (Vec4){{0.0f, 0.0f, 0.0f, 1.0f}};
     }
     Real inv_len = 1.0f / len;
 
     a.x *= inv_len;
     a.y *= inv_len;
     a.z *= inv_len;
+    a.w *= inv_len;
     return a;
+}
+
+bool vec4_eq(Vec4 a, Vec4 b) {
+    return a.x - b.x < REAL_EPS && a.y - b.y < REAL_EPS &&
+           a.z - b.z < REAL_EPS && a.w - b.w < REAL_EPS;
 }
 
 // Quaternions
@@ -107,19 +121,20 @@ Vec4 quat_from_units(Vec3 vFrom, Vec3 vTo) {
         }};
     }
 
-    return vec4_normalize(quat);
+    return quat_normalize(quat);
 }
 
-Vec4 *quat_mul(Vec4 *a, const Vec4 *b) {
-    Real qax = a->x, qay = a->y, qaz = a->z, qaw = a->w;
-    Real qbx = b->x, qby = b->y, qbz = b->z, qbw = b->w;
+Vec4 quat_mul(const Vec4 a, const Vec4 b) {
+    Vec4 res;
+    Real qax = a.x, qay = a.y, qaz = a.z, qaw = a.w;
+    Real qbx = b.x, qby = b.y, qbz = b.z, qbw = b.w;
 
-    a->x = qax * qbw + qaw * qbx + qay * qbz - qaz * qby;
-    a->y = qay * qbw + qaw * qby + qaz * qbx - qax * qbz;
-    a->z = qaz * qbw + qaw * qbz + qax * qby - qay * qbx;
-    a->w = qaw * qbw - qax * qbx - qay * qby - qaz * qbz;
+    res.x = qax * qbw + qaw * qbx + qay * qbz - qaz * qby;
+    res.y = qay * qbw + qaw * qby + qaz * qbx - qax * qbz;
+    res.z = qaz * qbw + qaw * qbz + qax * qby - qay * qbx;
+    res.w = qaw * qbw - qax * qbx - qay * qby - qaz * qbz;
 
-    return a;
+    return res;
 }
 
 // Helper functions

@@ -22,12 +22,13 @@ void init(void) {
     }
 }
 
-Real clock() {
-    static uint32_t *mtime_low;
-    if (mtime_low == NULL) {
-        mtime_low = (uint32_t *)get_mtime_low();
-    }
-    return real_from_i32(*mtime_low);
+Real clock() { return real_from_i32(get_mtime_low()); }
+
+int32_t srand(int32_t x) {
+    x = ((x >> 16) ^ x) * 0x45d9f3b;
+    x = ((x >> 16) ^ x) * 0x45d9f3b;
+    x = (x >> 16) ^ x;
+    return x;
 }
 
 int32_t abs(int32_t value) {

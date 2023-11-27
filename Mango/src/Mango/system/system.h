@@ -22,6 +22,7 @@ typedef enum {
 Real clock();
 int32_t abs(int32_t);
 void *malloc(size_t size);
+int32_t srand(int32_t seed);
 
 // syscalls
 uint32_t printf(const char *, ...);

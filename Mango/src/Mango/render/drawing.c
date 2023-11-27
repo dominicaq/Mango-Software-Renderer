@@ -1,7 +1,5 @@
 #include "drawing.h"
 
-const Vec4 WIREFRAME_COLOR = (Vec4){{255, 165, 0, 255}};  // Orange
-
 // Wireframe mode
 // -----------------------------------------------------------------------------
 void swap_ints(int *a, int *b) {
@@ -10,7 +8,7 @@ void swap_ints(int *a, int *b) {
     *a = *a ^ *b;
 }
 
-void line(Frame *frame, Vec3 v0, Vec3 v1) {
+void line(Frame *frame, Vec3 v0, Vec3 v1, Vec4 color) {
     int x0 = (int)v0.x;
     int x1 = (int)v1.x;
     int y0 = (int)v0.y;
@@ -34,9 +32,9 @@ void line(Frame *frame, Vec3 v0, Vec3 v1) {
     int y = y0;
     for (int x = x0; x <= x1; x++) {
         if (steep) {
-            frame_set_pixel(frame, y, x, WIREFRAME_COLOR);
+            frame_set_pixel(frame, y, x, color);
         } else {
-            frame_set_pixel(frame, x, y, WIREFRAME_COLOR);
+            frame_set_pixel(frame, x, y, color);
         }
         error2 += derror2;
         if (error2 > dx) {
@@ -46,10 +44,10 @@ void line(Frame *frame, Vec3 v0, Vec3 v1) {
     }
 }
 
-void wire_frame(Frame *frame, Vec3 screen_space[3]) {
-    line(frame, screen_space[0], screen_space[1]);
-    line(frame, screen_space[1], screen_space[2]);
-    line(frame, screen_space[2], screen_space[0]);
+void wire_frame(Frame *frame, Vec3 screen_space[3], Vec4 color) {
+    line(frame, screen_space[0], screen_space[1], color);
+    line(frame, screen_space[1], screen_space[2], color);
+    line(frame, screen_space[2], screen_space[0], color);
 }
 
 // Rasterizer
@@ -127,7 +125,7 @@ void draw_triangle(Frame *frame, Vertex verts[3], UBO *ubo) {
     }
 
     if (ubo->options & OPT_USE_WIREFRAME) {
-        wire_frame(frame, screen_space);
+        wire_frame(frame, screen_space, vec3_to_vec4(ubo->u_color, 1));
     }
 
     if (ubo->options & OPT_USE_RASTERIZE) {

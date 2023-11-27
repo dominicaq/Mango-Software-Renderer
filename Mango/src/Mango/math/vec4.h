@@ -68,6 +68,7 @@ Vec3 vec4_to_vec3(Vec4 v);
  * @return The result of the addition.
  */
 Vec4 vec4_add(Vec4 a, Vec4 b);
+Vec4 vec4_sub(Vec4 a, Vec4 b);
 
 /**
  * Calculate the magnitude (length) of a 4D vector.
@@ -88,7 +89,7 @@ Real vec4_magnitude(Vec4 a);
  * @param a The 4D vector to normalize.
  * @return The normalized (unit) vector.
  */
-Vec4 vec4_normalize(Vec4 a);
+Vec4 quat_normalize(Vec4 a);
 
 /**
  * Create a quaternion from two 3D vectors representing rotation.
@@ -113,7 +114,7 @@ Vec4 quat_from_units(Vec3 from, Vec3 to);
  * @source
  * http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/code/index.htm
  */
-Vec4 *quat_mul(Vec4 *q1, const Vec4 *q2);
+Vec4 quat_mul(const Vec4 q1, const Vec4 q2);
 
 /**
  * Create a quaternion from an axis and an angle.
