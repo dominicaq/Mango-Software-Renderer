@@ -86,7 +86,6 @@ Real mango_update(Mango *mango, Real last_time) {
         mango->ubo.u_color = target_mesh->color;
         mango->ubo.u_mat = target_mesh->material;
 
-        printf("rendering mesh %d", i);
         draw_mesh(mango->frame, target_mesh, &mango->ubo);
     }
 

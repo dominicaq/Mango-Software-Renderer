@@ -30,6 +30,13 @@ Real clock() {
     return real_from_i32(*mtime_low);
 }
 
+int32_t abs(int32_t value) {
+    uint32_t temp = value >> 31;  // make a mask of the sign bit
+    value ^= temp;                // toggle the bits if value is negative
+    value += temp & 1;
+    return value;
+}
+
 void *malloc(size_t size) {
     static uint8_t *heap_ptr = NULL;
     uint8_t *base;
