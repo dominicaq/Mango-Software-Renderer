@@ -1,30 +1,28 @@
-option(RISCV_CONSOLE "compile for riscv console" OFF)
-
 # Recursivley get all files in
 file(GLOB_RECURSE ALL_SOURCES
     src/*/*.c
     src/*/*.h
 )
 
-if (RISCV_CONSOLE)
+if (RVC)
   set(EXCLUDE "(display_SDL.|obj_parser.)")
 else () 
-    set(EXCLUDE "display_rvc.")
+  set(EXCLUDE "display_rvc.")
 endif()
 
 list(FILTER ALL_SOURCES EXCLUDE REGEX "${EXCLUDE}(c|h)$")
 
 add_library(Mango ${ALL_SOURCES})
 target_include_directories(Mango PUBLIC src)
-target_compile_options(Mango PRIVATE -O3)
 target_link_libraries(Mango PUBLIC m)
-if (RISCV_CONSOLE)
+if (RVC)
     target_compile_definitions(Mango PUBLIC RISCV_CONSOLE)
 else()
     # SDL
     # https://github.com/libsdl-org/SDL
     set(SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS 1)
     target_compile_definitions(Mango PRIVATE SDL_MAIN_HANDLED)
+    target_compile_options(Mango PRIVATE -fPIC)
     set( SDL_LIBC ON CACHE BOOL "" FORCE )
     set( SDL_TEST OFF CACHE BOOL "" FORCE )
     add_subdirectory(SDL)

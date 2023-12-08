@@ -1,6 +1,8 @@
 #ifdef RISCV_CONSOLE
 #include "system.h"
 
+uint32_t get_mtime_low();
+
 extern uint8_t _data[];
 extern uint8_t _sdata[];
 extern uint8_t _edata[];
@@ -9,17 +11,14 @@ extern uint8_t _bss[];
 extern uint8_t _ebss[];
 extern uint8_t _stack[];
 
-uint32_t get_mtime_low();
-
 void init(void) {
     // set bss to zero
-    for (uint8_t *i = _bss; i < _ebss; ++i) {
-        *i = 0;
-    }
+    // for (uint8_t *i = _bss; i < _ebss; ++i) {
+    //*i = 0;
+    //}
     // copy data rom to data ram
-    for (uint32_t i = 0; i < (_edata - _data); ++i) {
-        _data[i] = _data_source[i];
-    }
+    printf("%d, %d, %d", _data, _data_source);
+    memcpy(_data, _data_source, _edata - _data);
 }
 
 Real clock() { return real_from_i32(get_mtime_low()); }

@@ -6,5 +6,7 @@ node_modules/
 compile_commands.json
 *.DS_Store
 CMakeUserPresets.json
+debug/
+release/
 
 
