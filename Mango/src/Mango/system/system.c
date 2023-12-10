@@ -12,11 +12,6 @@ extern uint8_t _ebss[];
 extern uint8_t _stack[];
 
 void init(void) {
-    // set bss to zero
-    // for (uint8_t *i = _bss; i < _ebss; ++i) {
-    //*i = 0;
-    //}
-    // copy data rom to data ram
     printf("%d, %d, %d", _data, _data_source);
     memcpy(_data, _data_source, _edata - _data);
 }
@@ -46,8 +41,7 @@ void *malloc(size_t size) {
         printf("base %d, stack %d", _ebss, _stack);
     }
 
-    printf("ptr: %d", heap_ptr);
-    printf("mem: %d, %d", size, heap_ptr + size);
+    printf("malloc: %d, %d, %d", heap_ptr, size, _stack);
     if ((heap_ptr + size) <= _stack) {
         base = heap_ptr;
         heap_ptr += size;

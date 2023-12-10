@@ -12,6 +12,8 @@ typedef struct {
     AnimList running_anims;
     void (*user_update)(Real dt);
     UBO ubo;
+    Real last_time;
+    int controller;
 } Mango;
 
 Mango *mango_alloc(Scene *scene, const char *title, int width, int height);

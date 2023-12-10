@@ -1,21 +1,5 @@
 #include "framedata.h"
 
-float *frame_init_zbuffer(int width, int height) {
-    int pixel_count = width * height;
-    Real *z_buffer = (Real *)malloc(sizeof(float) * pixel_count);
-    if (z_buffer == NULL) {
-        printf("frame_init_zbuffer z_buffer malloc failed\n");
-        return NULL;
-    }
-    printf("allocated z_buffer\n");
-
-    // Init z_buffer to be "far away"
-    for (int i = 0; i < pixel_count; ++i) {
-        z_buffer[i] = 1.0f;
-    }
-    return z_buffer;
-}
-
 void frame_reset(Frame *frame) {
     display_reset(frame->display);
     // Reset zbuffer to be "far away"
@@ -46,10 +30,17 @@ Frame *frame_alloc(const char *title, int width, int height) {
     }
     printf("allocated display\n");
 
-    frame->z_buffer = frame_init_zbuffer(width, height);
+    int pixel_count = width * height;
+    frame->z_buffer = (Real *)malloc(sizeof(float) * pixel_count);
     if (frame->z_buffer == NULL) {
-        printf("frame_alloc z_buffer malloc failed\n");
+        printf("frame_init_zbuffer z_buffer malloc failed\n");
         return NULL;
+    }
+    printf("allocated z_buffer\n");
+
+    // Init z_buffer to be "far away"
+    for (int i = 0; i < pixel_count; ++i) {
+        frame->z_buffer[i] = 1.0f;
     }
 
     frame->width = width;

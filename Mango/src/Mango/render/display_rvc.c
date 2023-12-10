@@ -59,7 +59,6 @@ Display *display_alloc(const char *title, int32_t _0, int32_t _1) {
     display->background_data0 = (uint8_t *)get_pixel_bg_data(display->bg_i0);
     printf("data %d", display->background_data0);
     display->background_data1 = (uint8_t *)get_pixel_bg_data(display->bg_i1);
-    printf("here");
     display->data0 = false;
     set_pixel_bg_controls(0, (display->bg_i0 << 29) | (0 << 22) | (287 << 12) |
                                  (511 << 2) | display->palette_i);

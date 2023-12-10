@@ -32,6 +32,8 @@ uint32_t get_controller();
 uint32_t get_pixel_bg_data(uint32_t index);
 uint32_t set_pixel_bg_controls(uint32_t index, uint32_t controls);
 uint32_t get_bg_palette(uint32_t index);
+uint32_t set_video_callback(void (*callback)(void *), void *arg);
+uint32_t set_timer_callback(void (*callback)());
 #else
 #include <stdio.h>
 #include <stdlib.h>

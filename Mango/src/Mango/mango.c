@@ -43,9 +43,11 @@ void mango_update_anim(Mango *mango, Anim *anim, Real dt) {
     // }
 }
 
-Real mango_update(Mango *mango, Real last_time) {
+void mango_update(void *arg) {
+    Mango *mango = (Mango *)arg;
     Real current_time = clock();
-    Real dt = current_time - last_time;
+    Real dt = current_time - mango->last_time;
+    mango->last_time = current_time;
     mango->user_update(dt);
     frame_reset(mango->frame);
 
@@ -89,6 +91,7 @@ Real mango_update(Mango *mango, Real last_time) {
         draw_mesh(mango->frame, target_mesh, &mango->ubo);
     }
 
+    printf("cubes");
     // Draw SDF scene
     if (mango->ubo.options & OPT_SDF_ENABLE) {
         Vec3 sphere_position = (Vec3){{0, 5.0f, -5.0f}};
@@ -104,7 +107,6 @@ Real mango_update(Mango *mango, Real last_time) {
     }
 
     frame_update(mango->frame);
-    return current_time;
 }
 
 Mango *mango_alloc(Scene *scene, const char *title, int width, int height) {
@@ -153,8 +155,9 @@ void mango_run(Mango *mango) {
 #ifdef RISCV_CONSOLE
     uint32_t last_time = clock();
     printf("running mango %d", last_time);
+    set_video_callback(mango_update, mango);
     while (1) {
-        last_time = mango_update(mango, last_time);
+        mango->controller = get_controller();
     }
 #else
     Real last_time = clock();

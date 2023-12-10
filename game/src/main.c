@@ -27,6 +27,11 @@ int POINT_LIGHTS_END = 6;
 
 // Scene data
 Scene scene;
+Mango *mango;
+Real attack_cd = 0;
+int cube0 = 1;
+int cube1 = 3;
+
 Vec4 slight_right;
 Vec4 slight_left;
 
@@ -93,12 +98,6 @@ int alloc_objects(Scene *scene) {
     return 0;
 }
 
-Mango *mango;
-Vec4 slight_right;
-Real attack_cd = 0;
-int cube0 = 1;
-int cube1 = 3;
-
 void update(Real dt) {
     static float frames = 0;
     attack_cd += dt;
@@ -111,6 +110,8 @@ void update(Real dt) {
     // quat_mul(&scene.camera.game_object.quaternion, &slight_right);
     // scene.camera.game_object.needs_update = true;
     // End
+
+    printf("cubes %d %d", cube0, cube1);
     if (vec4_magnitude(vec4_sub(scene.objects[cube0].quaternion,
                                 scene.objects[cube1].quaternion)) < 0.1) {
         Real x = clock();
@@ -124,6 +125,7 @@ void update(Real dt) {
         scene.objects[cube1].quaternion = quat_normalize(new_quat);
         scene.dirty_locals[cube1] = true;
     }
+
     uint32_t controls = get_controller();
     if (controls & INPUT_DIRECTION_RIGHT) {
         scene.objects[cube0].quaternion =
@@ -183,7 +185,7 @@ int main(int argc, char *argv[]) {
     printf("Success.\n");
 
     // Update loop
-    printf("%s running...\n", GAME_TITLE);
+    printf("%d running...\n", &update);
 
     mango = mango_alloc(&scene, GAME_TITLE, BG_W, BG_H);
     mango->user_update = &update;

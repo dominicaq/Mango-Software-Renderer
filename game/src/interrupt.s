@@ -1,5 +1,4 @@
 .section .text, "ax"
-
 .global  get_mtime_low, printf, malloc, memcpy, set_mode, get_controller
 get_mtime_low:
     li a5, 0
@@ -26,4 +25,12 @@ set_pixel_bg_controls:
     ecall
 get_bg_palette:
     li a5, 7
+    ecall
+
+.global set_video_callback, set_timer_callback
+set_video_callback:
+    li a5, 8
+    ecall
+set_timer_callback:
+    li a5, 9
     ecall
