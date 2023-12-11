@@ -33,6 +33,9 @@ Vec4 slight_left;
 Vec4 slight_up;
 Vec4 slight_down;
 
+Vec4 slight_pz;
+Vec4 slight_nz;
+
 Camera init_camera(int frame_width, int frame_height) {
     Camera cam;
     cam.game_object = game_object_default();
@@ -178,11 +181,34 @@ void update(Real dt) {
         scene.dirty_locals[cube0] = true;
     }
 
+    if (controls & INPUT_DIRECTION_UP) {
+        scene.objects[cube0].quaternion =
+            quat_mul(slight_up, scene.objects[cube0].quaternion);
+        scene.dirty_locals[cube0] = true;
+    }
+
+    if (controls & INPUT_DIRECTION_DOWN) {
+        scene.objects[cube0].quaternion =
+            quat_mul(slight_down, scene.objects[cube0].quaternion);
+        scene.dirty_locals[cube0] = true;
+    }
+
     if (controls & INPUT_BUTTON_1) {
         mango->ubo.options = OPT_USE_RASTERIZE | OPT_VIEW_NORMALS;
     }
     if (controls & INPUT_BUTTON_2) {
         mango->ubo.options = OPT_USE_WIREFRAME;
+    }
+    if (controls & INPUT_BUTTON_3) {
+        scene.objects[cube0].quaternion =
+            quat_mul(slight_pz, scene.objects[cube0].quaternion);
+        scene.dirty_locals[cube0] = true;
+    }
+
+    if (controls & INPUT_BUTTON_4) {
+        scene.objects[cube0].quaternion =
+            quat_mul(slight_nz, scene.objects[cube0].quaternion);
+        scene.dirty_locals[cube0] = true;
     }
 
     ++frames;
@@ -202,6 +228,9 @@ int MAIN(int argc, char *argv[]) {
 
     slight_up = quat_from_axis(UNIT_X, -0.05f);
     slight_down = quat_from_axis(UNIT_X, 0.05f);
+
+    slight_nz = quat_from_axis(UNIT_Z, -0.05f);
+    slight_pz = quat_from_axis(UNIT_Z, 0.05f);
 
     if (alloc_objects(&scene) != 0) {
         return 1;

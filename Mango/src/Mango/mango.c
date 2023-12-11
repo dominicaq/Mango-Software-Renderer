@@ -17,8 +17,6 @@
 #define LINE_LEN 64
 char *TEXT_DATA = (char *)0x500F4800;
 
-uint32_t copyMemory(void *src, void *dest, uint32_t size);
-
 uint32_t memcpy(void *dest, void *src, uint32_t size) {
     // DMA1_SRC = (uint32_t)src;
     // DMA1_DEST = (uint32_t)dest;

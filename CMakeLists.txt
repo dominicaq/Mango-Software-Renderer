@@ -11,13 +11,19 @@ if (NOT RVC)
   set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE )
 endif()
 
-
-add_executable(renderer 
+set(SOURCES
     game/src/main.c 
     game/src/crt0.s 
-    game/src/interrupt.s 
     game/src/cube.c 
     game/src/cube.h)
+if(RVC11)
+  list(APPEND SOURCES game/src/system11.s)
+elseif(RVC7)
+  list(APPEND SOURCES game/src/system7.s)
+elseif(RVC3)
+  list(APPEND SOURCES game/src/system3.s)
+endif()
+add_executable(renderer ${SOURCES})
 
 target_link_options(renderer PUBLIC "-Wl,-T${CMAKE_CURRENT_SOURCE_DIR}/game/riscv32-console.ld")
 add_subdirectory(Mango)
