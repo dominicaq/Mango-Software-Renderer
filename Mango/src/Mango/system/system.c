@@ -1,7 +1,7 @@
 #ifdef RISCV_CONSOLE
 #include "system.h"
 
-uint32_t get_mtime_low(){return (*((volatile uint32_t *)0x40000008));}
+uint32_t get_mtime_low() { return (*((volatile uint32_t *)0x40000008)); }
 
 extern uint8_t _data[];
 extern uint8_t _sdata[];
@@ -11,13 +11,25 @@ extern uint8_t _bss[];
 extern uint8_t _ebss[];
 extern uint8_t _stack[];
 
+volatile void *memset(volatile void *dest, uint32_t n, uint32_t size) {
+    for (int32_t i = size - 1; i > -1; --i) {
+        ((uint8_t *)dest)[i] = n;
+    }
+    return dest;
+}
+
 void init(void) {
     // set bss to zero
     // for (uint8_t *i = _bss; i < _ebss; ++i) {
     //*i = 0;
     //}
     // copy data rom to data ram
-    printf("%d, %d, %d", _data, _data_source);
+
+    memset(((volatile void *)0x500F1000), 0xff, 0x400);
+    memset(((volatile void *)0x500F2000), 0xff, 0x400);
+    memset(((volatile void *)0x500F3000), 0xff, 0x400);
+    memset(_bss, 0, _ebss - _bss);
+
     memcpy(_data, _data_source, _edata - _data);
 }
 

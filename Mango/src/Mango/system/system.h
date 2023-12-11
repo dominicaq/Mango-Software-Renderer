@@ -24,6 +24,13 @@ int32_t abs(int32_t);
 void *malloc(size_t size);
 int32_t srand(int32_t seed);
 
+#define BUILD_LG_SP(i, x, y) \
+    SET_LG_CONT(i, ((128 + x) << 2) | ((64 + y) << 12) | (3 << 22))
+#define BUILD_MD_SP(i, x, y) \
+    SET_MD_CONT(i, ((128 + x) << 2) | ((32 + y) << 12) | (3 << 22))
+#define BUILD_SM_SP(i, x, y) \
+    SET_SM_CONT(i, ((128 + x) << 2) | ((16 + y) << 12) | (3 << 22))
+
 // syscalls
 uint32_t printf(const char *, ...);
 uint32_t memcpy(void *src, void *dest, uint32_t size);

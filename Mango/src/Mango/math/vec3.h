@@ -10,6 +10,13 @@
 
 #define EPSILON 1.0e-6
 
+#define BUILD_LG_SP(i, x, y) \
+    SET_LG_CONT(i, ((128 + x) << 2) | ((64 + y) << 12) | (3 << 22))
+#define BUILD_MD_SP(i, x, y) \
+    SET_MD_CONT(i, ((128 + x) << 2) | ((32 + y) << 12) | (3 << 22))
+#define BUILD_SM_SP(i, x, y) \
+    SET_SM_CONT(i, ((128 + x) << 2) | ((16 + y) << 12) | (3 << 22))
+
 typedef union {
     struct {
         Real x, y, z;

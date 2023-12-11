@@ -43,4 +43,8 @@ Real real_sq(Real x);
 Real real_exp(Real inValue);
 Real real_log(Real inValue);
 Real real_log2(Real x);
+
+#define SET_LG_CONT(i, cont) ((volatile int32_t *)0x500F5B00)[i] = cont
+#define SET_MD_CONT(i, cont) ((volatile int32_t *)0x500F5F00)[i] = cont
+#define SET_SM_CONT(i, cont) ((volatile int32_t *)0x500F6300)[i] = cont
 #endif

@@ -17,6 +17,7 @@ uint32_t BG_DATA_SIZE = 0x24000;
 
 #define GET_PIXEL_BG_DATA(input) (BG_DATAS + (BG_DATA_SIZE * input))
 #define SET_PIXEL_BG_CTRL(index, control) (BG_CONTROLS[index] = (control))
+
 volatile uint32_t *BG_CONTROLS = (volatile void *)0x500F5A00;
 
 void display_reset(Display *display) {
@@ -29,7 +30,7 @@ void display_reset(Display *display) {
 void display_update(Display *display) {
     (*((volatile uint32_t *)0x500F6780)) = (0b11111);
     SET_PIXEL_BG_CTRL(0, (0 << 29) | ((display->data0 * 2) << 22) |
-                                 (287 << 12) | (511 << 2) | display->palette_i);
+                             (287 << 12) | (511 << 2) | display->palette_i);
     display->data0 = !display->data0;
 }
 void display_set_pixel(Display *display, int32_t x, int32_t y, Vec4 color) {
@@ -53,7 +54,8 @@ Display *display_alloc(const char *title, int32_t _0, int32_t _1) {
     uint8_t *BG_PALETTES = (void *)0x500F0000;
     uint32_t BG_PALETTE_SIZE = 0x400;
     // display->palette = (uint32_t *)get_bg_palette(display->palette_i);
-    display->palette = (uint32_t *)(BG_PALETTES + (BG_PALETTE_SIZE * display->palette_i));
+    display->palette =
+        (uint32_t *)(BG_PALETTES + (BG_PALETTE_SIZE * display->palette_i));
 
     for (int32_t i = 0; i < 6; ++i) {
         for (int32_t j = 0; j < 6; ++j) {
@@ -73,9 +75,13 @@ Display *display_alloc(const char *title, int32_t _0, int32_t _1) {
     printf("here");
     display->data0 = false;
     SET_PIXEL_BG_CTRL(0, (display->bg_i0 << 29) | (0 << 22) | (287 << 12) |
-                                 (511 << 2) | display->palette_i);
+                             (511 << 2) | display->palette_i);
     SET_PIXEL_BG_CTRL(1, (display->bg_i1 << 29) | (1 << 22) | (287 << 12) |
-                                 (511 << 2) | display->palette_i);
+                             (511 << 2) | display->palette_i);
     return display;
 }
 void display_stop(Display *display) {}
+
+void move_lg_sp(int32_t x, int32_t y) { BUILD_LG_SP(0, x, y); }
+void move_md_sp(int32_t x, int32_t y) { BUILD_MD_SP(0, x, y); }
+void move_sm_sp(int32_t x, int32_t y) { BUILD_SM_SP(0, x, y); }

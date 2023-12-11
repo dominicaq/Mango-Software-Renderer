@@ -107,12 +107,31 @@ void update(Real dt) {
         attack_cd = 0;
     }
 
+    static int sp_scr = 0;
+    static int sp_type = 0;
+    switch (sp_type) {
+    case 0:
+        move_lg_sp(sp_scr, 0);
+        break;
+    case 1:
+        move_md_sp(sp_scr, 0);
+        break;
+    case 2:
+        move_sm_sp(sp_scr, 0);
+        break;
+    }
+    sp_scr = (sp_scr + 1) & 255;
+    if ((sp_scr & 63) == 0) {
+        sp_type = (sp_type + 1) % 3;
+    }
+
     // Update object(s)
     // quat_mul(&scene.camera.game_object.quaternion, &slight_right);
     // scene.camera.game_object.needs_update = true;
     // End
-    if (vec4_magnitude(vec4_sub(scene.objects[cube0].quaternion,
-                                scene.objects[cube1].quaternion)) < 0.1) {
+    if (fabsf(quat_mul(scene.objects[cube0].quaternion,
+                       quat_inv(scene.objects[cube1].quaternion))
+                  .w) > 0.99) {
         Real x = clock();
         int y = srand(real_to_i32(x));
         int z = srand(y);

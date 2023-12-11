@@ -115,6 +115,7 @@ Vec4 quat_from_units(Vec3 from, Vec3 to);
  * http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/code/index.htm
  */
 Vec4 quat_mul(const Vec4 q1, const Vec4 q2);
+Vec4 quat_inv(Vec4);
 
 /**
  * Create a quaternion from an axis and an angle.

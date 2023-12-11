@@ -137,6 +137,13 @@ Vec4 quat_mul(const Vec4 a, const Vec4 b) {
     return res;
 }
 
+Vec4 quat_inv(Vec4 a) {
+    a.x *= -1;
+    a.y *= -1;
+    a.z *= -1;
+    return a;
+}
+
 // Helper functions
 // -----------------------------------------------------------------------------
 void vec4_print(const Vec4 v) {
