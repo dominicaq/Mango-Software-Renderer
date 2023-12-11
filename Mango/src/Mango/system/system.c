@@ -1,7 +1,7 @@
 #ifdef RISCV_CONSOLE
 #include "system.h"
 
-uint32_t get_mtime_low();
+uint32_t get_mtime_low(){return (*((volatile uint32_t *)0x40000008));}
 
 extern uint8_t _data[];
 extern uint8_t _sdata[];

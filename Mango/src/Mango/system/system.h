@@ -26,7 +26,7 @@ int32_t srand(int32_t seed);
 
 // syscalls
 uint32_t printf(const char *, ...);
-void memcpy(void *src, void *dest, uint32_t size);
+uint32_t memcpy(void *src, void *dest, uint32_t size);
 uint32_t set_mode(uint32_t mode);
 uint32_t get_controller();
 uint32_t get_pixel_bg_data(uint32_t index);
