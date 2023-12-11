@@ -11,16 +11,14 @@ struct Display {
     uint32_t bgi0;
     uint32_t bgi1;
 #ifdef RVC7
-    background_t bg0;
-    background_t bg1;
+    background_t bgc;
+    uint8_t bgid;
 #endif
 };
 
 void display_reset(Display *display) {
     uint8_t *data = display->data0 ? display->bgd0 : display->bgd1;
-    for (int i = 0; i < BG_W * BG_H; ++i) {
-        data[i] = 0;
-    }
+    memset(data, 0, BG_H * BG_W);
 }
 void display_update(Display *display) {
 #ifdef RVC11
@@ -28,8 +26,11 @@ void display_update(Display *display) {
     set_pixel_bg_controls(0, (0 << 29) | ((display->data0 * 2) << 22) |
                                  (287 << 12) | (511 << 2) | display->palette_i);
 #elif defined RVC7
-    display->bg0.z = display->data0 * 2;
-    load_background(display->bg0);
+    // display->bg0.z = display->data0 * 2;
+    delete_background(display->bgid);
+    load_background_data_pixel(display->data0 ? display->bgd0 : display->bgd1,
+                               display->bgi0);
+    display->bgid = load_background(display->bgc);
 #endif
     display->data0 = !display->data0;
 }
@@ -72,19 +73,17 @@ Display *display_alloc(const char *title, int32_t _0, int32_t _1) {
     display->bgi1 = 1;
     display->data0 = false;
 #ifdef RVC11
-    display->background_data0 = (uint8_t *)get_pixel_bg_data(display->bgi0);
-    display->background_data1 = (uint8_t *)get_pixel_bg_data(display->bgi1);
-    set_pixel_bg_controls(0, (display->bg_i0 << 29) | (0 << 22) | (287 << 12) |
+    display->bgd0 = (uint8_t *)get_pixel_bg_data(display->bgi0);
+    display->bgd1 = (uint8_t *)get_pixel_bg_data(display->bgi1);
+    set_pixel_bg_controls(0, (display->bgi0 << 29) | (0 << 22) | (287 << 12) |
                                  (511 << 2) | display->palette_i);
-    set_pixel_bg_controls(1, (display->bg_i1 << 29) | (1 << 22) | (287 << 12) |
+    set_pixel_bg_controls(1, (display->bgi1 << 29) | (1 << 22) | (287 << 12) |
                                  (511 << 2) | display->palette_i);
 #elif defined RVC7
     display->bgd0 = (uint8_t *)malloc(sizeof(uint8_t) * 4 * BG_H * BG_W);
     display->bgd1 = (uint8_t *)malloc(sizeof(uint8_t) * 4 * BG_H * BG_W);
-    display->bg0 =
-        (background_t){PIXEL, 287, 511, 0, display->palette_i, display->bgi0};
-    display->bg1 =
-        (background_t){PIXEL, 287, 511, 1, display->palette_i, display->bgi1};
+    display->bgc =
+        (background_t){PIXEL, 0, 0, 0, display->palette_i, display->bgi0};
 #endif
     return display;
 }

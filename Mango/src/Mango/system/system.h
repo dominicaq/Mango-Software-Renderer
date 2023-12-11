@@ -105,6 +105,7 @@ uint8_t delete_background(uint8_t background_id);
 
 // Button enum type
 typedef enum Button { w = 0, a, x, d, u, i, j, k, NONE } Button;
+
 /** @brief get controller - Gets the current value of the controller
  *
  * @return A Button type representing the button being pressed (or none)
