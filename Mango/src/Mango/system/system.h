@@ -32,6 +32,18 @@ uint32_t get_controller();
 uint32_t get_pixel_bg_data(uint32_t index);
 uint32_t set_pixel_bg_controls(uint32_t index, uint32_t controls);
 uint32_t get_bg_palette(uint32_t index);
+
+uint32_t get_lg_sp_palette(uint32_t index);
+uint32_t get_md_sp_palette(uint32_t index);
+uint32_t get_sm_sp_palette(uint32_t index);
+
+uint32_t set_lg_sp_controls(uint32_t index, uint32_t controls);
+uint32_t set_md_sp_controls(uint32_t index, uint32_t controls);
+uint32_t set_sm_sp_controls(uint32_t index, uint32_t controls);
+
+uint32_t get_lg_sp_data(uint32_t index);
+uint32_t get_md_sp_data(uint32_t index);
+uint32_t get_sm_sp_data(uint32_t index);
 #else
 #include <stdio.h>
 #include <stdlib.h>
