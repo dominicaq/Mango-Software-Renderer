@@ -1,5 +1,7 @@
 #include "plane.h"
 
+#include <math.h>
+
 bool is_point_on_plane(const Plane *plane, const Vec3 *point) {
     // Calculate the vector from the plane's position to the point
     Vec3 to_point = vec3_sub(*point, plane->position);

@@ -1,9 +1,6 @@
 #ifndef PLANE_H
 #define PLANE_H
 
-#include <stdbool.h>
-#include <math.h>
-
 #include "vec3.h"
 
 typedef struct {
@@ -18,7 +15,7 @@ typedef struct {
  * @param point The point from which to calculate the distance.
  * @return The distance from the point to the plane.
  */
-float distance_to_plane(const Plane* plane, const Vec3* point);
+float distance_to_plane(const Plane *plane, const Vec3 *point);
 
 /**
  * Check if a point lies on the plane.
@@ -27,6 +24,6 @@ float distance_to_plane(const Plane* plane, const Vec3* point);
  * @param point The point to check if it lies on the plane.
  * @return true if the point is on the plane, false otherwise.
  */
-bool is_point_on_plane(const Plane* plane, const Vec3* point);
+bool is_point_on_plane(const Plane *plane, const Vec3 *point);
 
 #endif

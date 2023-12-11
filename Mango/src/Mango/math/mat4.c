@@ -1,5 +1,7 @@
 #include "mat4.h"
 
+#include <math.h>
+
 const Mat4 ZERO_MATRIX = {{{0.0f, 0.0f, 0.0f, 0.0f},
                            {0.0f, 0.0f, 0.0f, 0.0f},
                            {0.0f, 0.0f, 0.0f, 0.0f},

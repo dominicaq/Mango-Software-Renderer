@@ -1,11 +1,15 @@
-
 #include <Mango/mango.h>
 #include <Mango/mesh/obj_parser.h>
 #include <Mango/render/drawing.h>
 #include <Mango/render/framedata.h>
+#include <math.h>
 
 // Pre parsed game data
-#include "cube.h"
+#include "models/cube.h"
+#ifndef RVC
+#define BG_W 1920
+#define BG_H 1080
+#endif
 
 // Window data
 const char *GAME_TITLE = "Mango Renderer";
@@ -110,20 +114,22 @@ void update(Real dt) {
     // quat_mul(&scene.camera.game_object.quaternion, &slight_right);
     // scene.camera.game_object.needs_update = true;
     // End
+    {
+        Real diff_w = fabsf(quat_mul(scene.objects[cube0].quaternion,
+                                     quat_inv(scene.objects[cube1].quaternion))
+                                .w);
+        if (diff_w > 0.99f) {
+            int x = rand();
+            int y = rand();
+            int z = rand();
+            int w = rand();
 
-    printf("cubes %d %d", cube0, cube1);
-    if (vec4_magnitude(vec4_sub(scene.objects[cube0].quaternion,
-                                scene.objects[cube1].quaternion)) < 0.1) {
-        Real x = clock();
-        int y = srand(real_to_i32(x));
-        int z = srand(y);
-        int w = srand(z);
-
-        Vec4 new_quat = {
-            {x, real_from_i32(y), real_from_i32(z), real_from_i32(w)}};
-        // Vec4 new_quat = {{2, 3, 324, 2}};
-        scene.objects[cube1].quaternion = quat_normalize(new_quat);
-        scene.dirty_locals[cube1] = true;
+            Vec4 new_quat = {
+                {x, real_from_i32(y), real_from_i32(z), real_from_i32(w)}};
+            // Vec4 new_quat = {{2, 3, 324, 2}};
+            scene.objects[cube1].quaternion = quat_normalize(new_quat);
+            scene.dirty_locals[cube1] = true;
+        }
     }
 
     uint32_t controls = get_controller();
@@ -161,7 +167,7 @@ void update(Real dt) {
     ++frames;
 }
 
-int main(int argc, char *argv[]) {
+int MAIN(int argc, char *argv[]) {
     // Start
     printf("Initializing mango renderer...\n");
 
@@ -182,10 +188,7 @@ int main(int argc, char *argv[]) {
     // Debug options
     scene.options = OPT_USE_WIREFRAME;
 
-    printf("Success.\n");
-
-    // Update loop
-    printf("%d running...\n", &update);
+    printf("Running...\n");
 
     mango = mango_alloc(&scene, GAME_TITLE, BG_W, BG_H);
     mango->user_update = &update;

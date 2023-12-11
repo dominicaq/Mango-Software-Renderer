@@ -1,5 +1,4 @@
-
-#ifndef RISCV_CONSOLE
+#ifndef RVC
 #include <SDL.h>
 #include <time.h>
 #endif
@@ -7,13 +6,10 @@
 #include "mango.h"
 #include "render/drawing.h"
 #include "render/framedata.h"
-#include "shaders/sdf.h"
 
-#ifdef RISCV_CONSOLE
-uint32_t get_controller(void);
-uint32_t get_mtime();
-
-uint32_t mango_get_controller() { return get_controller(); }
+#ifndef RVC
+uint32_t controller_mask;
+uint32_t get_controller() { return controller_mask; }
 #endif
 
 void mango_play_anim(Mango *mango, int object_index, AnimStack *stack) {
@@ -91,21 +87,6 @@ void mango_update(void *arg) {
         draw_mesh(mango->frame, target_mesh, &mango->ubo);
     }
 
-    printf("cubes");
-    // Draw SDF scene
-    if (mango->ubo.options & OPT_SDF_ENABLE) {
-        Vec3 sphere_position = (Vec3){{0, 5.0f, -5.0f}};
-        Mat4 sdf_model = sdf_model_matrix(sphere_position);
-        Mat4 sdf_mv = mat4_mul(view_matrix, sdf_model);
-        Mat4 sdf_mvp = mat4_mul(projection_matrix, sdf_mv);
-
-        // Apply transformation
-        Vec4 sdf_pos = vec3_to_vec4(sphere_position, 1.0f);
-        Vec4 sdf_clip_space = mat_mul_vec4(sdf_mvp, sdf_pos);
-        Vec3 sdf_ndc = vec4_homogenize(sdf_clip_space);
-        sdf_draw(mango->frame, current_camera, sdf_ndc);
-    }
-
     frame_update(mango->frame);
 }
 
@@ -152,15 +133,14 @@ Mango *mango_alloc(Scene *scene, const char *title, int width, int height) {
 
 void mango_run(Mango *mango) {
     printf("running mango\n");
-#ifdef RISCV_CONSOLE
-    uint32_t last_time = clock();
-    printf("running mango %d", last_time);
-    set_video_callback(mango_update, mango);
+#ifdef RVC
+    mango->last_time = clock();
+    printf("running mango %d", mango->last_time);
     while (1) {
-        mango->controller = get_controller();
+        mango_update(mango);
     }
 #else
-    Real last_time = clock();
+    mango->last_time = clock();
     SDL_Event e;
     bool quit = false;
     while (!quit) {
@@ -169,11 +149,43 @@ void mango_run(Mango *mango) {
             case SDL_QUIT:
                 quit = true;
                 break;
+            case SDL_KEYDOWN:
+                switch (e.key.keysym.sym) {
+                case SDLK_w:
+                    controller_mask |= INPUT_DIRECTION_UP;
+                    break;
+                case SDLK_a:
+                    controller_mask |= INPUT_DIRECTION_LEFT;
+                    break;
+                case SDLK_s:
+                    controller_mask |= INPUT_DIRECTION_DOWN;
+                    break;
+                case SDLK_d:
+                    controller_mask |= INPUT_DIRECTION_RIGHT;
+                    break;
+                }
+                break;
+            case SDL_KEYUP:
+                switch (e.key.keysym.sym) {
+                case SDLK_w:
+                    controller_mask &= ~INPUT_DIRECTION_UP;
+                    break;
+                case SDLK_a:
+                    controller_mask &= ~INPUT_DIRECTION_LEFT;
+                    break;
+                case SDLK_s:
+                    controller_mask &= ~INPUT_DIRECTION_DOWN;
+                    break;
+                case SDLK_d:
+                    controller_mask &= ~INPUT_DIRECTION_RIGHT;
+                    break;
+                }
+                break;
             default:
                 break;
             }
         }
-        last_time = mango_update(mango, last_time);
+        mango_update(mango);
     }
 #endif
 }

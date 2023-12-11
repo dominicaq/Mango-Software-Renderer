@@ -1,6 +1,5 @@
 #ifndef REAL
 #define REAL
-#include <math.h>
 #include <stdint.h>
 
 typedef float Real;

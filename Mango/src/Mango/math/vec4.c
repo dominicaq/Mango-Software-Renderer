@@ -1,5 +1,7 @@
 #include "vec4.h"
 
+#include <math.h>
+
 // Vec4 opertaions
 // -----------------------------------------------------------------------------
 Vec4 mat_mul_vec4(const Mat4 m, const Vec4 v) {
@@ -69,6 +71,14 @@ Vec4 quat_normalize(Vec4 a) {
     a.y *= inv_len;
     a.z *= inv_len;
     a.w *= inv_len;
+    return a;
+}
+
+Vec4 quat_inv(Vec4 a) {
+    a.x *= -1;
+    a.y *= -1;
+    a.z *= -1;
+
     return a;
 }
 

@@ -1,6 +1,7 @@
 #include "real.h"
 
 #include <float.h>
+#include <math.h>
 
 const Real REAL_FOUR_DIV_PI = (float)0x3fa2f983;
 const Real REAL_FOUR_DIV_PI2 = (float)0xbecf817b;

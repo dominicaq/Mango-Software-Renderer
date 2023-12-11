@@ -9,7 +9,6 @@
 #include "../math/geometry.h"
 #include "../math/vec3.h"
 #include "../math/vec4.h"
-#include "../shaders/sdf.h"
 #include "../shaders/shader.h"
 #include "framedata.h"
 
@@ -22,8 +21,6 @@ typedef struct {
     Vec4 color;
     Vec2 uv;
 } Vertex;
-
-const extern Vec4 WIREFRAME_COLOR;
 
 /*
  * draw_model - Draw a 3D model

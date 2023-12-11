@@ -1,9 +1,6 @@
 #ifndef GEOMETRY_H
 #define GEOMETRY_H
 
-#include <math.h>
-#include <stdbool.h>
-
 #include "mat4.h"
 #include "vec2.h"
 #include "vec3.h"
@@ -81,12 +78,13 @@ bool is_backface(Vec3 ndc[3]);
  * @return true if the point is within the NDC range of [-1, 1]
  * in all dimensions (x, y, z), false otherwise.
  */
-bool is_point_in_frustum(const Vec4* clip_space_point);
+bool is_point_in_frustum(const Vec4 *clip_space_point);
 
 /**
  * Clamp a value within a specified range.
  *
- * This function clamps a value to be within the specified minimum and maximum range.
+ * This function clamps a value to be within the specified minimum and maximum
+ * range.
  *
  * @param value The value to clamp.
  * @param min The minimum value.

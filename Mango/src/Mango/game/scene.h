@@ -1,8 +1,6 @@
 #ifndef SCENE_H
 #define SCENE_H
 
-#include <math.h>
-
 #include "../shaders/shader.h"
 #include "camera.h"
 #include "gameobject.h"

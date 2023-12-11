@@ -1,7 +1,6 @@
 #ifndef VEC3_H
 #define VEC3_H
 
-#include <math.h>
 #include <stdbool.h>
 #include <stdint.h>
 

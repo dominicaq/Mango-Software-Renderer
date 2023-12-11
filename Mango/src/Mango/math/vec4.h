@@ -144,6 +144,7 @@ Vec4 quat_from_axis(Vec3 axis, Real angle);
  */
 Vec4 quat_from_euler(Vec3 euler);
 
+Vec4 quat_inv(Vec4);
 // Helper functions
 // -----------------------------------------------------------------------------
 

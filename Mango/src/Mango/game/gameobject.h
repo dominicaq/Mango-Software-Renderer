@@ -1,9 +1,6 @@
 #ifndef GAMEOBJECT_H
 #define GAMEOBJECT_H
 
-#include <math.h>
-#include <stdbool.h>
-
 #include "../math/mat4.h"
 #include "../math/vec2.h"
 #include "../math/vec3.h"
@@ -26,7 +23,7 @@ typedef struct {
     int norm_count;
     int uv_count;
 
-    Vec3 color; // I dont want to edit the spider code. color wont be used.
+    Vec3 color;  // I dont want to edit the spider code. color wont be used.
     Material *material;
 
     BoneWeight (*weights)[MAX_VERT_WEIGHTS];

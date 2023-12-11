@@ -1,14 +1,15 @@
 #include "sdf.h"
 
+#include <math.h>
+
 // SDF Render
 // -----------------------------------------------------------------------------
 
 Mat4 sdf_model_matrix(Vec3 position) {
-    Mat4 IDENTITY = {{
-        {1.0f, 0.0f, 0.0f, position.x},
-        {0.0f, 1.0f, 0.0f, position.y},
-        {0.0f, 0.0f, 1.0f, position.z},
-        {0.0f, 0.0f, 0.0f, 1.0f}}};
+    Mat4 IDENTITY = {{{1.0f, 0.0f, 0.0f, position.x},
+                      {0.0f, 1.0f, 0.0f, position.y},
+                      {0.0f, 0.0f, 1.0f, position.z},
+                      {0.0f, 0.0f, 0.0f, 1.0f}}};
     return IDENTITY;
 }
 
@@ -198,29 +199,23 @@ float sdf_torus(Vec3 p, Vec2 t) {
 // Operations
 // -----------------------------------------------------------------------------
 
-float sdf_op_union(float d1, float d2) {
-    return fminf(d1, d2);
-}
+float sdf_op_union(float d1, float d2) { return fminf(d1, d2); }
 
-float sdf_op_sub(float d1, float d2) {
-    return fmaxf(-d1, d2);
-}
+float sdf_op_sub(float d1, float d2) { return fmaxf(-d1, d2); }
 
-float sdf_op_intersect(float d1, float d2) {
-    return fmaxf(d1, d2);
-}
+float sdf_op_intersect(float d1, float d2) { return fmaxf(d1, d2); }
 
 float sdf_op_smooth_union(float d1, float d2, float k) {
     float h = clamp(0.5f + 0.5f * (d2 - d1) / k, 0.0f, 1.0f);
     return lerp(d2, d1, h) - k * h * (1.0f - h);
 }
 
-float sdf_op_smooth_sub( float d1, float d2, float k) {
+float sdf_op_smooth_sub(float d1, float d2, float k) {
     float h = clamp(0.5f - 0.5f * (d2 + d1) / k, 0.0f, 1.0f);
-    return lerp(d2, -d1, h ) + k * h * (1.0f - h);
+    return lerp(d2, -d1, h) + k * h * (1.0f - h);
 }
 
-float sdf_op_smooth_intersect( float d1, float d2, float k) {
+float sdf_op_smooth_intersect(float d1, float d2, float k) {
     float h = clamp(0.5f - 0.5f * (d2 - d1) / k, 0.0f, 1.0f);
     return lerp(d2, d1, h) + k * h * (1.0f - h);
 }

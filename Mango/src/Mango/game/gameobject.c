@@ -1,5 +1,7 @@
 #include "gameobject.h"
 
+#include <math.h>
+
 const Real DEG2RAD = M_PI / 180.0f;
 
 Mat4 rotate(Vec3 angles) {

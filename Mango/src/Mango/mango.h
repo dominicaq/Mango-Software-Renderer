@@ -21,4 +21,8 @@ void mango_run(Mango *);
 void mango_play_anim(Mango *, int object_index, AnimStack *);
 void mango_free(Mango *);
 
+#ifndef RVC
+uint32_t get_controller();
+#endif
+
 #endif

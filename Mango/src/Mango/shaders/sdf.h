@@ -2,29 +2,25 @@
 #define SDF_H
 
 #include "../game/camera.h"
+#include "../math/geometry.h"
+#include "../math/mat4.h"
+#include "../math/shader_math.h"
 #include "../math/vec2.h"
 #include "../math/vec3.h"
 #include "../math/vec4.h"
-#include "../math/mat4.h"
-#include "../math/shader_math.h"
 #include "../render/framedata.h"
-#include "../math/geometry.h"
 
 #define SDF_EPSILON 0.0001
-#define SDF_MAX_MARCH_STEPS 255 // 255
+#define SDF_MAX_MARCH_STEPS 255  // 255
 #define SDF_MAX 100
 #define SDF_MIN 0
 
-enum {
-    SPHERE,
-    PLANE,
-    TORUS
-} typedef SDFShape;
+typedef enum { SPHERE, PLANE, TORUS } SDFShape;
 
-struct {
+typedef struct {
     SDFShape shape;
     Vec3 position;
-} typedef SDFObject;
+} SDFObject;
 
 // Render Pipeline
 // -----------------------------------------------------------------------------
@@ -58,7 +54,7 @@ float sdf_plane(Vec3 p, Vec3 n, float h);
 // Source: https://iquilezles.org/articles/distfunctions/
 // -----------------------------------------------------------------------------
 
-float smin( float a, float b, float k );
+float smin(float a, float b, float k);
 
 float sdf_op_union(float d1, float d2);
 
