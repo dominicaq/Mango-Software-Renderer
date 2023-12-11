@@ -1,4 +1,4 @@
-#ifdef RISCV_CONSOLE
+#ifdef RVC
 #include "system.h"
 
 uint32_t get_mtime_low() { return (*((volatile uint32_t *)0x40000008)); }
@@ -35,7 +35,8 @@ void init(void) {
 
 Real clock() { return real_from_i32((*((volatile uint32_t *)0x40000008))); }
 
-int32_t srand(int32_t x) {
+int32_t rand() {
+    static int x = 1;
     x = ((x >> 16) ^ x) * 0x45d9f3b;
     x = ((x >> 16) ^ x) * 0x45d9f3b;
     x = (x >> 16) ^ x;

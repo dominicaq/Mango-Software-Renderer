@@ -1,4 +1,7 @@
 option(RVC "compile for riscv console" OFF)
+option(RVC11 "compile for riscv group 11" OFF)
+option(RVC7 "compile for riscv group 7" OFF)
+option(RVC3 "compile for riscv group 3" OFF)
 if (NOT RVC)
   cmake_minimum_required(VERSION 3.13)
   set(CMAKE_C_STANDARD 11)

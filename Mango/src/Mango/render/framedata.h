@@ -5,7 +5,7 @@
 
 #include "../math/vec4.h"
 
-#ifdef RISCV_CONSOLE
+#ifdef RVC
 #include "display_rvc.h"
 #else
 #include "display_SDL.h"

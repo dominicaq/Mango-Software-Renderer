@@ -1,4 +1,5 @@
 #include "display_rvc.h"
+
 #define BG_SIZE 147456
 #define PALETTE_DELTA 0x33
 

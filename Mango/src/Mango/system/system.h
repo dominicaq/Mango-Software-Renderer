@@ -5,7 +5,7 @@
 
 #include "real.h"
 
-#ifdef RISCV_CONSOLE
+#ifdef RVC
 
 typedef enum {
     INPUT_BUTTON_4 = 128,
@@ -22,14 +22,7 @@ typedef enum {
 Real clock();
 int32_t abs(int32_t);
 void *malloc(size_t size);
-int32_t srand(int32_t seed);
-
-#define BUILD_LG_SP(i, x, y) \
-    SET_LG_CONT(i, ((128 + x) << 2) | ((64 + y) << 12) | (3 << 22))
-#define BUILD_MD_SP(i, x, y) \
-    SET_MD_CONT(i, ((128 + x) << 2) | ((32 + y) << 12) | (3 << 22))
-#define BUILD_SM_SP(i, x, y) \
-    SET_SM_CONT(i, ((128 + x) << 2) | ((16 + y) << 12) | (3 << 22))
+int32_t rand();
 
 // syscalls
 uint32_t printf(const char *, ...);
@@ -51,6 +44,9 @@ uint32_t set_sm_sp_controls(uint32_t index, uint32_t controls);
 uint32_t get_lg_sp_data(uint32_t index);
 uint32_t get_md_sp_data(uint32_t index);
 uint32_t get_sm_sp_data(uint32_t index);
+
+uint32_t set_timer(void (*callback)(), uint32_t time);
+uint32_t set_video(void (*callback)(void *), void *arg);
 #else
 #include <stdio.h>
 #include <stdlib.h>

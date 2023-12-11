@@ -1,84 +1,85 @@
 
-#ifndef RISCV_CONSOLE
+#ifndef RVC
 #include <SDL.h>
 #include <time.h>
 #endif
+
+#include <stdarg.h>
 
 #include "mango.h"
 #include "render/drawing.h"
 #include "render/framedata.h"
 #include "shaders/sdf.h"
-#include <stdarg.h>
 
-#ifdef RISCV_CONSOLE
+#ifdef RVC
 
 #define MODE_CONTROL (*((volatile uint32_t *)0x500F6780))
 #define LINE_LEN 64
 char *TEXT_DATA = (char *)0x500F4800;
 
-
 uint32_t copyMemory(void *src, void *dest, uint32_t size);
 
 uint32_t memcpy(void *dest, void *src, uint32_t size) {
-  // DMA1_SRC = (uint32_t)src;
-  // DMA1_DEST = (uint32_t)dest;
-  // DMA1_SIZE = size;
-  // DMA1_STATUS = DTA;
-  // while (DMA1_STATUS & DTA) {
-  // }
-  for (int32_t i = size - 1; i > -1; --i) {
-    ((uint8_t *)dest)[i] = ((uint8_t *)src)[i];
-  }
-  return (uint32_t)dest;
+    // DMA1_SRC = (uint32_t)src;
+    // DMA1_DEST = (uint32_t)dest;
+    // DMA1_SIZE = size;
+    // DMA1_STATUS = DTA;
+    // while (DMA1_STATUS & DTA) {
+    // }
+    for (int32_t i = size - 1; i > -1; --i) {
+        ((uint8_t *)dest)[i] = ((uint8_t *)src)[i];
+    }
+    return (uint32_t)dest;
 }
 
 uint32_t printf(const char *fmt, ...) {
-  if (MODE_CONTROL & 0b1) {
-    return 2;
-  }
-  va_list args;
-  va_start(args, fmt);
-  char line[LINE_LEN] = {0};
-  int line_i = 0;
-  for (int i = 0; fmt[i] != '\0'; ++i) {
-    if (fmt[i] != '%') {
-      line[line_i++] = fmt[i];
-      continue;
+    if (MODE_CONTROL & 0b1) {
+        return 2;
     }
-    ++i;
-    if (fmt[i] == '\0') {
-      break;
+    va_list args;
+    va_start(args, fmt);
+    char line[LINE_LEN] = {0};
+    int line_i = 0;
+    for (int i = 0; fmt[i] != '\0'; ++i) {
+        if (fmt[i] != '%') {
+            line[line_i++] = fmt[i];
+            continue;
+        }
+        ++i;
+        if (fmt[i] == '\0') {
+            break;
+        }
+
+        switch (fmt[i]) {
+        case 'd':
+            {
+                int num = va_arg(args, int);
+                int start = line_i;
+                // Extract digits in reverse order
+                do {
+                    line[line_i++] = num % 10 + '0';
+                    num /= 10;
+                } while (num != 0);
+
+                // Reverse the string
+                int end = line_i - 1;
+                while (start < end) {
+                    char temp = line[start];
+                    line[start] = line[end];
+                    line[end] = temp;
+                    start++;
+                    end--;
+                }
+            }
+        case 'f':
+            break;
+        }
     }
 
-    switch (fmt[i]) {
-    case 'd': {
-      int num = va_arg(args, int);
-      int start = line_i;
-      // Extract digits in reverse order
-      do {
-        line[line_i++] = num % 10 + '0';
-        num /= 10;
-      } while (num != 0);
-
-      // Reverse the string
-      int end = line_i - 1;
-      while (start < end) {
-        char temp = line[start];
-        line[start] = line[end];
-        line[end] = temp;
-        start++;
-        end--;
-      }
-    }
-    case 'f':
-      break;
-    }
-  }
-
-  memcpy(TEXT_DATA + LINE_LEN, TEXT_DATA, LINE_LEN * 31);
-  memcpy(TEXT_DATA, line, LINE_LEN);
-  va_end(args);
-  return 22;
+    memcpy(TEXT_DATA + LINE_LEN, TEXT_DATA, LINE_LEN * 31);
+    memcpy(TEXT_DATA, line, LINE_LEN);
+    va_end(args);
+    return 22;
 }
 
 #endif
@@ -217,7 +218,7 @@ Mango *mango_alloc(Scene *scene, const char *title, int width, int height) {
 
 void mango_run(Mango *mango) {
     printf("running mango\n");
-#ifdef RISCV_CONSOLE
+#ifdef RVC
     uint32_t last_time = clock();
     printf("running mango %d", last_time);
     while (1) {

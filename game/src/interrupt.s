@@ -57,3 +57,11 @@ set_md_sp_controls:
 set_sm_sp_controls:
     li a5, 16
     ecall
+.global set_timer, set_video
+set_video:
+    li a5, 17
+    ecall
+set_timer:
+    li a5, 18
+    ecall
+

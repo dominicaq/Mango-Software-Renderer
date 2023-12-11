@@ -92,6 +92,16 @@ int alloc_objects(Scene *scene) {
 
     return 0;
 }
+typedef struct {
+    int32_t position;
+    int32_t size;
+} Sprites;
+Sprites sprites;
+void video_callback(void *arg) {
+    Sprites *sp = (Sprites *)arg;
+    sp->position = (sp->position + 1) & 255;
+}
+void timer_callback() { sprites.size = (sprites.size + 1) % 3; }
 
 Mango *mango;
 Vec4 slight_right;
@@ -107,23 +117,23 @@ void update(Real dt) {
         attack_cd = 0;
     }
 
-    static int sp_scr = 0;
-    static int sp_type = 0;
-    switch (sp_type) {
+    switch (sprites.size) {
     case 0:
-        move_lg_sp(sp_scr, 0);
+        move_lg_sp(sprites.position, 0);
         break;
     case 1:
-        move_md_sp(sp_scr, 0);
+        move_md_sp(sprites.position, 0);
         break;
     case 2:
-        move_sm_sp(sp_scr, 0);
+        move_sm_sp(sprites.position, 0);
         break;
     }
-    sp_scr = (sp_scr + 1) & 255;
-    if ((sp_scr & 63) == 0) {
-        sp_type = (sp_type + 1) % 3;
+#if defined(RVC7) || defined(RVC3) || !defined(RVC)
+    sprites.position = (sprites.position + 1) & 255;
+    if ((sprites.position & 63) == 0) {
+        sprites.size = (sprites.size + 1) % 3;
     }
+#endif
 
     // Update object(s)
     // quat_mul(&scene.camera.game_object.quaternion, &slight_right);
@@ -132,13 +142,13 @@ void update(Real dt) {
     if (fabsf(quat_mul(scene.objects[cube0].quaternion,
                        quat_inv(scene.objects[cube1].quaternion))
                   .w) > 0.99) {
-        Real x = clock();
-        int y = srand(real_to_i32(x));
-        int z = srand(y);
-        int w = srand(z);
+        int x = rand();
+        int y = rand();
+        int z = rand();
+        int w = rand();
 
-        Vec4 new_quat = {
-            {x, real_from_i32(y), real_from_i32(z), real_from_i32(w)}};
+        Vec4 new_quat = {{real_from_i32(x), real_from_i32(y), real_from_i32(z),
+                          real_from_i32(w)}};
         // Vec4 new_quat = {{2, 3, 324, 2}};
         scene.objects[cube1].quaternion = quat_normalize(new_quat);
         scene.dirty_locals[cube1] = true;
@@ -178,7 +188,11 @@ void update(Real dt) {
     ++frames;
 }
 
-int main(int argc, char *argv[]) {
+int MAIN(int argc, char *argv[]) {
+#ifdef RVC11
+    set_timer(timer_callback, 10000);
+    set_video(video_callback, &sprites);
+#endif
     // Start
     printf("Initializing mango renderer...\n");
 
