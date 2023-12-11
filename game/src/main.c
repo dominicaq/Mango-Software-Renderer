@@ -124,7 +124,7 @@ void update(Real dt) {
         scene.objects[cube1].quaternion = quat_normalize(new_quat);
         scene.dirty_locals[cube1] = true;
     }
-    uint32_t controls = get_controller();
+    uint32_t controls = *((volatile uint32_t *)0x40000018);
     if (controls & INPUT_DIRECTION_RIGHT) {
         scene.objects[cube0].quaternion =
             quat_mul(slight_right, scene.objects[cube0].quaternion);

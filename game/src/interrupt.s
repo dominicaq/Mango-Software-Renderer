@@ -1,20 +1,17 @@
 .section .text, "ax"
-
-.global  get_mtime_low, printf, malloc, memcpy, set_mode, get_controller
 get_mtime_low:
-    li a5, 0
+    li a5, 4
     ecall
 printf:
-    li a5, 1
-    ecall
-memcpy:
-    li a5, 2
+    ret
+copyMemory:
+    li a5, 50
     ecall
 set_mode:
-    li a5, 3
+    li a5, 97
     ecall
-get_controller:
-    li a5, 4
+get_controller_:
+    li a5, 2
     ecall
 
 .global get_pixel_bg_data, set_pixel_bg_controls, get_bg_palette

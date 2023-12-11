@@ -21,7 +21,7 @@ void init(void) {
     memcpy(_data, _data_source, _edata - _data);
 }
 
-Real clock() { return real_from_i32(get_mtime_low()); }
+Real clock() { return real_from_i32((*((volatile uint32_t *)0x40000008))); }
 
 int32_t srand(int32_t x) {
     x = ((x >> 16) ^ x) * 0x45d9f3b;

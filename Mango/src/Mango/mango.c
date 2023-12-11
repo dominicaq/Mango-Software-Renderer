@@ -8,12 +8,18 @@
 #include "render/drawing.h"
 #include "render/framedata.h"
 #include "shaders/sdf.h"
+#include <stdarg.h>
 
 #ifdef RISCV_CONSOLE
-uint32_t get_controller(void);
-uint32_t get_mtime();
 
-uint32_t mango_get_controller() { return get_controller(); }
+#define MODE_CONTROL (*((volatile uint32_t *)0x500F6780))
+#define LINE_LEN 64
+char *TEXT_DATA = (char *)0x500F4800;
+
+
+uint32_t copyMemory(void *src, void *dest, uint32_t size);
+
+void memcpy(void *dest, void *src, uint32_t size) { for (int32_t i = size - 1; i > -1; --i) ((uint8_t *)dest)[i] = ((uint8_t *)src)[i]; }
 #endif
 
 void mango_play_anim(Mango *mango, int object_index, AnimStack *stack) {

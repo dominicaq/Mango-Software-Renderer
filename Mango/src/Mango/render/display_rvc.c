@@ -12,6 +12,13 @@ struct Display {
     uint32_t bg_i1;
 };
 
+uint8_t *BG_DATAS = (void *)0x50000000;
+uint32_t BG_DATA_SIZE = 0x24000;
+
+#define GET_PIXEL_BG_DATA(input) (BG_DATAS + (BG_DATA_SIZE * input))
+#define SET_PIXEL_BG_CTRL(index, control) (BG_CONTROLS[index] = (control))
+volatile uint32_t *BG_CONTROLS = (volatile void *)0x500F5A00;
+
 void display_reset(Display *display) {
     uint8_t *data =
         display->data0 ? display->background_data0 : display->background_data1;
@@ -20,8 +27,8 @@ void display_reset(Display *display) {
     }
 }
 void display_update(Display *display) {
-    set_mode(0b11111);
-    set_pixel_bg_controls(0, (0 << 29) | ((display->data0 * 2) << 22) |
+    (*((volatile uint32_t *)0x500F6780)) = (0b11111);
+    SET_PIXEL_BG_CTRL(0, (0 << 29) | ((display->data0 * 2) << 22) |
                                  (287 << 12) | (511 << 2) | display->palette_i);
     display->data0 = !display->data0;
 }
@@ -42,7 +49,11 @@ Display *display_alloc(const char *title, int32_t _0, int32_t _1) {
     }
     printf("allocated display\n");
     display->palette_i = 0;
-    display->palette = (uint32_t *)get_bg_palette(display->palette_i);
+
+    uint8_t *BG_PALETTES = (void *)0x500F0000;
+    uint32_t BG_PALETTE_SIZE = 0x400;
+    // display->palette = (uint32_t *)get_bg_palette(display->palette_i);
+    display->palette = (uint32_t *)(BG_PALETTES + (BG_PALETTE_SIZE * display->palette_i));
 
     for (int32_t i = 0; i < 6; ++i) {
         for (int32_t j = 0; j < 6; ++j) {
@@ -56,14 +67,14 @@ Display *display_alloc(const char *title, int32_t _0, int32_t _1) {
 
     display->bg_i0 = 0;
     display->bg_i1 = 1;
-    display->background_data0 = (uint8_t *)get_pixel_bg_data(display->bg_i0);
+    display->background_data0 = (uint8_t *)GET_PIXEL_BG_DATA(display->bg_i0);
     printf("data %d", display->background_data0);
-    display->background_data1 = (uint8_t *)get_pixel_bg_data(display->bg_i1);
+    display->background_data1 = (uint8_t *)GET_PIXEL_BG_DATA(display->bg_i1);
     printf("here");
     display->data0 = false;
-    set_pixel_bg_controls(0, (display->bg_i0 << 29) | (0 << 22) | (287 << 12) |
+    SET_PIXEL_BG_CTRL(0, (display->bg_i0 << 29) | (0 << 22) | (287 << 12) |
                                  (511 << 2) | display->palette_i);
-    set_pixel_bg_controls(1, (display->bg_i1 << 29) | (1 << 22) | (287 << 12) |
+    SET_PIXEL_BG_CTRL(1, (display->bg_i1 << 29) | (1 << 22) | (287 << 12) |
                                  (511 << 2) | display->palette_i);
     return display;
 }
