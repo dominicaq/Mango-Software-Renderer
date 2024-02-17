@@ -50,5 +50,3 @@ Once built, you can run the software renderer as follows:
 
 # License
 This project is licensed under the [MIT License.](https://github.com/dominicaq/PureC-Software-renderer/blob/main/LICENSE)
-
-All model assets are licensed under the [??? License.]
