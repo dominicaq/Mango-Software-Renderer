@@ -1,17 +1,16 @@
 #ifndef VEC_2_H
 #define VEC_2_H
 
+#include <stdio.h>
 #include <math.h>
 
-#include "../system/system.h"
 #include "vec3.h"
 
 typedef union {
     struct {
-        Real x;
-        Real y;
+        float x, y;
     };
-    Real elem[2];
+    float elem[2];
 } Vec2;
 
 /**
@@ -45,7 +44,7 @@ Vec2 vec2_sub(Vec2 a, Vec2 b);
  * @param a The 2D vector to be scaled.
  * @return The resulting scaled 2D vector.
  */
-Vec2 vec2_scale(Vec2 a, Real s);
+Vec2 vec2_scale(Vec2 a, float s);
 
 /**
  * Calculate the magnitude (length) of a 2D vector.
@@ -55,7 +54,7 @@ Vec2 vec2_scale(Vec2 a, Real s);
  * @param a The 2D vector.
  * @return The magnitude of the vector.
  */
-Real vec2_magnitude(Vec2 a);
+float vec2_magnitude(Vec2 a);
 
 /**
  * Calculate the dot product of two 2D vectors.
@@ -66,7 +65,7 @@ Real vec2_magnitude(Vec2 a);
  * @param b The second 2D vector.
  * @return The dot product of the two vectors.
  */
-Real vec2_dot(Vec2 a, Vec2 b);
+float vec2_dot(Vec2 a, Vec2 b);
 
 /**
  * Calculate the cross product of two 2D vectors.
@@ -77,7 +76,7 @@ Real vec2_dot(Vec2 a, Vec2 b);
  * @param b The second 2D vector.
  * @return The cross product value.
  */
-Real vec2_cross(Vec2 a, Vec2 b);
+float vec2_cross(Vec2 a, Vec2 b);
 
 /**
  * Swap the contents of two 2D vectors.
@@ -89,7 +88,7 @@ Real vec2_cross(Vec2 a, Vec2 b);
  */
 void vec2_swap(Vec2 *v1, Vec2 *v2);
 
-Vec3 vec2_to_vec3(Vec2 a, Real z);
+Vec3 vec2_to_vec3(Vec2 a, float z);
 
 /**
  * Print the components of a 2D vector to the standard output.

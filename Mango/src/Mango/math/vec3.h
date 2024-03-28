@@ -1,20 +1,20 @@
 #ifndef VEC3_H
 #define VEC3_H
 
+#include <stdio.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "../system/system.h"
 #include "shader_math.h"
 
 #define EPSILON 1.0e-6
 
 typedef union {
     struct {
-        Real x, y, z;
+        float x, y, z;
     };
-    Real elem[3];
+    float elem[3];
 } Vec3;
 
 // Constants
@@ -59,7 +59,7 @@ Vec3 vec3_sub(Vec3 a, Vec3 b);
  * @param alpha The interpolation parameter (0.0 to 1.0).
  * @return The interpolated 3D vector.
  */
-Vec3 vec3_lerp(Vec3 a, Vec3 b, Real alpha);
+Vec3 vec3_lerp(Vec3 a, Vec3 b, float alpha);
 
 /**
  * Scale a 3D vector by a scalar value.
@@ -71,7 +71,7 @@ Vec3 vec3_lerp(Vec3 a, Vec3 b, Real alpha);
  * @param s The scalar value.
  * @return The scaled 3D vector.
  */
-Vec3 vec3_scale(Vec3 a, Real s);
+Vec3 vec3_scale(Vec3 a, float s);
 
 /**
  * Calculate the magnitude (length) of a 3D vector.
@@ -81,7 +81,7 @@ Vec3 vec3_scale(Vec3 a, Real s);
  * @param a The 3D vector.
  * @return The magnitude of the vector.
  */
-Real vec3_magnitude(Vec3 a);
+float vec3_magnitude(Vec3 a);
 
 /**
  * Calculate the dot product of two 3D vectors.
@@ -92,7 +92,7 @@ Real vec3_magnitude(Vec3 a);
  * @param b The second 3D vector.
  * @return The dot product.
  */
-Real vec3_dot(Vec3 a, Vec3 b);
+float vec3_dot(Vec3 a, Vec3 b);
 
 /**
  * Calculate the cross product of two 3D vectors.
@@ -160,6 +160,6 @@ Vec3 vec3_min(Vec3 a, Vec3 b);
 
 bool vec3_equal(Vec3 a, Vec3 b);
 
-Vec3 vec3_clamp(Vec3 a, Real min, Real max);
+Vec3 vec3_clamp(Vec3 a, float min, float max);
 
 #endif  // VEC3_H

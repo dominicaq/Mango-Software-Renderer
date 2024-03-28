@@ -1,6 +1,7 @@
 #ifndef MAX4_H
 #define MAX4_H
 
+#include <stdio.h>
 #include "vec3.h"
 
 typedef struct {

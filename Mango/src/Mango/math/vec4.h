@@ -1,15 +1,16 @@
 #ifndef VEC4_H
 #define VEC4_H
 
-#include "../system/system.h"
+#include <stdio.h>
+
 #include "mat4.h"
 #include "vec3.h"
 
 typedef union {
     struct {
-        Real x, y, z, w;
+        float x, y, z, w;
     };
-    Real elem[4];
+    float elem[4];
 } Vec4;
 
 /**
@@ -34,7 +35,7 @@ Vec4 mat_mul_vec4(Mat4 m, Vec4 v);
  * @param w The 'w' component of the resulting 4D vector.
  * @return The 4D vector.
  */
-Vec4 vec3_to_vec4(Vec3 v, Real w);
+Vec4 vec3_to_vec4(Vec3 v, float w);
 
 /**
  * Homogenize a 4D vector to a 3D vector by dividing by its 'w' component.
@@ -77,7 +78,7 @@ Vec4 vec4_add(Vec4 a, Vec4 b);
  * @param a The 4D vector.
  * @return The magnitude of the vector.
  */
-Real vec4_magnitude(Vec4 a);
+float vec4_magnitude(Vec4 a);
 
 /**
  * Normalize a 4D vector, making it a unit vector.
@@ -111,7 +112,7 @@ Vec4 quat_from_units(Vec3 from, Vec3 to);
  * @param q2 The second quaternion.
  * @return The result of quaternion multiplication.
  * @source
- * http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/code/index.htm
+ * http://www.euclideanspace.com/maths/algebra/floatNormedAlgebra/quaternions/code/index.htm
  */
 Vec4 *quat_mul(Vec4 *q1, const Vec4 *q2);
 
@@ -127,7 +128,7 @@ Vec4 *quat_mul(Vec4 *q1, const Vec4 *q2);
  * @source
  * http://www.euclideanspace.com/maths/geometry/rotations/conversions/angleToQuaternion/index.htm
  */
-Vec4 quat_from_axis(Vec3 axis, Real angle);
+Vec4 quat_from_axis(Vec3 axis, float angle);
 
 /**
  * Create a quaternion from an euler.
@@ -142,9 +143,6 @@ Vec4 quat_from_axis(Vec3 axis, Real angle);
  *
  */
 Vec4 quat_from_euler(Vec3 euler);
-
-// Helper functions
-// -----------------------------------------------------------------------------
 
 /**
  * Print the components of a 4D vector to the standard output.

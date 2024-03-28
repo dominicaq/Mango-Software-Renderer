@@ -3,6 +3,7 @@
 #include <Mango/render/drawing.h>
 #include <Mango/render/framedata.h>
 #include <time.h>
+#include <string.h>
 
 // Pre parsed game data
 #include "models/spider.h"
@@ -166,9 +167,9 @@ int alloc_objects(Scene *scene) {
 
 Mango *mango;
 Vec4 slight_right;
-Real attack_cd = 0;
+float attack_cd = 0;
 
-void update(Real dt) {
+void update(float dt) {
     static float frames = 0;
     attack_cd += dt;
     if (attack_cd > 3000) {

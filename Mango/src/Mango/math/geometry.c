@@ -3,22 +3,20 @@
 // Coordinate functions
 // -----------------------------------------------------------------------------
 Vec3 barycentric_coords(Vec3 p, Vec3 a, Vec3 b, Vec3 c) {
-    Vec3 v0 = vec3_sub(b, a);
-    Vec3 v1 = vec3_sub(c, a);
-    Vec3 v2 = vec3_sub(p, a);
+    Vec3 v0 = vec3_sub(b,a);
+    Vec3 v1 = vec3_sub(c,a);
+    Vec3 v2 = vec3_sub(p,a);
 
-    Real d00 = vec3_dot(v0, v0);
-    Real d01 = vec3_dot(v0, v1);
-    Real d11 = vec3_dot(v1, v1);
-    Real d20 = vec3_dot(v2, v0);
-    Real d21 = vec3_dot(v2, v1);
-    Real invDenom = real_div(real_from_float(1.0f),
-                             real_sub(real_mul(d00, d11), real_mul(d01, d01)));
-    Real v = real_sub(real_mul(d11, d20), real_mul(d01, d21)) * invDenom;
-    Real w =
-        real_mul(real_sub(real_mul(d00, d21), real_mul(d01, d20)), invDenom);
-    Real u = real_sub(real_sub(1.0f, v), w);
-    return (Vec3){{u, v, w}};
+    float d00 = vec3_dot(v0, v0);
+    float d01 = vec3_dot(v0, v1);
+    float d11 = vec3_dot(v1, v1);
+    float d20 = vec3_dot(v2, v0);
+    float d21 = vec3_dot(v2, v1);
+    float inverse_denom = 1.0f / (d00 * d11 - d01 * d01);
+    float v = (d11 * d20 - d01 * d21) * inverse_denom;
+    float w = (d00 * d21 - d01 * d20) * inverse_denom;
+    float u = 1.0f - v - w;
+    return (Vec3){{u,v,w}};
 }
 
 Vec3 lerp_bc_coords(Vec3 bc_coords, Vec3 points[3]) {

@@ -1,6 +1,7 @@
 #ifndef ANIMATION_H
 #define ANIMATION_H
 #include <stdbool.h>
+#include <stddef.h>
 
 #include "../math/vec3.h"
 #include "../math/vec4.h"
@@ -20,19 +21,19 @@ typedef enum interpolation {
 } Interpolation;
 
 typedef struct {
-    Real dx;  // < Derivative in the time axis
-    Real dy;  // < Derivative in the (curve specific) value axis
+    float dx;  // < Derivative in the time axis
+    float dy;  // < Derivative in the (curve specific) value axis
 } Tangent;
 
 typedef struct {
-    Real time;
-    Real value;
+    float time;
+    float value;
     Interpolation interpolation;
     Tangent left;
     Tangent right;
 } Keyframe;
 
-Real keyframe_lerp(Keyframe *next, Keyframe *prev, Real alpha);
+float keyframe_lerp(Keyframe *next, Keyframe *prev, float alpha);
 
 LIST_TYPE(KeyframeList, Keyframe);
 
@@ -49,11 +50,11 @@ typedef struct {
     KeyframeList curves[3];
 } AnimProp;
 
-void prop_update(AnimProp *prop, GameObject *obj, Real time_prog);
+void prop_update(AnimProp *prop, GameObject *obj, float time_prog);
 LIST_TYPE(AnimPropList, AnimProp);
 
 typedef struct {
-    Real weight;
+    float weight;
     bool weight_is_animated;
     bool blended;
     bool additive;
@@ -66,13 +67,13 @@ typedef struct {
 LIST_TYPE(AnimLayerList, AnimLayer);
 
 typedef struct {
-    Real time_begin;
-    Real time_end;
+    float time_begin;
+    float time_end;
     AnimLayerList layers;
 } AnimStack;
 
 typedef struct {
-    Real time_progress;
+    float time_progress;
     int object_index;
     AnimStack stack;
 } Anim;

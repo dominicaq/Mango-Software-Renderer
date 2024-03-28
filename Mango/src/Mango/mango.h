@@ -10,7 +10,7 @@ typedef struct {
     Frame *frame;
     Scene *scene;
     AnimList running_anims;
-    void (*user_update)(Real dt);
+    void (*user_update)(float dt);
     UBO ubo;
 } Mango;
 

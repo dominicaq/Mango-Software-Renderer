@@ -2,7 +2,7 @@
 
 float *frame_init_zbuffer(int width, int height) {
     int pixel_count = width * height;
-    Real *z_buffer = (Real *)malloc(sizeof(float) * pixel_count);
+    float *z_buffer = (float *)malloc(sizeof(float) * pixel_count);
     if (z_buffer == NULL) {
         printf("frame_init_zbuffer z_buffer malloc failed\n");
         return NULL;

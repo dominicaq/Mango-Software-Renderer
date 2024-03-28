@@ -1,11 +1,11 @@
 #include "animation.h"
 
-void prop_update(AnimProp *prop, GameObject *obj, Real time_prog) {
+void prop_update(AnimProp *prop, GameObject *obj, float time_prog) {
     Vec3 values;
     for (int i = 0; i < 3; ++i) {
         Keyframe key_prev = {0, prop->default_value.elem[i], 0};
 
-        Real time_prev = 0;
+        float time_prev = 0;
         for (int j = 0; j < prop->curves[i].len; ++j) {
             Keyframe *key = &prop->curves[i].arr[j];
             if (time_prog < key->time) {
@@ -29,15 +29,15 @@ void prop_update(AnimProp *prop, GameObject *obj, Real time_prog) {
     }
 }
 
-Real find_cubic_bezier(Real p1, Real p2, Real x0) {
-    Real p1_3 = p1 * 3.0, p2_3 = p2 * 3.0;
-    Real a = p1_3 - p2_3 + 1.0;
-    Real b = p2_3 - p1_3 - p1_3;
-    Real c = p1_3;
+float find_cubic_bezier(float p1, float p2, float x0) {
+    float p1_3 = p1 * 3.0, p2_3 = p2 * 3.0;
+    float a = p1_3 - p2_3 + 1.0;
+    float b = p2_3 - p1_3 - p1_3;
+    float c = p1_3;
 
-    Real a_3 = 3.0 * a, b_2 = 2.0 * b;
-    Real t = x0;
-    Real x1, t2, t3;
+    float a_3 = 3.0 * a, b_2 = 2.0 * b;
+    float t = x0;
+    float x1, t2, t3;
 
     // Manually unroll three iterations of Newton-Rhapson, this is enough
     // for most tangents
@@ -57,7 +57,7 @@ Real find_cubic_bezier(Real p1, Real p2, Real x0) {
     t -= x1 / (a_3 * t2 + b_2 * t + c);
 
     // 4 ULP from 1.0
-    if (real_abs(x1) <= REAL_EPS) return t;
+    if (fabsf(x1) <= EPSILON) return t;
 
     // Perform more iterations until we reach desired accuracy
     for (size_t i = 0; i < 4; i++) {
@@ -71,14 +71,14 @@ Real find_cubic_bezier(Real p1, Real p2, Real x0) {
         x1 = a * t3 + b * t2 + c * t - x0;
         t -= x1 / (a_3 * t2 + b_2 * t + c);
 
-        if (real_abs(x1) <= REAL_EPS) return t;
+        if (fabsf(x1) <= EPSILON) return t;
     }
 
     return t;
 }
 
-Real keyframe_lerp(Keyframe *next, Keyframe *prev, Real t) {
-    Real res = 0.0f;
+float keyframe_lerp(Keyframe *next, Keyframe *prev, float t) {
+    float res = 0.0f;
     switch (next->interpolation) {
     case INTERPOLATION_CONSTANT_PREV:
         return prev->value;
@@ -88,27 +88,30 @@ Real keyframe_lerp(Keyframe *next, Keyframe *prev, Real t) {
         return prev->value * (1.0 - t) + next->value * t;
     case INTERPOLATION_CUBIC:
         {
-            Real rcp_delta = real_div(1, real_sub(next->time, prev->time));
-            Real x1 = real_mul(prev->right.dx, rcp_delta);
-            Real x2 = real_sub(1.0, real_mul(next->left.dx, rcp_delta));
+            float rcp_delta = 1.0 / (next->time - prev->time);
+            float x1 = prev->right.dx * rcp_delta;
+            float x2 = 1.0 - next->left.dx * rcp_delta;
             t = find_cubic_bezier(x1, x2, t);
 
-            Real t2 = real_mul(t, t);
-            Real t3 = real_mul(t2, t);
-            Real u = real_sub(1.0, t);
-            Real u2 = real_mul(u, u);
-            Real u3 = real_mul(u2, u);
+            float t2 = t * t;
+            float t3 = t2 * t;
+            float u = 1.0 - t;
+            float u2 = u * u;
+            float u3 = u2 * u;
 
-            Real y0 = prev->value;
-            Real y3 = next->value;
-            Real y1 = real_add(y0, prev->right.dy);
-            Real y2 = real_sub(y3, next->left.dy);
+            float y0 = prev->value;
+            float y3 = next->value;
+            float y1 = y0 + next->right.dy;
+            float y2 = y3 - next->left.dy;
 
-            return real_add(
-                real_mul(u3, y0),
-                real_add(real_mul(3.0, real_add(real_mul(real_mul(u2, t), y1),
-                                                real_mul(real_mul(u, t2), y2))),
-                         real_mul(t3, y3)));
+            return u3 * y0 + ((3.0 * ((u2 * t * y1) + (u * t2 * y2))) +
+            (t3* y3));
+
+            // return float_add(
+            //     float_mul(u3, y0),
+            //     float_add(float_mul(3.0, float_add(float_mul(float_mul(u2, t), y1),
+            //                                     float_mul(float_mul(u, t2), y2))),
+            //              float_mul(t3, y3)));
         }
     }
     return res;

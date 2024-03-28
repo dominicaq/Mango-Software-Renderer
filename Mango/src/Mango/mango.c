@@ -1,20 +1,11 @@
 
-#ifndef RISCV_CONSOLE
 #include <SDL.h>
 #include <time.h>
-#endif
 
 #include "mango.h"
 #include "render/drawing.h"
 #include "render/framedata.h"
 #include "shaders/sdf.h"
-
-#ifdef RISCV_CONSOLE
-uint32_t get_controller(void);
-uint32_t get_mtime();
-
-uint32_t mango_get_controller() { return get_controller(); }
-#endif
 
 void mango_play_anim(Mango *mango, int object_index, AnimStack *stack) {
     for (int i = 0; i < mango->running_anims.len; ++i) {
@@ -25,7 +16,7 @@ void mango_play_anim(Mango *mango, int object_index, AnimStack *stack) {
     }
 }
 
-void mango_update_anim(Mango *mango, Anim *anim, Real dt) {
+void mango_update_anim(Mango *mango, Anim *anim, float dt) {
     // if (anim->time_progress >= anim->stack.time_end) {
     //     return;
     // }
@@ -43,9 +34,9 @@ void mango_update_anim(Mango *mango, Anim *anim, Real dt) {
     // }
 }
 
-Real mango_update(Mango *mango, Real last_time) {
-    Real current_time = clock();
-    Real dt = current_time - last_time;
+float mango_update(Mango *mango, float last_time) {
+    float current_time = clock();
+    float dt = current_time - last_time;
     mango->user_update(dt);
     frame_reset(mango->frame);
 
@@ -86,7 +77,6 @@ Real mango_update(Mango *mango, Real last_time) {
         mango->ubo.u_color = target_mesh->color;
         mango->ubo.u_mat = target_mesh->material;
 
-        printf("rendering mesh %d", i);
         draw_mesh(mango->frame, target_mesh, &mango->ubo);
     }
 
@@ -114,14 +104,13 @@ Mango *mango_alloc(Scene *scene, const char *title, int width, int height) {
         printf("mango_alloc mango malloc failed\n");
         return NULL;
     }
-    printf("allocated mango\n");
+
     mango->scene = scene;
     mango->frame = frame_alloc(title, width, height);
     if (mango->frame == NULL) {
         printf("mango_alloc frame malloc failed\n");
         return NULL;
     }
-    printf("allocated frame\n");
 
     mango->ubo.options = scene->options;
     mango->running_anims.len = 64;
@@ -151,14 +140,7 @@ Mango *mango_alloc(Scene *scene, const char *title, int width, int height) {
 
 void mango_run(Mango *mango) {
     printf("running mango\n");
-#ifdef RISCV_CONSOLE
-    uint32_t last_time = clock();
-    printf("running mango %d", last_time);
-    while (1) {
-        last_time = mango_update(mango, last_time);
-    }
-#else
-    Real last_time = clock();
+    float last_time = clock();
     SDL_Event e;
     bool quit = false;
     while (!quit) {
@@ -173,7 +155,6 @@ void mango_run(Mango *mango) {
         }
         last_time = mango_update(mango, last_time);
     }
-#endif
 }
 
 void mango_free(Mango *mango) { frame_free(mango->frame); }

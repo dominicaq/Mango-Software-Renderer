@@ -13,7 +13,7 @@
 
 typedef struct {
     int width, height;
-    Real *z_buffer;
+    float *z_buffer;
     Display *display;
 } Frame;
 

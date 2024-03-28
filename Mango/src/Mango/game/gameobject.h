@@ -13,11 +13,11 @@
 #define MAX_VERT_WEIGHTS 8
 
 const extern Vec3 COLLOR_PALLETE[7];
-extern const Real DEG2RAD;
+extern const float DEG2RAD;
 
 typedef struct {
     int boneIndex;
-    Real weight;
+    float weight;
 } BoneWeight;
 
 typedef struct {
@@ -42,8 +42,8 @@ typedef struct {
 Mesh mesh_empty();
 
 typedef struct {
-    Real radius;
-    Real length;
+    float radius;
+    float length;
 } Bone;
 
 typedef struct {
@@ -52,7 +52,7 @@ typedef struct {
         LIGHT_AMBIENT,
     } type;
     Vec3 color;
-    Real intensity;
+    float intensity;
 } Light;
 
 typedef struct {

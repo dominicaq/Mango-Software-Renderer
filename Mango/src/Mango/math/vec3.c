@@ -21,23 +21,23 @@ Vec3 vec3_sub(Vec3 a, Vec3 b) {
     return a;
 }
 
-Vec3 vec3_lerp(Vec3 a, Vec3 b, Real alpha) {
+Vec3 vec3_lerp(Vec3 a, Vec3 b, float alpha) {
     a.x += (b.x - a.x) * alpha;
     a.y += (b.y - a.y) * alpha;
     a.z += (b.z - a.z) * alpha;
     return a;
 }
 
-Vec3 vec3_scale(Vec3 a, Real s) {
+Vec3 vec3_scale(Vec3 a, float s) {
     a.x *= s;
     a.y *= s;
     a.z *= s;
     return a;
 }
 
-Real vec3_magnitude(Vec3 a) { return sqrt(a.x * a.x + a.y * a.y + a.z * a.z); }
+float vec3_magnitude(Vec3 a) { return sqrt(a.x * a.x + a.y * a.y + a.z * a.z); }
 
-Real vec3_dot(Vec3 a, Vec3 b) { return a.x * b.x + a.y * b.y + a.z * b.z; }
+float vec3_dot(Vec3 a, Vec3 b) { return a.x * b.x + a.y * b.y + a.z * b.z; }
 
 Vec3 vec3_cross(Vec3 a, Vec3 b) {
     a.x = a.y * b.z - a.z * b.y;
@@ -46,9 +46,9 @@ Vec3 vec3_cross(Vec3 a, Vec3 b) {
     return a;
 }
 
-Real q_rsqrt(Real number) {
+float q_rsqrt(float number) {
     union {
-        Real f;
+        float f;
         uint32_t i;
     } conv = {.f = number};
     conv.i = 0x5f3759df - (conv.i >> 1);
@@ -57,13 +57,13 @@ Real q_rsqrt(Real number) {
 }
 
 Vec3 vec3_normalize(Vec3 a) {
-    Real len_sq = vec3_dot(a, a);
-    // Real len = vec3_magnitude(a);
+    float len_sq = vec3_dot(a, a);
+    // float len = vec3_magnitude(a);
     if (len_sq == 0.0f) {
         return (Vec3){{0.0f, 0.0f, 0.0f}};
     }
-    Real inv_len = q_rsqrt(len_sq);
-    // Real inv_len = 1.0f / len;
+    float inv_len = q_rsqrt(len_sq);
+    // float inv_len = 1.0f / len;
 
     a.x *= inv_len;
     a.y *= inv_len;
@@ -72,7 +72,7 @@ Vec3 vec3_normalize(Vec3 a) {
 }
 
 Vec3 vec3_reflect(Vec3 position, Vec3 normal) {
-    Real angle = vec3_dot(position, normal);
+    float angle = vec3_dot(position, normal);
     Vec3 scaled_normal = vec3_scale(normal, 2.0f * angle);
     return vec3_sub(position, scaled_normal);
 }
@@ -114,7 +114,7 @@ bool vec3_equal(Vec3 a, Vec3 b) {
     return a.x == b.x && a.y == b.y && a.z == b.z;
 }
 
-Vec3 vec3_clamp(Vec3 a, Real min, Real max) {
+Vec3 vec3_clamp(Vec3 a, float min, float max) {
     a.x = clamp(a.x, min, max);
     a.y = clamp(a.y, min, max);
     a.z = clamp(a.z, min, max);
