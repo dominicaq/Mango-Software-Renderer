@@ -136,52 +136,36 @@ void draw_triangle(Frame *frame, Vertex verts[3], UBO *ubo) {
 }
 
 void clip_one_vert(Frame *frame, Vertex verts[3], UBO *ubo) {
-    Vec3 ndc1[3] = {verts[0].position, verts[1].position, verts[2].position};
-    // Vec3 norms1[3] = {verts[0].normal, verts[1].normal, verts[2].normal};
-
-    Vec3 ndc2[3] = {verts[0].position, verts[1].position, verts[2].position};
-    // Vec3 norms2[3] = {verts[0].normal, verts[1].normal, verts[2].normal};
-
-    float alpha1 = -ndc1[0].z / (ndc1[1].z - ndc1[0].z);
-    ndc1[0] = vec3_lerp(ndc1[0], ndc1[1], alpha1);
-    // norms1[0] = vec3_lerp(norms1[0], norms1[1], alpha1);
-
-    ndc2[1] = ndc1[0];
-    // norms1[1] = norms1[0];
-
-    float alpha2 = -ndc2[0].z / (ndc2[2].z - ndc2[0].z);
-    ndc2[0] = vec3_lerp(ndc2[0], ndc2[2], alpha2);
-    // norms2[0] = vec3_lerp(norms2[0], norms2[2], alpha2);
-
-    // Reassign and draw
-    Vertex triangle1[3];
-    Vertex triangle2[3];
+    // Create pointers to the vertices for manipulation
+    Vertex *ndc1[3];
+    Vertex *ndc2[3];
     for (int i = 0; i < 3; ++i) {
-        triangle1[i].position = ndc1[i];
-        triangle1[i].normal = verts[i].normal;
-        triangle1[i].uv = verts[i].uv;
-
-        triangle2[i].position = ndc2[i];
-        triangle2[i].normal = verts[i].normal;
-        triangle2[i].uv = verts[i].uv;
+        ndc1[i] = &verts[i];
+        ndc2[i] = &verts[i];
     }
-    draw_triangle(frame, triangle1, ubo);
-    draw_triangle(frame, triangle2, ubo);
+
+    // Perform clipping calculations
+    float alpha1 = -ndc1[0]->position.z / (ndc1[1]->position.z - ndc1[0]->position.z);
+    ndc1[0]->position = vec3_lerp(ndc1[0]->position, ndc1[1]->position, alpha1);
+
+    ndc2[1]->position = ndc1[0]->position;
+
+    float alpha2 = -ndc2[0]->position.z / (ndc2[2]->position.z - ndc2[0]->position.z);
+    ndc2[0]->position = vec3_lerp(ndc2[0]->position, ndc2[2]->position, alpha2);
+
+    // Draw clipped triangles
+    draw_triangle(frame, *ndc1, ubo);
+    draw_triangle(frame, *ndc2, ubo);
 }
 
 void clip_two_verts(Frame *frame, Vertex verts[3], UBO *ubo) {
-    Vec3 ndc[3] = {verts[0].position, verts[1].position, verts[2].position};
+    // Perform clipping calculations
+    float alpha0 = -verts[0].position.z / (verts[2].position.z - verts[0].position.z);
+    float alpha1 = -verts[1].position.z / (verts[2].position.z - verts[1].position.z);
+    verts[0].position = vec3_lerp(verts[0].position, verts[2].position, alpha0);
+    verts[1].position = vec3_lerp(verts[1].position, verts[2].position, alpha1);
 
-    // Lerp data
-    float alpha0 = -ndc[0].z / (ndc[2].z - ndc[0].z);
-    float alpha1 = -ndc[1].z / (ndc[2].z - ndc[1].z);
-    ndc[0] = vec3_lerp(ndc[0], ndc[2], alpha0);
-    ndc[1] = vec3_lerp(ndc[1], ndc[2], alpha1);
-
-    // Reassign and draw
-    for (int i = 0; i < 3; ++i) {
-        verts[i].position = ndc[i];
-    }
+    // Draw clipped triangle
     draw_triangle(frame, verts, ubo);
 }
 
@@ -197,43 +181,21 @@ void transform_triangle(Frame *frame, Vertex *verts, UBO *ubo) {
         // Apply vertex shader
         vertex_shader(ubo, a_position);
 
+        // Clip space coordinates (Normalized Device Coordinates)
         ndc_verts[i].position = vec4_homogenize(ubo->v_data.gl_position);
         ndc_verts[i].normal = ubo->v_data.out_normal;
         ndc_verts[i].uv = verts[i].uv;
+
+        // Check if vertex is outside the view frustum (lazy clipping)
+        if (ndc_verts[i].position.x < -1.0f || ndc_verts[i].position.x > 1.0f ||
+            ndc_verts[i].position.y < -1.0f || ndc_verts[i].position.y > 1.0f ||
+            ndc_verts[i].position.z < -1.0f || ndc_verts[i].position.z > 1.0f) {
+            // Vertex is outside the view frustum, return without drawing
+            return;
+        }
     }
 
-    // TODO: Note in the future, apparently clipping using the clip_space is
-    // easier, but cant find a paper / dont have the time to translate one
-    // Vertex clipping (nasty)
-    float ndc0 = ndc_verts[0].position.z;
-    float ndc1 = ndc_verts[1].position.z;
-    float ndc2 = ndc_verts[2].position.z;
-    if (ndc0 > 1.0f) {
-        if (ndc1 > 1.0f) {
-            if (ndc2 > 1.0f) {
-                return;
-            }
-            clip_two_verts(frame, ndc_verts, ubo);
-        } else if (ndc2 > 1.0f) {
-            Vertex vert_reorder[3] = {ndc_verts[2], ndc_verts[0], ndc_verts[1]};
-            clip_two_verts(frame, vert_reorder, ubo);
-        } else {
-            clip_one_vert(frame, ndc_verts, ubo);
-        }
-    } else if (ndc1 > 1.0f) {
-        if (ndc2 > 1.0f) {
-            Vertex vert_reorder[3] = {ndc_verts[1], ndc_verts[2], ndc_verts[0]};
-            clip_two_verts(frame, vert_reorder, ubo);
-        } else {
-            Vertex vert_reorder[3] = {ndc_verts[1], ndc_verts[2], ndc_verts[0]};
-            clip_one_vert(frame, vert_reorder, ubo);
-        }
-    } else if (ndc2 > 1.0f) {
-        Vertex vert_reorder[3] = {ndc_verts[2], ndc_verts[0], ndc_verts[1]};
-        clip_one_vert(frame, vert_reorder, ubo);
-    } else {
-        draw_triangle(frame, ndc_verts, ubo);
-    }
+    draw_triangle(frame, ndc_verts, ubo);
 }
 
 void draw_mesh(Frame *frame, Mesh *mesh, UBO *ubo) {

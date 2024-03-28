@@ -53,6 +53,7 @@ typedef struct {
     } type;
     Vec3 color;
     float intensity;
+    float radius;
 } Light;
 
 typedef struct {

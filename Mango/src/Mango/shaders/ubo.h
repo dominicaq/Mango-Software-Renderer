@@ -51,6 +51,7 @@ typedef struct {
     GameObject *light_objects[MAX_LIGHTS];
     Light *lights[MAX_LIGHTS];
     int num_lights;
+    Light ambient_light;
 
     // Pipeline data
     VertexData v_data;

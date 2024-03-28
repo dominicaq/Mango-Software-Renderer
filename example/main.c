@@ -47,7 +47,7 @@ const Vec3 COLLOR_PALLETE[7] = {
     {{0.5f, 0.0f, 0.5f}}   // Violet
 };
 
-int POINT_LIGHTS_BEGIN = 3;
+int POINT_LIGHTS_BEGIN = 4;
 int POINT_LIGHTS_END = 6;
 
 // Scene data
@@ -57,9 +57,9 @@ Vec4 slight_right;
 Camera init_camera(int frame_width, int frame_height) {
     Camera cam;
     cam.game_object = game_object_default();
-    cam.game_object.position = (Vec3){{0.0f, 1.0f, 20.0f}};
+    cam.game_object.position = (Vec3){{0.0f, 1.0f, 10.0f}};
     cam.dirty_local = true;
-    cam.fov = 50.0f;
+    cam.fov = 90.0f;
     cam.aspect = (float)(frame_width) / frame_height;
     cam.z_near = 0.1f;
     cam.z_far = 1000.0f;
@@ -69,7 +69,7 @@ Camera init_camera(int frame_width, int frame_height) {
 }
 
 int alloc_objects(Scene *scene) {
-    // Vec3 white = COLLOR_PALLETE[4];
+    Vec3 white = COLLOR_PALLETE[4];
     // Vec3 blue = (Vec3){{0.0f, 0.5f, 1.0f}};
 
     // Objects
@@ -99,12 +99,14 @@ int alloc_objects(Scene *scene) {
         return 1;
     }
 
-    // scene->objects[0] = game_object_default();
-    // scene->objects[0].position = (Vec3){{0.0f, -3.0f, -12.0f}};
-    // scene->objects[0].scale = (Vec3){{14.0f, 14.0f, 14.0f}};
-    // scene->attributes[0].type = ATTR_MESH;
-    // scene->attributes[0].mesh = load_obj_mesh("../models/head.obj");
-    // scene->attributes[0].mesh.color = white;
+    scene->objects[0] = game_object_default();
+    scene->objects[0].position = (Vec3){{0.0f, 0.0f, -12.0f}};
+    scene->objects[0].scale = (Vec3){{2.0f, 2.0f, 2.0f}};
+    scene->attributes[0].type = ATTR_MESH;
+    scene->attributes[0].mesh = load_obj_mesh("../models/atlas.obj");
+    scene->attributes[0].mesh.color = white;
+
+    // Texture
     // Material *mat0 = malloc(sizeof(Material));
     // if (mat0 == NULL) {
     // printf("ERROR: malloc failed mat0\n");
@@ -125,6 +127,7 @@ int alloc_objects(Scene *scene) {
     // mat0->normal_map = &head_normal;
     // scene->attributes[0].mesh.material = mat0;
 
+    // Box
     // scene->objects[1] = game_object_default();
     // scene->objects[1].quaternion = quat_from_units(UNIT_X, UNIT_Z);
     // scene->objects[1].position = (Vec3){{0.0f, 6.0f, -10.0f}};
@@ -139,13 +142,14 @@ int alloc_objects(Scene *scene) {
     // scene->attributes[2].mesh = load_obj_mesh("../models/head.obj");
     // scene->attributes[2].mesh.color = white;
 
-    float light_intensity = 50.0f;
+    float light_intensity = 4.0f;
     for (int i = POINT_LIGHTS_BEGIN; i < POINT_LIGHTS_END; ++i) {
         scene->objects[i] = game_object_default();
         scene->attributes[i].type = ATTR_LIGHT;
         scene->attributes[i].light.type = LIGHT_POINT;
         scene->attributes[i].light.color = COLLOR_PALLETE[i];
         scene->attributes[i].light.intensity = light_intensity;
+        scene->attributes[i].light.radius = 20.0f;
     }
 
     // scene->objects[6] = game_object_default();
@@ -154,11 +158,11 @@ int alloc_objects(Scene *scene) {
     // scene->attributes[6].light.color = (Vec3){{0.4f, 0.4f, 0.4f}};
     // scene->attributes[6].light.intensity = light_intensity;
 
-    memcpy(scene->objects + manual_objects, spider_game_objects,
-           spider_object_amt * sizeof(GameObject));
-    memcpy(scene->attributes + manual_objects, spider_attrs,
-           spider_object_amt * sizeof(GameObjectAttr));
-    scene->max_depth = MAX(scene->max_depth, spider_max_depth);
+    // memcpy(scene->objects + manual_objects, spider_game_objects,
+    //        spider_object_amt * sizeof(GameObject));
+    // memcpy(scene->attributes + manual_objects, spider_attrs,
+    //        spider_object_amt * sizeof(GameObjectAttr));
+    // scene->max_depth = MAX(scene->max_depth, spider_max_depth);
 
     scene->objects[manual_objects].scale = (Vec3){{0.1f, 0.1f, 0.1f}};
 
@@ -188,15 +192,15 @@ void update(float dt) {
     // quat_mul(&scene.camera->game_object.quaternion, &slight_right);
     // scene.camera->dirty_local = true;
 
-    float circle_radius = 10.0f;
+    float circle_radius = 20.0f;
     int num_lights = POINT_LIGHTS_END - POINT_LIGHTS_BEGIN;
     float angle_increment = 2.0f * M_PI / num_lights;
     for (int i = POINT_LIGHTS_BEGIN; i < POINT_LIGHTS_END; ++i) {
-        float angle = angle_increment * (i + (frames / 20.0f));
+        float angle = angle_increment * (i + (frames / 100.0f));
         float x = circle_radius * cosf(angle);
         float z = circle_radius * sinf(angle);
         scene.dirty_locals[i] = true;
-        scene.objects[i].position = (Vec3){{x, 0.0f, z}};
+        scene.objects[i].position = (Vec3){{x, 5.0f, z}};
     }
 
     // Rotate model
@@ -219,7 +223,7 @@ int MAIN(int argc, char *argv[]) {
     scene.camera = &camera;
 
     // Debug options
-    scene.options = OPT_USE_RASTERIZE | OPT_USE_WIREFRAME;
+    scene.options = OPT_USE_RASTERIZE;
 
     printf("Success.\n");
 

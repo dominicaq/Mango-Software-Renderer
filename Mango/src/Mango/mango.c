@@ -44,6 +44,12 @@ float mango_update(Mango *mango, float last_time) {
     Camera *current_camera = current_scene->camera;
     mango->ubo.u_cam_pos = current_camera->game_object.position;
 
+    // TODO: TEMP, create ambient light
+    Light ambient_light;
+    ambient_light.color = (Vec3){{1.0f, 1.0f, 1.0f}};
+    ambient_light.intensity = 0.1f;
+    mango->ubo.ambient_light = ambient_light;
+
     for (int i = 0; i < mango->running_anims.len; ++i) {
         mango_update_anim(mango, &mango->running_anims.arr[i], dt);
     }
