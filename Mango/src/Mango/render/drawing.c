@@ -88,6 +88,18 @@ void init_clip_planes() {
     clip_planes[3] = (Plane){(Vec3){{0.0f, 1.0f * q_rsqrt(2.0f), 1.0f * q_rsqrt(2.0f)}}, 0.0f};
     // Top Plane
     clip_planes[4] = (Plane){(Vec3){{0.0f, -1.0f * q_rsqrt(2.0f), 1.0f * q_rsqrt(2.0f)}}, 0.0f};
+
+    // DEBUG CLIP PLANES
+    // Near plane
+    // clip_planes[0] = (Plane){(Vec3){{0.0f, 0.0f, 1.0f}}, 0.5f}; // Adjusted distance to 0.5f
+    // Left plane
+    clip_planes[1] = (Plane){(Vec3){{1.0f * q_rsqrt(2.0f), 0.0f, 1.0f * q_rsqrt(2.0f)}}, -0.5f}; // Adjusted distance to -0.5f
+    // Right Plane
+    clip_planes[2] = (Plane){(Vec3){{-1.0f * q_rsqrt(2.0f), 0.0f, 1.0f * q_rsqrt(2.0f)}}, -0.5f}; // Adjusted distance to -0.5f
+    // Bottom Plane
+    clip_planes[3] = (Plane){(Vec3){{0.0f, 1.0f * q_rsqrt(2.0f), 1.0f * q_rsqrt(2.0f)}}, -0.5f}; // Adjusted distance to -0.5f
+    // Top Plane
+    clip_planes[4] = (Plane){(Vec3){{0.0f, -1.0f * q_rsqrt(2.0f), 1.0f * q_rsqrt(2.0f)}}, -0.5f}; // Adjusted distance to -0.5f
 }
 
 float signed_distance(Plane plane, Vec3 point) {
@@ -169,12 +181,12 @@ void draw_triangle(Frame *frame, Vertex verts[3], UBO *ubo) {
         perspective_w[i] = view_space.z;
     }
 
-    if (ubo->options & OPT_USE_WIREFRAME) {
-        wire_frame(frame, screen_space);
-    }
-
     if (ubo->options & OPT_USE_RASTERIZE) {
         rasterize(frame, view_verts, screen_space, perspective_w, ubo);
+    }
+
+    if (ubo->options & OPT_USE_WIREFRAME) {
+        wire_frame(frame, screen_space);
     }
 }
 
@@ -232,7 +244,6 @@ void transform_triangle(Frame *frame, Vertex *verts, UBO *ubo) {
             ndc_verts[0] = A_prime;
             ndc_verts[1] = B_prime;
         } else if (d0 < 0 && d1 > 0 && d2 > 0) {
-            return;
             // Vertex A not in clip volume
             Vertex B_prime = vertex_intersect(*B, *A, clip_planes[i]);
             Vertex C_prime = vertex_intersect(*C, *A, clip_planes[i]);
@@ -240,23 +251,21 @@ void transform_triangle(Frame *frame, Vertex *verts, UBO *ubo) {
 
             // Add new triangle
             ndc_verts[num_verts] = B_prime;
-            ndc_verts[num_verts + 1] = ndc_verts[1];
+            ndc_verts[num_verts + 1] = *C;
             ndc_verts[num_verts + 2] = C_prime;
             num_verts += 3;
         } else if (d0 > 0 && d1 < 0 && d2 > 0) {
-            return;
             // Vertex B not in clip volume
             Vertex A_prime = vertex_intersect(*A, *B, clip_planes[i]);
             Vertex C_prime = vertex_intersect(*C, *B, clip_planes[i]);
-            ndc_verts[1] = A_prime;
+            ndc_verts[1] = C_prime;
 
             // Add new triangle
-            ndc_verts[num_verts] = A_prime;
-            ndc_verts[num_verts + 1] = ndc_verts[2];
-            ndc_verts[num_verts + 2] = C_prime;
+            ndc_verts[num_verts] = C_prime;
+            ndc_verts[num_verts + 1] = *A;
+            ndc_verts[num_verts + 2] = A_prime;
             num_verts += 3;
         } else if (d0 > 0 && d1 > 0 && d2 < 0) {
-            return;
             // Vertex C not in clip volume
             Vertex A_prime = vertex_intersect(*A, *C, clip_planes[i]);
             Vertex B_prime = vertex_intersect(*B, *C, clip_planes[i]);
@@ -264,7 +273,7 @@ void transform_triangle(Frame *frame, Vertex *verts, UBO *ubo) {
 
             // Add new triangle
             ndc_verts[num_verts] = A_prime;
-            ndc_verts[num_verts + 1] = ndc_verts[1];
+            ndc_verts[num_verts + 1] = *B;
             ndc_verts[num_verts + 2] = B_prime;
             num_verts += 3;
         }
