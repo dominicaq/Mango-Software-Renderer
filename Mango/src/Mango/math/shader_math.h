@@ -1,6 +1,8 @@
 #ifndef SHADER_MATH_H
 #define SHADER_MATH_H
 
+#include "stdint.h"
+
 float clamp(float value, float min, float max);
 
 /**
@@ -12,5 +14,10 @@ float clamp(float value, float min, float max);
  * @return Result of linear interpolation between `a` and `b`.
  */
 float lerp(float a, float b, float t);
+
+/*
+ * Quake square root (result is already inverse)
+ */
+float q_rsqrt(float number);
 
 #endif

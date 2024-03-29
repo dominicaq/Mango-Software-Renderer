@@ -19,7 +19,7 @@ Vec2 vec2_scale(Vec2 a, float s) {
 }
 
 float vec2_magnitude(Vec2 a) {
-    return sqrt(a.x * a.x + a.y * a.y);
+    return q_rsqrt(a.x * a.x + a.y * a.y);
 }
 
 float vec2_dot(Vec2 a, Vec2 b) {
@@ -28,6 +28,10 @@ float vec2_dot(Vec2 a, Vec2 b) {
 
 float vec2_cross(Vec2 a, Vec2 b) {
     return a.x * b.y - a.y * b.x;
+}
+
+Vec2 vec2_lerp(Vec2 a, Vec2 b, float t) {
+    return vec2_add(a, vec2_scale(vec2_sub(b, a), t));
 }
 
 Vec3 vec2_to_vec3(Vec2 a, float z) { return (Vec3){{a.x, a.y, z}}; }

@@ -1,9 +1,10 @@
 #include "drawing.h"
 
-const Vec4 WIREFRAME_COLOR = (Vec4){{255, 165, 0, 255}};  // Orange
+const Vec4 WIREFRAME_COLOR = (Vec4){{255, 165, 0, 255}}; // Orange
 
-// Wireframe mode
-// -----------------------------------------------------------------------------
+/*
+* Wireframe
+*/
 void swap_ints(int *a, int *b) {
     *a = *a ^ *b;
     *b = *a ^ *b;
@@ -52,8 +53,50 @@ void wire_frame(Frame *frame, Vec3 screen_space[3]) {
     line(frame, screen_space[2], screen_space[0]);
 }
 
-// Rasterizer
-// -----------------------------------------------------------------------------
+/*
+* Triangle clipping
+*/
+Vertex vertex_intersect(const Vertex a, const Vertex b, Plane plane) {
+    Vec3 line_dir = vec3_sub(b.position, a.position);
+    float dot_denominator = vec3_dot(plane.normal, line_dir);
+
+    // Ensure we're not dividing by zero
+    // No intersection or parallel
+    if (fabs(dot_denominator) < EPSILON) {
+        return a;
+    }
+
+    float t = -(vec3_dot(a.position, plane.normal) + plane.distance) / dot_denominator;
+
+    // Compute the new vertex intersection point
+    Vertex result = {0};
+    result.position = vec3_add(a.position, vec3_scale(line_dir, t));
+    result.normal = vec3_add(a.normal, vec3_scale(vec3_sub(b.normal, a.normal),t));
+    result.uv = vec2_add(a.uv, vec2_scale(vec2_sub(b.uv, a.uv), t));
+    return result;
+}
+
+void init_clip_planes() {
+    // Clip planes: Dot of <normal, posiiton> precalculated
+    // Near plane
+    clip_planes[0] = (Plane){(Vec3){{0.0f, 0.0f, 1.0f}}, 1.0f};
+    // Left plane
+    clip_planes[1] = (Plane){(Vec3){{1.0f * q_rsqrt(2.0f), 0.0f, 1.0f * q_rsqrt(2.0f)}}, 0.0f};
+    // Right Plane
+    clip_planes[2] = (Plane){(Vec3){{-1.0f * q_rsqrt(2.0f), 0.0f, 1.0f * q_rsqrt(2.0f)}}, 0.0f};
+    // Bottom Plane
+    clip_planes[3] = (Plane){(Vec3){{0.0f, 1.0f * q_rsqrt(2.0f), 1.0f * q_rsqrt(2.0f)}}, 0.0f};
+    // Top Plane
+    clip_planes[4] = (Plane){(Vec3){{0.0f, -1.0f * q_rsqrt(2.0f), 1.0f * q_rsqrt(2.0f)}}, 0.0f};
+}
+
+float signed_distance(Plane plane, Vec3 point) {
+    return vec3_dot(plane.normal, point) + plane.distance;
+}
+
+/*
+* Render Pipeline
+*/
 void rasterize(Frame *frame, Vertex verts[3], Vec3 ss[3],
                float perspective_w[3], UBO *ubo) {
     // Bounding box around triangle (in screen space) (ss = screen space)
@@ -135,44 +178,11 @@ void draw_triangle(Frame *frame, Vertex verts[3], UBO *ubo) {
     }
 }
 
-void clip_one_vert(Frame *frame, Vertex verts[3], UBO *ubo) {
-    // Create pointers to the vertices for manipulation
-    Vertex *ndc1[3];
-    Vertex *ndc2[3];
-    for (int i = 0; i < 3; ++i) {
-        ndc1[i] = &verts[i];
-        ndc2[i] = &verts[i];
-    }
-
-    // Perform clipping calculations
-    float alpha1 = -ndc1[0]->position.z / (ndc1[1]->position.z - ndc1[0]->position.z);
-    ndc1[0]->position = vec3_lerp(ndc1[0]->position, ndc1[1]->position, alpha1);
-
-    ndc2[1]->position = ndc1[0]->position;
-
-    float alpha2 = -ndc2[0]->position.z / (ndc2[2]->position.z - ndc2[0]->position.z);
-    ndc2[0]->position = vec3_lerp(ndc2[0]->position, ndc2[2]->position, alpha2);
-
-    // Draw clipped triangles
-    draw_triangle(frame, *ndc1, ubo);
-    draw_triangle(frame, *ndc2, ubo);
-}
-
-void clip_two_verts(Frame *frame, Vertex verts[3], UBO *ubo) {
-    // Perform clipping calculations
-    float alpha0 = -verts[0].position.z / (verts[2].position.z - verts[0].position.z);
-    float alpha1 = -verts[1].position.z / (verts[2].position.z - verts[1].position.z);
-    verts[0].position = vec3_lerp(verts[0].position, verts[2].position, alpha0);
-    verts[1].position = vec3_lerp(verts[1].position, verts[2].position, alpha1);
-
-    // Draw clipped triangle
-    draw_triangle(frame, verts, ubo);
-}
-
 void transform_triangle(Frame *frame, Vertex *verts, UBO *ubo) {
-    // Transform triangle data
-    Vertex ndc_verts[3];
-    for (int i = 0; i < 3; ++i) {
+    // Maximum of 21 new vertices can be created from clipping
+    Vertex ndc_verts[21];
+    size_t num_verts = 3;
+    for (size_t i = 0; i < 3; ++i) {
         // Passed into shader
         Vertex current_vertex = verts[i];
         Vec4 a_position = vec3_to_vec4(current_vertex.position, 1.0f);
@@ -185,17 +195,90 @@ void transform_triangle(Frame *frame, Vertex *verts, UBO *ubo) {
         ndc_verts[i].position = vec4_homogenize(ubo->v_data.gl_position);
         ndc_verts[i].normal = ubo->v_data.out_normal;
         ndc_verts[i].uv = verts[i].uv;
+    }
 
-        // Check if vertex is outside the view frustum (lazy clipping)
-        if (ndc_verts[i].position.x < -1.0f || ndc_verts[i].position.x > 1.0f ||
-            ndc_verts[i].position.y < -1.0f || ndc_verts[i].position.y > 1.0f ||
-            ndc_verts[i].position.z < -1.0f || ndc_verts[i].position.z > 1.0f) {
-            // Vertex is outside the view frustum, return without drawing
+    for (size_t i = 0; i < NUM_CLIP_PLANES; ++i) {
+        // Signed distance between polygon and plane
+        float d0 = signed_distance(clip_planes[i], ndc_verts[0].position);
+        float d1 = signed_distance(clip_planes[i], ndc_verts[1].position);
+        float d2 = signed_distance(clip_planes[i], ndc_verts[2].position);
+
+        // Check vertices against clip planes
+        Vertex *A = &ndc_verts[0];
+        Vertex *B = &ndc_verts[1];
+        Vertex *C = &ndc_verts[2];
+        if (d0 > 0 && d1 > 0 && d2 > 0) {
+            // Triangle fully in clip space continue through plane checks
+            continue;
+        } else if (d0 < 0 && d1 < 0 && d2 < 0) {
+            // Triangle fully outside clip space
             return;
+        } else if (d0 > 0 && d1 < 0 && d2 < 0) {
+            // Only vertex A inside clip volume
+            Vertex B_prime = vertex_intersect(*A, *B, clip_planes[i]);
+            Vertex C_prime = vertex_intersect(*A, *C, clip_planes[i]);
+            ndc_verts[1] = B_prime;
+            ndc_verts[2] = C_prime;
+        } else if (d0 < 0 && d1 > 0 && d2 < 0) {
+            // Only vertex B inside clip volume
+            Vertex A_prime = vertex_intersect(*B, *A, clip_planes[i]);
+            Vertex C_prime = vertex_intersect(*B, *C, clip_planes[i]);
+            ndc_verts[0] = A_prime;
+            ndc_verts[2] = C_prime;
+        } else if (d0 < 0 && d1 < 0 && d2 > 0) {
+            // Only vertex C inside clip volume
+            Vertex A_prime = vertex_intersect(*C, *A, clip_planes[i]);
+            Vertex B_prime = vertex_intersect(*C, *B, clip_planes[i]);
+            ndc_verts[0] = A_prime;
+            ndc_verts[1] = B_prime;
+        } else if (d0 < 0 && d1 > 0 && d2 > 0) {
+            return;
+            // Vertex A not in clip volume
+            Vertex B_prime = vertex_intersect(*B, *A, clip_planes[i]);
+            Vertex C_prime = vertex_intersect(*C, *A, clip_planes[i]);
+            ndc_verts[0] = B_prime;
+
+            // Add new triangle
+            ndc_verts[num_verts] = B_prime;
+            ndc_verts[num_verts + 1] = ndc_verts[1];
+            ndc_verts[num_verts + 2] = C_prime;
+            num_verts += 3;
+        } else if (d0 > 0 && d1 < 0 && d2 > 0) {
+            return;
+            // Vertex B not in clip volume
+            Vertex A_prime = vertex_intersect(*A, *B, clip_planes[i]);
+            Vertex C_prime = vertex_intersect(*C, *B, clip_planes[i]);
+            ndc_verts[1] = A_prime;
+
+            // Add new triangle
+            ndc_verts[num_verts] = A_prime;
+            ndc_verts[num_verts + 1] = ndc_verts[2];
+            ndc_verts[num_verts + 2] = C_prime;
+            num_verts += 3;
+        } else if (d0 > 0 && d1 > 0 && d2 < 0) {
+            return;
+            // Vertex C not in clip volume
+            Vertex A_prime = vertex_intersect(*A, *C, clip_planes[i]);
+            Vertex B_prime = vertex_intersect(*B, *C, clip_planes[i]);
+            ndc_verts[2] = A_prime;
+
+            // Add new triangle
+            ndc_verts[num_verts] = A_prime;
+            ndc_verts[num_verts + 1] = ndc_verts[1];
+            ndc_verts[num_verts + 2] = B_prime;
+            num_verts += 3;
         }
     }
 
-    draw_triangle(frame, ndc_verts, ubo);
+    // Draw one or two ndc_verts
+    for (size_t i = 0; i < num_verts; i += 3) {
+        Vertex triangle[3] = {
+            ndc_verts[i],
+            ndc_verts[i + 1],
+            ndc_verts[i + 2]
+        };
+        draw_triangle(frame, triangle, ubo);
+    }
 }
 
 void draw_mesh(Frame *frame, Mesh *mesh, UBO *ubo) {

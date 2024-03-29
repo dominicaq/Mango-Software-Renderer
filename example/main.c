@@ -100,7 +100,7 @@ int alloc_objects(Scene *scene) {
     }
 
     scene->objects[0] = game_object_default();
-    scene->objects[0].position = (Vec3){{0.0f, 0.0f, -12.0f}};
+    scene->objects[0].position = (Vec3){{0.0f, 0.0f, -5.0f}};
     scene->objects[0].scale = (Vec3){{2.0f, 2.0f, 2.0f}};
     scene->attributes[0].type = ATTR_MESH;
     scene->attributes[0].mesh = load_obj_mesh("../models/atlas.obj");

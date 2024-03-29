@@ -118,6 +118,8 @@ Mango *mango_alloc(Scene *scene, const char *title, int width, int height) {
         return NULL;
     }
 
+    init_clip_planes();
+
     mango->ubo.options = scene->options;
     mango->running_anims.len = 64;
     mango->running_anims.arr =

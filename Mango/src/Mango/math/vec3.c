@@ -22,9 +22,9 @@ Vec3 vec3_sub(Vec3 a, Vec3 b) {
 }
 
 Vec3 vec3_lerp(Vec3 a, Vec3 b, float alpha) {
-    a.x += (b.x - a.x) * alpha;
-    a.y += (b.y - a.y) * alpha;
-    a.z += (b.z - a.z) * alpha;
+    a.x += alpha * (b.x - a.x);
+    a.y += alpha * (b.y - a.y);
+    a.z += alpha * (b.z - a.z);
     return a;
 }
 
@@ -44,16 +44,6 @@ Vec3 vec3_cross(Vec3 a, Vec3 b) {
     a.y = a.z * b.x - a.x * b.z;
     a.z = a.x * b.y - a.y * b.x;
     return a;
-}
-
-float q_rsqrt(float number) {
-    union {
-        float f;
-        uint32_t i;
-    } conv = {.f = number};
-    conv.i = 0x5f3759df - (conv.i >> 1);
-    conv.f *= 1.5F - (number * 0.5F * conv.f * conv.f);
-    return conv.f;
 }
 
 Vec3 vec3_normalize(Vec3 a) {

@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <math.h>
 
+#include "shader_math.h"
 #include "vec3.h"
 
 typedef union {
@@ -77,6 +78,8 @@ float vec2_dot(Vec2 a, Vec2 b);
  * @return The cross product value.
  */
 float vec2_cross(Vec2 a, Vec2 b);
+
+Vec2 vec2_lerp(Vec2 a, Vec2 b, float t);
 
 /**
  * Swap the contents of two 2D vectors.
