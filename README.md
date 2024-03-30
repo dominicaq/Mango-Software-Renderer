@@ -41,15 +41,16 @@ CPU-bound nature. In contrast, modern rendering APIs leverage the GPU for high-p
 Once you have CMake installed, follow these steps to build the project:
 ```console
 cd software_renderer
+git submodule update --init --recursive
 mkdir build
 cd build
 cmake ..
 ```
 
 # Run
-Once built, you can run the software renderer as follows:
+Once built, you can run the renderer in the build folder as follows:
 ```console
-.\software_renderer
+.\mango_renderer
 ```
 
 # License
