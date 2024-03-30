@@ -6,7 +6,7 @@ etc. This project expands further and implements features that you would
 typically do in a computer graphics course.
 
 <p align="center">
-  <img width="640" height="360" src="https://github.com/dominicaq/PureC-Software-renderer/blob/main/images/showcase.png">
+  <img width="640" height="360" src="https://github.com/dominicaq/Mango-Software-Renderer/blob/main/images/showcase.png">
 </p>
 
 # Disclaimer
@@ -29,6 +29,10 @@ CPU-bound nature. In contrast, modern rendering APIs leverage the GPU for high-p
 - Enable/Disable rasterization
 - Wireframe
 - Enable/Disable Signed Distance Field rendering (SDF)
+
+<p align="center">
+  <img width="640" height="360" src="https://github.com/dominicaq/Mango-Software-Rendererblob/main/images/render_options.png">
+</p>
 
 # Prerequisites
 - **CMake 3.27.7** A cross-platform build system. You can download it [here.](https://cmake.org/download/)
