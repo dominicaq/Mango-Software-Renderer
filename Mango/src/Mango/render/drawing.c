@@ -81,15 +81,15 @@ void init_clip_planes() {
     // Near plane
     clip_planes[0] = (Plane){(Vec3){{0.0f, 0.0f, 1.0f}}, 1.0f};
     // Left plane
-    clip_planes[1] = (Plane){(Vec3){{1.0f * q_rsqrt(2.0f), 0.0f, 1.0f * q_rsqrt(2.0f)}}, 0.0f};
+    clip_planes[1] = (Plane){(Vec3){{1.0f * sqrt(2.0f), 0.0f, 1.0f * sqrt(2.0f)}}, 0.0f};
     // Right Plane
-    clip_planes[2] = (Plane){(Vec3){{-1.0f * q_rsqrt(2.0f), 0.0f, 1.0f * q_rsqrt(2.0f)}}, 0.0f};
+    clip_planes[2] = (Plane){(Vec3){{-1.0f * sqrt(2.0f), 0.0f, 1.0f * sqrt(2.0f)}}, 0.0f};
     // Bottom Plane
-    clip_planes[3] = (Plane){(Vec3){{0.0f, 1.0f * q_rsqrt(2.0f), 1.0f * q_rsqrt(2.0f)}}, 0.0f};
+    clip_planes[3] = (Plane){(Vec3){{0.0f, 1.0f * sqrt(2.0f), 1.0f * sqrt(2.0f)}}, 0.0f};
     // Top Plane
-    clip_planes[4] = (Plane){(Vec3){{0.0f, -1.0f * q_rsqrt(2.0f), 1.0f * q_rsqrt(2.0f)}}, 0.0f};
+    clip_planes[4] = (Plane){(Vec3){{0.0f, -1.0f * sqrt(2.0f), 1.0f * sqrt(2.0f)}}, 0.0f};
 
-    // DEBUG CLIP PLANES
+#ifdef DEBUG_CLIP_PLANE
     // Near plane
     // clip_planes[0] = (Plane){(Vec3){{0.0f, 0.0f, 1.0f}}, 0.5f}; // Adjusted distance to 0.5f
     // Left plane
@@ -100,6 +100,7 @@ void init_clip_planes() {
     clip_planes[3] = (Plane){(Vec3){{0.0f, 1.0f * q_rsqrt(2.0f), 1.0f * q_rsqrt(2.0f)}}, -0.5f}; // Adjusted distance to -0.5f
     // Top Plane
     clip_planes[4] = (Plane){(Vec3){{0.0f, -1.0f * q_rsqrt(2.0f), 1.0f * q_rsqrt(2.0f)}}, -0.5f}; // Adjusted distance to -0.5f
+#endif
 }
 
 float signed_distance(Plane plane, Vec3 point) {
@@ -207,6 +208,20 @@ void transform_triangle(Frame *frame, Vertex *verts, UBO *ubo) {
         ndc_verts[i].position = vec4_homogenize(ubo->v_data.gl_position);
         ndc_verts[i].normal = ubo->v_data.out_normal;
         ndc_verts[i].uv = verts[i].uv;
+    }
+
+    // Check if triangle is enitrely outside clip space
+    size_t num_outside = 0;
+    for (size_t i = 0; i < 3; ++i) {
+        if (ndc_verts[i].position.x < -1.0f || ndc_verts[i].position.x > 1.0f ||
+            ndc_verts[i].position.y < -1.0f || ndc_verts[i].position.y > 1.0f ||
+            ndc_verts[i].position.z < -1.0f || ndc_verts[i].position.z > 1.0f) {
+                ++num_outside;
+        }
+    }
+
+    if (num_outside >= 3) {
+        return;
     }
 
     for (size_t i = 0; i < NUM_CLIP_PLANES; ++i) {

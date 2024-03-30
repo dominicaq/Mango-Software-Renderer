@@ -12,8 +12,8 @@
 
 // Window data
 const char *GAME_TITLE = "Mango Renderer";
-const int SCREEN_WIDTH = 854;
-const int SCREEN_HEIGHT = 480;
+const int SCREEN_WIDTH = 800;
+const int SCREEN_HEIGHT = 600;
 
 void fps_counter() {
     static int frames = 0;
@@ -57,12 +57,12 @@ Vec4 slight_right;
 Camera init_camera(int frame_width, int frame_height) {
     Camera cam;
     cam.game_object = game_object_default();
-    cam.game_object.position = (Vec3){{0.0f, 1.0f, 20.0f}};
+    cam.game_object.position = (Vec3){{0.0f, 1.0f, 30.0f}};
     cam.dirty_local = true;
     cam.fov = 90.0f;
     cam.aspect = (float)(frame_width) / frame_height;
-    cam.z_near = 0.01f;
-    cam.z_far = 100.0f;
+    cam.z_near = 0.1f;
+    cam.z_far = 1000.0f;
     cam.width = frame_width;
     cam.height = frame_height;
     return cam;
@@ -100,10 +100,10 @@ int alloc_objects(Scene *scene) {
     }
 
     scene->objects[0] = game_object_default();
-    scene->objects[0].position = (Vec3){{-15.0f, 0.0f, 0.0f}};
-    scene->objects[0].scale = (Vec3){{20.0f, 20.0f, 20.0f}};
+    scene->objects[0].position = (Vec3){{-50.0f, 5.0f, -20.0f}};
+    scene->objects[0].scale = (Vec3){{5.0f, 5.0f, 5.0f}};
     scene->attributes[0].type = ATTR_MESH;
-    scene->attributes[0].mesh = load_obj_mesh("../models/head.obj");
+    scene->attributes[0].mesh = load_obj_mesh("../models/atlas.obj");
     scene->attributes[0].mesh.color = white;
 
     // Texture
@@ -181,9 +181,9 @@ void update(float dt) {
         attack_cd = 0;
     }
 
-    // Update camera
-    // quat_mul(&scene.camera->game_object.quaternion, &slight_right);
-    // scene.camera->dirty_local = true;
+    // Rotate camera
+    quat_mul(&scene.camera->game_object.quaternion, &slight_right);
+    scene.camera->dirty_local = true;
 
     // quat_mul(&scene.objects[7].quaternion, &slight_right);
     // scene.dirty_locals[7] = true;
@@ -222,7 +222,7 @@ int MAIN(int argc, char *argv[]) {
     scene.camera = &camera;
 
     // Debug options
-    scene.options = OPT_USE_RASTERIZE | OPT_USE_WIREFRAME;
+    scene.options = OPT_USE_RASTERIZE;// | OPT_USE_WIREFRAME;
 
     printf("Success.\n");
 
