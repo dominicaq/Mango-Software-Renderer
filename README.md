@@ -31,7 +31,7 @@ CPU-bound nature. In contrast, modern rendering APIs leverage the GPU for high-p
 - Enable/Disable Signed Distance Field rendering (SDF)
 
 <p align="center">
-  <img width="640" height="360" src="https://github.com/dominicaq/Mango-Software-Renderer/blob/main/images/render_options.gif">
+  <img width="800" height="600" src="https://github.com/dominicaq/Mango-Software-Renderer/blob/main/images/render_options.gif">
 </p>
 
 # Prerequisites
