@@ -40,7 +40,7 @@ CPU-bound nature. In contrast, modern rendering APIs leverage the GPU for high-p
 # Build
 Once you have CMake installed, follow these steps to build the project:
 ```console
-cd software_renderer
+cd Mango-Software-Renderer
 git submodule update --init --recursive
 mkdir build
 cd build
