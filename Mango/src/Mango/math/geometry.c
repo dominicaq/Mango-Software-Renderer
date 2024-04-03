@@ -31,28 +31,18 @@ Vec3 lerp_bc_coords(Vec3 bc_coords, Vec3 points[3]) {
     }};
 }
 
-Vec2 lerp_uv_coords(Vec3 bc_coords, float perps_w[3], Vec2 uvs[3]) {
-    // Perps = perspective
-    // Correct barycentric coordinates
-    float bc_x = bc_coords.x / perps_w[0];
-    float bc_y = bc_coords.y / perps_w[1];
-    float bc_z = bc_coords.z / perps_w[2];
-    float inv_w = 1.0f / (bc_x + bc_y + bc_z);
+Vec2 lerp_uv_coords(Vec3 bc_coords, float perps_w[3], Vec2 uv[3]) {
+    // Extract barycentric coordinates
+    float alpha = bc_coords.x;
+    float beta = bc_coords.y;
+    float gamma = bc_coords.z;
 
-    Vec2 corrected_uv;
-    corrected_uv.x = (bc_x * inv_w) * uvs[0].x + (bc_y * inv_w) * uvs[1].x
-                                               + (bc_z * inv_w) * uvs[2].x;
+    // Interpolate UV coordinates
+    Vec2 interpolated_uv;
+    interpolated_uv.x = alpha * uv[0].x + beta * uv[1].x + gamma * uv[2].x;
+    interpolated_uv.y = alpha * uv[0].y + beta * uv[1].y + gamma * uv[2].y;
 
-    corrected_uv.y = (bc_x * inv_w) * uvs[0].y + (bc_y * inv_w) * uvs[1].y
-                                               + (bc_z * inv_w) * uvs[2].y;
-    return corrected_uv;
-}
-
-Vec2 calculate_uv(Vec3 bc_coords, Vec3 uv_coords[3]) {
-    Vec3 uv_w = lerp_bc_coords(bc_coords, uv_coords);
-    float wt = uv_w.z;
-
-    return (Vec2){{uv_w.x / wt, uv_w.y / wt}};
+    return interpolated_uv;
 }
 
 // Normalized device coordinates to screen coordinates
@@ -85,13 +75,4 @@ bool is_backface(Vec3 ndc[3]) {
     Vec3 ac = vec3_sub(ndc[0], ndc[2]);
     float sign = ab.x * ac.y - ac.x * ab.y;
     return sign < 0.0f;
-}
-
-bool is_point_in_frustum(const Vec4 *clip_space_point) {
-    float x = clip_space_point->x;
-    float y = clip_space_point->y;
-    float z = clip_space_point->z;
-    float w = clip_space_point->w;
-
-    return (x >= -w && x <= w) && (y >= -w && y <= w) && (z >= -w && z <= w);
 }

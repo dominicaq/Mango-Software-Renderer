@@ -4,20 +4,6 @@ const bool FLAT_SHADING = true;
 const bool SMOOTH_SHADING = false;
 const bool PHONG_SHADING = false;
 
-Vec3 sample_tex(Vec2 uv, Texture *texture) {
-    if (texture == NULL) {
-        return VEC3_ZERO;
-    }
-
-    // Calculate the index in the texture data array
-    int index = (uv.y * texture->width + uv.x * texture->height);
-    Vec3 rgb;
-    rgb.x = texture->data[index];
-    rgb.y = texture->data[index + 1];
-    rgb.z = texture->data[index + 2];
-    return rgb;
-}
-
 void vertex_shader(UBO *ubo, Vec4 a_position) {
     // If you you ever want non-uniform scaling, use this:
     // vec3 normalMatrix = transpose(inverse(mat3(modelMatrix)));
@@ -54,7 +40,6 @@ void fragment_shader(UBO *ubo, Vec3 frag_coord) {
     }
 
     // Multiple lights
-    // Vec3 total_diffuse = sample_tex(ubo->f_data.uv, ubo->u_mat->albedo_map);
     Vec3 total_diffuse = VEC3_ZERO;
     Vec3 total_specular = VEC3_ZERO;
     for (int i = 0; i < ubo->num_lights; i++) {
@@ -87,13 +72,10 @@ void fragment_shader(UBO *ubo, Vec3 frag_coord) {
     }
 
     // Scale color
+    // Vec3 albedo_color = sample_texture(ubo->f_data.uv, ubo->u_mat->albedo_map);
+
     Vec3 lighting = vec3_add(total_diffuse, total_specular);
     lighting = vec3_scale(lighting, 255.0f / ubo->num_lights);
     lighting = vec3_clamp(lighting, 0.0f, 255.0f);
     ubo->f_data.gl_frag_color = vec3_to_vec4(lighting, 255.0f);
-
-    // DEBUG
-    // ubo->f_data.tex_albedo = sample_tex(ubo->f_data.uv,
-    // ubo->u_mat->albedo_map); ubo->f_data.gl_frag_color =
-    // vec3_to_vec4(ubo->f_data.tex_albedo, 255.0f);
 }

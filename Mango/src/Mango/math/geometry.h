@@ -74,16 +74,6 @@ Vec3 world_to_screen(int width, int height, Vec3 v);
 bool is_backface(Vec3 ndc[3]);
 
 /**
- * Check if a point in clip space (represented by a Vec4) is within
- * the normalized device coordinates (NDC) range of [-1, 1] in all dimensions.
- *
- * @param clip_space_point The 4D point represented in clip space.
- * @return true if the point is within the NDC range of [-1, 1]
- * in all dimensions (x, y, z), false otherwise.
- */
-bool is_point_in_frustum(const Vec4* clip_space_point);
-
-/**
  * Clamp a value within a specified range.
  *
  * This function clamps a value to be within the specified minimum and maximum range.

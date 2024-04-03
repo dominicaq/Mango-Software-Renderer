@@ -7,8 +7,6 @@
 
 // Pre parsed game data
 #include "models/spider.h"
-#include "textures/tex_head_diffuse.h"
-#include "textures/tex_head_nm.h"
 
 // Window data
 const char *GAME_TITLE = "Mango Renderer";
@@ -107,25 +105,17 @@ int alloc_objects(Scene *scene) {
     scene->attributes[0].mesh.color = white;
 
     // Texture
-    // Material *mat0 = malloc(sizeof(Material));
-    // if (mat0 == NULL) {
-    // printf("ERROR: malloc failed mat0\n");
-    // }
-    // Texture head_diffuse;
-    // head_diffuse.data = head_diffuse_jpg;
-    // head_diffuse.width = head_diffuse_jpg_width;
-    // head_diffuse.height = head_diffuse_jpg_height;
-    // head_diffuse.data_size = head_diffuse_jpg_len;
-    // head_diffuse.bpp = 3;
-    // Texture head_normal;
-    // head_normal.data = tex_head_nm;
-    // head_normal.width = tex_head_nm_jpg_width;
-    // head_normal.height = tex_head_nm_jpg_height;
-    // head_normal.data_size = tex_head_nm_width_jpg_len;
-    // head_normal.bpp = 3;
-    // mat0->albedo_map = &head_diffuse;
-    // mat0->normal_map = &head_normal;
-    // scene->attributes[0].mesh.material = mat0;
+    Material mat0 = malloc(sizeof(Material));
+    if (mat0 == NULL) {
+        printf("ERROR: malloc failed mat0\n");
+    }
+
+    Texture default_texture = load_texture("textures/default.jpg");
+    if (default_texture == NULL) {
+        printf("ERROR: failed to load texture\n");
+    }
+    mat0->albedo_map = default_texture;
+    scene->attributes[0].mesh.material = &mat0;
 
     // Box
     // scene->objects[1] = game_object_default();
@@ -222,7 +212,7 @@ int MAIN(int argc, char *argv[]) {
     scene.camera = &camera;
 
     // Debug options
-    scene.options = OPT_USE_RASTERIZE;// | OPT_USE_WIREFRAME;
+    scene.options = OPT_USE_RASTERIZE;
 
     printf("Success.\n");
 

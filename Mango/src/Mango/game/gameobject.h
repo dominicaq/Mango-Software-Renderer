@@ -8,7 +8,7 @@
 #include "../math/vec2.h"
 #include "../math/vec3.h"
 #include "../math/vec4.h"
-#include "material.h"
+#include "../render/material.h"
 
 #define MAX_VERT_WEIGHTS 8
 

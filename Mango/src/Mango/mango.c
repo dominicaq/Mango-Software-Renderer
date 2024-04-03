@@ -7,6 +7,9 @@
 #include "render/framedata.h"
 #include "shaders/sdf.h"
 
+/*
+* Animations
+*/
 void mango_play_anim(Mango *mango, int object_index, AnimStack *stack) {
     for (int i = 0; i < mango->running_anims.len; ++i) {
         Anim *anim = mango->running_anims.arr + i;
@@ -34,6 +37,9 @@ void mango_update_anim(Mango *mango, Anim *anim, float dt) {
     // }
 }
 
+/*
+* Core
+*/
 float mango_update(Mango *mango, float last_time) {
     float current_time = clock();
     float dt = current_time - last_time;
@@ -76,29 +82,29 @@ float mango_update(Mango *mango, float last_time) {
         Mat4 mvp = mat4_mul(projection_matrix, model_view_matrix);
         Mat4 vp = mat4_mul(projection_matrix, view_matrix);
 
-        // Update UBO
+        // Update UBO per object
         mango->ubo.u_mvp = mvp;
         mango->ubo.u_vp_inv = mat4_inverse(vp);
         mango->ubo.u_model_view = model_view_matrix;
         mango->ubo.u_color = target_mesh->color;
-        mango->ubo.u_mat = target_mesh->material;
+        mango->ubo.u_mat = *target_mesh->material;
 
         draw_mesh(mango->frame, target_mesh, &mango->ubo);
     }
 
     // Draw SDF scene
-    if (mango->ubo.options & OPT_SDF_ENABLE) {
-        Vec3 sphere_position = (Vec3){{0, 5.0f, -5.0f}};
-        Mat4 sdf_model = sdf_model_matrix(sphere_position);
-        Mat4 sdf_mv = mat4_mul(view_matrix, sdf_model);
-        Mat4 sdf_mvp = mat4_mul(projection_matrix, sdf_mv);
+    // if (mango->ubo.options & OPT_SDF_ENABLE) {
+    //     Vec3 sphere_position = (Vec3){{0, 5.0f, -5.0f}};
+    //     Mat4 sdf_model = sdf_model_matrix(sphere_position);
+    //     Mat4 sdf_mv = mat4_mul(view_matrix, sdf_model);
+    //     Mat4 sdf_mvp = mat4_mul(projection_matrix, sdf_mv);
 
-        // Apply transformation
-        Vec4 sdf_pos = vec3_to_vec4(sphere_position, 1.0f);
-        Vec4 sdf_clip_space = mat_mul_vec4(sdf_mvp, sdf_pos);
-        Vec3 sdf_ndc = vec4_homogenize(sdf_clip_space);
-        sdf_draw(mango->frame, current_camera, sdf_ndc);
-    }
+    //     // Apply transformation
+    //     Vec4 sdf_pos = vec3_to_vec4(sphere_position, 1.0f);
+    //     Vec4 sdf_clip_space = mat_mul_vec4(sdf_mvp, sdf_pos);
+    //     Vec3 sdf_ndc = vec4_homogenize(sdf_clip_space);
+    //     sdf_draw(mango->frame, current_camera, sdf_ndc);
+    // }
 
     frame_update(mango->frame);
     return current_time;
