@@ -110,12 +110,12 @@ int alloc_objects(Scene *scene) {
         printf("ERROR: malloc failed mat0\n");
     }
 
-    // // Albedo texture
-    // Texture default_texture = load_texture("../example/textures/default.jpg");
-    // if (default_texture == NULL) {
-    //     printf("ERROR: failed to load texture\n");
-    //     return 1;
-    // }
+    // Albedo texture
+    Texture default_texture = load_texture("../example/textures/default.jpg");
+    if (default_texture == NULL) {
+        printf("ERROR: failed to load texture\n");
+        return 1;
+    }
     // mat0->albedo_map = default_texture;
     scene->attributes[0].mesh.material = mat0;
 
