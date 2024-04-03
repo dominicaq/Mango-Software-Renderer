@@ -49,7 +49,7 @@ typedef struct {
 
 #define NUM_CLIP_PLANES 5
 
-Plane clip_planes[NUM_CLIP_PLANES];
+extern Plane clip_planes[NUM_CLIP_PLANES];
 
 void init_clip_planes();
 

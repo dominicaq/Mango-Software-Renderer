@@ -1,5 +1,6 @@
 #include "drawing.h"
 
+Plane clip_planes[NUM_CLIP_PLANES];
 const Vec4 WIREFRAME_COLOR = (Vec4){{255, 165, 0, 255}}; // Orange
 
 /*
@@ -195,11 +196,11 @@ void transform_triangle(Frame *frame, Vertex *verts, UBO *ubo) {
     // Maximum of 21 new vertices can be created from clipping
     Vertex ndc_verts[21];
     size_t num_verts = 3;
+    size_t num_outside = 0;
     for (size_t i = 0; i < 3; ++i) {
         // Passed into shader
-        Vertex current_vertex = verts[i];
-        Vec4 a_position = vec3_to_vec4(current_vertex.position, 1.0f);
-        ubo->v_data.in_normal = current_vertex.normal;
+        Vec4 a_position = vec3_to_vec4(verts[i].position, 1.0f);
+        ubo->v_data.in_normal = verts[i].normal;
 
         // Apply vertex shader
         vertex_shader(ubo, a_position);
@@ -208,11 +209,8 @@ void transform_triangle(Frame *frame, Vertex *verts, UBO *ubo) {
         ndc_verts[i].position = vec4_homogenize(ubo->v_data.gl_position);
         ndc_verts[i].normal = ubo->v_data.out_normal;
         ndc_verts[i].uv = verts[i].uv;
-    }
 
-    // Check if triangle is enitrely outside clip space
-    size_t num_outside = 0;
-    for (size_t i = 0; i < 3; ++i) {
+        // Check if currect vertex is outside clip space
         if (ndc_verts[i].position.x < -1.0f || ndc_verts[i].position.x > 1.0f ||
             ndc_verts[i].position.y < -1.0f || ndc_verts[i].position.y > 1.0f ||
             ndc_verts[i].position.z < -1.0f || ndc_verts[i].position.z > 1.0f) {
@@ -220,6 +218,7 @@ void transform_triangle(Frame *frame, Vertex *verts, UBO *ubo) {
         }
     }
 
+    // Check if triangle is enitrely outside clip space
     if (num_outside >= 3) {
         return;
     }
