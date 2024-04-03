@@ -72,7 +72,7 @@ int alloc_objects(Scene *scene) {
 
     // Objects
     int manual_objects = 7;
-    scene->object_count = manual_objects + spider_object_amt;
+    scene->object_count = manual_objects; // + spider_object_amt;
     scene->dirty_locals = (bool *)malloc(scene->object_count * sizeof(bool));
     if (scene->dirty_locals == NULL) {
         printf("ERROR: malloc failed dirty_locals\n");
@@ -101,21 +101,23 @@ int alloc_objects(Scene *scene) {
     scene->objects[0].position = (Vec3){{0.0f, 5.0f, -20.0f}};
     scene->objects[0].scale = (Vec3){{20.0f, 20.0f, 20.0f}};
     scene->attributes[0].type = ATTR_MESH;
-    scene->attributes[0].mesh = load_obj_mesh("../models/head.obj");
+    scene->attributes[0].mesh = load_obj_mesh("../example/models/head.obj");
     scene->attributes[0].mesh.color = white;
 
-    // Texture
-    Material mat0 = malloc(sizeof(Material));
+    // Material
+    Material mat0 = alloc_material();
     if (mat0 == NULL) {
         printf("ERROR: malloc failed mat0\n");
     }
 
-    Texture default_texture = load_texture("textures/default.jpg");
-    if (default_texture == NULL) {
-        printf("ERROR: failed to load texture\n");
-    }
-    mat0->albedo_map = default_texture;
-    scene->attributes[0].mesh.material = &mat0;
+    // // Albedo texture
+    // Texture default_texture = load_texture("../example/textures/default.jpg");
+    // if (default_texture == NULL) {
+    //     printf("ERROR: failed to load texture\n");
+    //     return 1;
+    // }
+    // mat0->albedo_map = default_texture;
+    scene->attributes[0].mesh.material = mat0;
 
     // Box
     // scene->objects[1] = game_object_default();
@@ -163,13 +165,18 @@ Mango *mango;
 Vec4 slight_right;
 float attack_cd = 0;
 
+void start() {
+    slight_right = quat_from_axis(UNIT_Y, 0.001f);
+}
+
 void update(float dt) {
     static float frames = 0;
-    attack_cd += dt;
-    if (attack_cd > 3000) {
-        mango_play_anim(mango, 7, &spider_Attack_anim);
-        attack_cd = 0;
-    }
+
+    // attack_cd += dt;
+    // if (attack_cd > 3000) {
+    //     mango_play_anim(mango, 7, &spider_Attack_anim);
+    //     attack_cd = 0;
+    // }
 
     // Rotate camera
     // quat_mul(&scene.camera->game_object.quaternion, &slight_right);
@@ -195,31 +202,29 @@ void update(float dt) {
     // Rotate model
     // quat_mul(&scene.objects[0].quaternion, &slight_right);
     // scene.dirty_locals[0] = true;
+
+    if (scene.options & OPT_ENABLE_FPS_COUNTER) {
+        fps_counter();
+    }
     ++frames;
 }
 
 int MAIN(int argc, char *argv[]) {
-    // Start
     printf("Initializing mango renderer...\n");
-
-    // Scene data
-    slight_right = quat_from_axis(UNIT_Y, 0.001f);
-    if (alloc_objects(&scene) != 0) {
+    if (alloc_objects(&scene) > 0) {
         return 1;
     }
 
+    // Scene data
     Camera camera = init_camera(SCREEN_WIDTH, SCREEN_HEIGHT);
     scene.camera = &camera;
-
-    // Debug options
-    scene.options = OPT_USE_RASTERIZE;
-
+    scene.options = OPT_USE_RASTERIZE | OPT_ENABLE_FPS_COUNTER;
+    mango = mango_alloc(&scene, GAME_TITLE, SCREEN_WIDTH, SCREEN_HEIGHT);
     printf("Success.\n");
 
     // Update loop
     printf("%s running...\n", GAME_TITLE);
-
-    mango = mango_alloc(&scene, GAME_TITLE, SCREEN_WIDTH, SCREEN_HEIGHT);
+    start();
     mango->user_update = &update;
     mango_run(mango);
 

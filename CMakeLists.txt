@@ -5,7 +5,7 @@ set(C_STANDARD_REQUIRED ON)
 
 project(mango_renderer)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fPIC")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fPIC -g") # -o3
 set( BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE )
 
 add_subdirectory(Mango)
