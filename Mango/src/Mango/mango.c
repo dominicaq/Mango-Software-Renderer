@@ -11,12 +11,12 @@
 * Animations
 */
 void mango_play_anim(Mango *mango, int object_index, AnimStack *stack) {
-    // for (int i = 0; i < mango->running_anims.len; ++i) {
-    //     Anim *anim = mango->running_anims.arr + i;
-    //     if (anim->time_progress >= anim->stack.time_end) {
-    //         *anim = (Anim){0, object_index, *stack};
-    //     }
-    // }
+    for (int i = 0; i < mango->running_anims.len; ++i) {
+        Anim *anim = mango->running_anims.arr + i;
+        if (anim->time_progress >= anim->stack.time_end) {
+            *anim = (Anim){0, object_index, *stack};
+        }
+    }
 }
 
 void mango_update_anim(Mango *mango, Anim *anim, float dt) {
@@ -87,7 +87,7 @@ float mango_update(Mango *mango, float last_time) {
         mango->ubo.u_vp_inv = mat4_inverse(vp);
         mango->ubo.u_model_view = model_view_matrix;
         mango->ubo.u_color = target_mesh->color;
-        mango->ubo.u_mat = target_mesh->material;
+        mango->ubo.u_mat = *target_mesh->material;
 
         draw_mesh(mango->frame, target_mesh, &mango->ubo);
     }
@@ -153,11 +153,10 @@ Mango *mango_alloc(Scene *scene, const char *title, int width, int height) {
 }
 
 void mango_run(Mango *mango) {
+    printf("running mango\n");
     float last_time = clock();
     SDL_Event e;
     bool quit = false;
-
-    printf("running mango\n");
     while (!quit) {
         while (SDL_PollEvent(&e)) {
             switch (e.type) {

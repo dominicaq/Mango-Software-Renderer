@@ -27,7 +27,7 @@ typedef struct {
     int uv_count;
 
     Vec3 color; // I dont want to edit the spider code. color wont be used.
-    Material material;
+    Material *material;
 
     BoneWeight (*weights)[MAX_VERT_WEIGHTS];
     Vec3 *verts;
