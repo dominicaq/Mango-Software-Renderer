@@ -66,7 +66,6 @@ Camera init_camera(int frame_width, int frame_height) {
 
 int alloc_objects(Scene *scene) {
     Vec3 white = (Vec3){{1.0f, 1.0f, 1.0f}};
-    Vec3 blue = (Vec3){{0.0f, 0.5f, 1.0f}};
 
     // Objects
     int manual_objects = 7;
@@ -95,6 +94,7 @@ int alloc_objects(Scene *scene) {
         return 1;
     }
 
+    // Scene object 1
     scene->objects[0] = game_object_default();
     scene->objects[0].position = (Vec3){{0.0f, 0.0f, 4.0f}};
     scene->objects[0].scale = (Vec3){{10.0f, 10.0f, 10.0f}};
@@ -102,7 +102,6 @@ int alloc_objects(Scene *scene) {
     scene->attributes[0].mesh = load_obj_mesh("../example/models/head.obj");
     scene->attributes[0].mesh.color = white;
 
-    // Texture
     Material *mat0 = malloc(sizeof(Material));
     if (mat0 == NULL) {
         printf("ERROR: malloc failed mat0\n");
@@ -117,6 +116,7 @@ int alloc_objects(Scene *scene) {
     mat0->albedo_map = default_texture;
     scene->attributes[0].mesh.material = mat0;
 
+    // Scene Object 2
     // Box (an example of adding multiple objects)
     // scene->objects[1] = game_object_default();
     // scene->objects[1].quaternion = quat_from_units(UNIT_X, UNIT_Z);
@@ -125,13 +125,14 @@ int alloc_objects(Scene *scene) {
     // scene->attributes[1].mesh = load_obj_mesh("../models/light_box.obj");
     // scene->attributes[1].mesh.color = blue;
 
+    // Lights
     for (int i = POINT_LIGHTS_BEGIN; i < POINT_LIGHTS_END; ++i) {
         scene->objects[i] = game_object_default();
         scene->attributes[i].type = ATTR_LIGHT;
         scene->attributes[i].light.type = LIGHT_POINT;
         scene->attributes[i].light.color = COLLOR_PALLETE[i];
-        scene->attributes[i].light.intensity = 10.0f;
-        scene->attributes[i].light.radius = 5.0f;
+        scene->attributes[i].light.intensity = 15.0f;
+        scene->attributes[i].light.radius = 10.0f;
     }
 
     return 0;
@@ -186,21 +187,21 @@ void update(float dt) {
     // quat_mul(&scene.camera->game_object.quaternion, &slight_right);
     // scene.camera->dirty_local = true;
 
+    // Rotate 1st model
+    // quat_mul(&scene.objects[0].quaternion, &slight_right);
+    // scene.dirty_locals[0] = true;
+
     // Circling point lights
-    float circle_radius = 20.0f;
+    float circle_radius = 30.0f;
     int num_lights = POINT_LIGHTS_END - POINT_LIGHTS_BEGIN;
     float angle_increment = 2.0f * M_PI / num_lights;
     for (int i = POINT_LIGHTS_BEGIN; i < POINT_LIGHTS_END; ++i) {
-        float angle = angle_increment * (i + (frames / 100.0f));
+        float angle = angle_increment * (i + (frames / 1000.0f));
         float x = circle_radius * cosf(angle);
         float z = circle_radius * sinf(angle);
         scene.dirty_locals[i] = true;
         scene.objects[i].position = (Vec3){{x, 5.0f, z}};
     }
-
-    // Rotate 1st model
-    // quat_mul(&scene.objects[0].quaternion, &slight_right);
-    // scene.dirty_locals[0] = true;
 
     if (scene.options & OPT_FPS_COUNTER) {
         fps_counter();

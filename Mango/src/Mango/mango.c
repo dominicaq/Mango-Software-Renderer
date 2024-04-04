@@ -7,39 +7,36 @@
 #include "render/framedata.h"
 #include "shaders/sdf.h"
 
-/*
-* Animations
-*/
-void mango_play_anim(Mango *mango, int object_index, AnimStack *stack) {
-    for (int i = 0; i < mango->running_anims.len; ++i) {
-        Anim *anim = mango->running_anims.arr + i;
-        if (anim->time_progress >= anim->stack.time_end) {
-            *anim = (Anim){0, object_index, *stack};
+Mango *mango_alloc(Scene *scene, const char *title, int width, int height) {
+    Mango *mango = (Mango *)malloc(sizeof(Mango));
+    if (mango == NULL) {
+        printf("mango_alloc mango malloc failed\n");
+        return NULL;
+    }
+
+    mango->scene = scene;
+    mango->frame = frame_alloc(title, width, height);
+    if (mango->frame == NULL) {
+        printf("mango_alloc frame malloc failed\n");
+        return NULL;
+    }
+
+    init_clip_planes();
+
+    mango->ubo.options = scene->options;
+
+    int num_lights = 0;
+    for (int i = 0; i < scene->object_count; ++i) {
+        if (scene->attributes[i].type == ATTR_LIGHT) {
+            mango->ubo.lights[num_lights] = &scene->attributes[i].light;
+            mango->ubo.light_objects[num_lights] = &scene->objects[i];
+            ++num_lights;
         }
     }
+    mango->ubo.num_lights = num_lights;
+    return mango;
 }
 
-void mango_update_anim(Mango *mango, Anim *anim, float dt) {
-    // if (anim->time_progress >= anim->stack.time_end) {
-    //     return;
-    // }
-    // anim->time_progress += dt;
-    // if (anim->time_progress < anim->stack.time_begin) {
-    //     return;
-    // }
-    // for (int i = 0; i < anim->stack.layers.len; ++i) {
-    //     AnimLayer *layer = &anim->stack.layers.arr[i];
-    //     for (int j = 0; j < layer->anim_props.len; ++j) {
-    //         AnimProp *prop = &layer->anim_props.arr[i];
-    //         GameObject *obj = &mango->scene->objects[prop->node_index];
-    //         prop_update(prop, obj, anim->time_progress);
-    //     }
-    // }
-}
-
-/*
-* Core
-*/
 float mango_update(Mango *mango, float last_time) {
     float current_time = clock();
     float dt = current_time - last_time;
@@ -49,16 +46,6 @@ float mango_update(Mango *mango, float last_time) {
     Scene *current_scene = mango->scene;
     Camera *current_camera = current_scene->camera;
     mango->ubo.u_cam_pos = current_camera->game_object.position;
-
-    // TODO: TEMP, create ambient light
-    Light ambient_light;
-    ambient_light.color = (Vec3){{1.0f, 1.0f, 1.0f}};
-    ambient_light.intensity = 0.1f;
-    mango->ubo.ambient_light = ambient_light;
-
-    for (int i = 0; i < mango->running_anims.len; ++i) {
-        mango_update_anim(mango, &mango->running_anims.arr[i], dt);
-    }
 
     // Update scene transforms
     scene_update_matrices(current_scene);
@@ -108,48 +95,6 @@ float mango_update(Mango *mango, float last_time) {
 
     frame_update(mango->frame);
     return current_time;
-}
-
-Mango *mango_alloc(Scene *scene, const char *title, int width, int height) {
-    Mango *mango = (Mango *)malloc(sizeof(Mango));
-    if (mango == NULL) {
-        printf("mango_alloc mango malloc failed\n");
-        return NULL;
-    }
-
-    mango->scene = scene;
-    mango->frame = frame_alloc(title, width, height);
-    if (mango->frame == NULL) {
-        printf("mango_alloc frame malloc failed\n");
-        return NULL;
-    }
-
-    init_clip_planes();
-
-    mango->ubo.options = scene->options;
-    mango->running_anims.len = 64;
-    mango->running_anims.arr =
-        (Anim *)malloc(mango->running_anims.len * sizeof(Anim));
-    if (mango->running_anims.arr == NULL) {
-        printf("mango_alloc anims malloc failed\n");
-        return NULL;
-    }
-    printf("allocated animations\n");
-    for (int i = 0; i < mango->running_anims.len; ++i) {
-        mango->running_anims.arr[i].time_progress = 1;
-        mango->running_anims.arr[i].stack.time_end = 0;
-    }
-
-    int num_lights = 0;
-    for (int i = 0; i < scene->object_count; ++i) {
-        if (scene->attributes[i].type == ATTR_LIGHT) {
-            mango->ubo.lights[num_lights] = &scene->attributes[i].light;
-            mango->ubo.light_objects[num_lights] = &scene->objects[i];
-            ++num_lights;
-        }
-    }
-    mango->ubo.num_lights = num_lights;
-    return mango;
 }
 
 void mango_run(Mango *mango) {

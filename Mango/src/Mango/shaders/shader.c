@@ -81,5 +81,12 @@ void fragment_shader(UBO *ubo, Vec3 frag_coord) {
     // Combine lighting components with albedo color
     Vec3 lighting = vec3_add(total_diffuse, total_specular);
     Vec4 lighting_rgba = vec3_to_vec4(lighting, 1.0f);
-    ubo->f_data.gl_frag_color = vec4_mul_vec4(albedo_color, lighting_rgba);
+
+    Vec4 final_color = vec4_mul_vec4(albedo_color, lighting_rgba);
+    // Gamma correction
+    float gamma = 0.75f;
+    final_color.x = powf(final_color.x, gamma);
+    final_color.y = powf(final_color.y, gamma);
+    final_color.z = powf(final_color.z, gamma);
+    ubo->f_data.gl_frag_color = final_color;
 }

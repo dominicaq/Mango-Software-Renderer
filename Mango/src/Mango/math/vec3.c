@@ -67,12 +67,11 @@ Vec3 vec3_reflect(Vec3 position, Vec3 normal) {
     return vec3_sub(position, scaled_normal);
 }
 
-Vec3 vec3_negate(const Vec3 v) {
-    Vec3 result;
-    result.x = -v.x;
-    result.y = -v.y;
-    result.z = -v.z;
-    return result;
+Vec3 vec3_pow(Vec3 a, float power) {
+    a.x = powf(a.x, power);
+    a.y = powf(a.y, power);
+    a.z = powf(a.z, power);
+    return a;
 }
 
 Vec3 vec3_abs(Vec3 v) {
