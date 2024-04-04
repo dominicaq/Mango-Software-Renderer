@@ -21,14 +21,17 @@ CPU-bound nature. In contrast, modern rendering APIs leverage the GPU for high-p
 - Model View Perspective transformations (MVP)
 - Blinn-Phong shader for realistic lighting
 - Multi-light fragment shader
-- Signed Distance Fields
+- Texture Sampling
 
 # Options
+- Wireframe
 - View Normals
 - View UV map
+- View only textures
+- View only colors
+- View only lighting
 - Enable/Disable rasterization
-- Wireframe
-- Enable/Disable Signed Distance Field rendering (SDF)
+- Enable/Disable Signed Distance Field rendering (SDF) (WIP)
 
 <p align="center">
   <img width="800" height="600" src="https://github.com/dominicaq/Mango-Software-Renderer/blob/main/images/render_options.gif">

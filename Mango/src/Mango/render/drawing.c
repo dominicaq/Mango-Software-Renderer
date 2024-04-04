@@ -1,7 +1,7 @@
 #include "drawing.h"
 
 Plane clip_planes[NUM_CLIP_PLANES];
-const Vec4 WIREFRAME_COLOR = (Vec4){{255, 165, 0, 255}}; // Orange
+const Vec4 WIREFRAME_COLOR = (Vec4){{1.0, 0.5, 0, 1.0}}; // Orange
 
 /*
 * Wireframe

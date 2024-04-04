@@ -5,6 +5,8 @@
 #include <time.h>
 #include <string.h>
 
+// #include <SDL_stdinc.h>
+
 // Window data
 const char *GAME_TITLE = "Mango Renderer";
 const int SCREEN_WIDTH = 800;
@@ -51,9 +53,9 @@ Vec4 slight_right;
 Camera init_camera(int frame_width, int frame_height) {
     Camera cam;
     cam.game_object = game_object_default();
-    cam.game_object.position = (Vec3){{0.0f, 1.0f, 30.0f}};
+    cam.game_object.position = (Vec3){{0.0f, 1.0f, 25.0f}};
     cam.dirty_local = true;
-    cam.fov = 70.0f;
+    cam.fov = 90.0f;
     cam.aspect = (float)(frame_width) / frame_height;
     cam.z_near = 0.1f;
     cam.z_far = 100.0f;
@@ -63,7 +65,7 @@ Camera init_camera(int frame_width, int frame_height) {
 }
 
 int alloc_objects(Scene *scene) {
-    Vec3 white = COLLOR_PALLETE[4];
+    Vec3 white = (Vec3){{1.0f, 1.0f, 1.0f}};
     Vec3 blue = (Vec3){{0.0f, 0.5f, 1.0f}};
 
     // Objects
@@ -143,6 +145,32 @@ void start() {
     slight_right = quat_from_axis(UNIT_Y, 0.01f);
 }
 
+void free_camera(float dt) {
+    // const Uint8 *state = SDL_GetKeyboardState(NULL);
+
+    // float cameraSpeed = 5.0f * dt; // Adjust speed as necessary
+
+    // Vec3 forward = vec3_scale(scene.camera->game_object.forward, cameraSpeed);
+    // Vec3 right = vec3_scale(scene.camera->game_object.right, cameraSpeed);
+
+    // if (state[SDL_SCANCODE_W]) {
+    //     scene.camera->game_object.position = vec3_add(scene.camera->game_object.position, forward);
+    //     scene.camera->dirty_local = true;
+    // }
+    // if (state[SDL_SCANCODE_S]) {
+    //     scene.camera->game_object.position = vec3_sub(scene.camera->game_object.position, forward);
+    //     scene.camera->dirty_local = true;
+    // }
+    // if (state[SDL_SCANCODE_A]) {
+    //     scene.camera->game_object.position = vec3_sub(scene.camera->game_object.position, right);
+    //     scene.camera->dirty_local = true;
+    // }
+    // if (state[SDL_SCANCODE_D]) {
+    //     scene.camera->game_object.position = vec3_add(scene.camera->game_object.position, right);
+    //     scene.camera->dirty_local = true;
+    // }
+}
+
 void update(float dt) {
     static float frames = 0;
 
@@ -150,12 +178,15 @@ void update(float dt) {
     // quat_mul(&scene.camera->game_object.quaternion, &slight_right);
     // scene.camera->dirty_local = true;
 
+    free_camera(dt);
+
     // quat_mul(&scene.objects[7].quaternion, &slight_right);
     // scene.dirty_locals[7] = true;
 
     // quat_mul(&scene.camera->game_object.quaternion, &slight_right);
     // scene.camera->dirty_local = true;
 
+    // Circling point lights
     float circle_radius = 20.0f;
     int num_lights = POINT_LIGHTS_END - POINT_LIGHTS_BEGIN;
     float angle_increment = 2.0f * M_PI / num_lights;
@@ -167,7 +198,7 @@ void update(float dt) {
         scene.objects[i].position = (Vec3){{x, 5.0f, z}};
     }
 
-    // Rotate model
+    // Rotate 1st model
     // quat_mul(&scene.objects[0].quaternion, &slight_right);
     // scene.dirty_locals[0] = true;
 
@@ -187,11 +218,11 @@ int MAIN(int argc, char *argv[]) {
 
     Camera camera = init_camera(SCREEN_WIDTH, SCREEN_HEIGHT);
     scene.camera = &camera;
-    scene.options = OPT_USE_RASTERIZE | OPT_FPS_COUNTER;// | OPT_TEXTURE_SHADING_MODE;
+    scene.options = OPT_USE_RASTERIZE | OPT_FPS_COUNTER;
     mango = mango_alloc(&scene, GAME_TITLE, SCREEN_WIDTH, SCREEN_HEIGHT);
     printf("Success.\n");
 
-    // Update loop
+    // Game core
     start();
     printf("%s running...\n", GAME_TITLE);
     mango->user_update = &update;

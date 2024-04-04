@@ -27,23 +27,26 @@ void fragment_shader(UBO *ubo, Vec3 frag_coord) {
 
     // DEBUG OPTIONS
     if (ubo->options & OPT_VIEW_NORMALS) {
-        N = vec3_scale(N, 0.5f); // Scale for visualization
-        N = vec3_clamp(N, 0.0f, 1.0f); // Ensure values are within [0, 1]
-        ubo->f_data.gl_frag_color = vec3_to_vec4(N, 1.0f); // Convert to vec4 for color
+        N = vec3_clamp(N, 0.0f, 1.0f);
+        ubo->f_data.gl_frag_color = vec3_to_vec4(N, 1.0f);
         return;
     } else if (ubo->options & OPT_VIEW_UV_MAP) {
-        Vec3 uv_color = vec2_to_vec3(ubo->f_data.uv, 1.0f); // Convert UV to color
-        uv_color = vec3_scale(uv_color, 0.5f); // Scale for visualization
-        uv_color = vec3_clamp(uv_color, 0.0f, 1.0f); // Ensure values are within [0, 1]
-        ubo->f_data.gl_frag_color = vec3_to_vec4(uv_color, 1.0f); // Convert to vec4 for color
+        Vec3 uv_color = vec2_to_vec3(ubo->f_data.uv, 1.0f);
+        uv_color = vec3_clamp(uv_color, 0.0f, 1.0f);
+        ubo->f_data.gl_frag_color = vec3_to_vec4(uv_color, 1.0f);
         return;
     }
 
     // Sample albedo color from texture
     Vec4 albedo_color = sample_texture(ubo->f_data.uv, ubo->u_mat->albedo_map);
-    if (ubo->options & OPT_TEXTURE_SHADING_MODE) {
+    if (ubo->options & OPT_TEXTURE_ONLY) {
         ubo->f_data.gl_frag_color = albedo_color;
         return;
+    }
+
+    // No texture
+    if (ubo->options & OPT_NO_TEXTURE) {
+        albedo_color = vec3_to_vec4(ubo->u_color, 1.0f);
     }
 
     // Initialize total diffuse and specular components
@@ -69,7 +72,7 @@ void fragment_shader(UBO *ubo, Vec3 frag_coord) {
 
             // Specular
             Vec3 half_angle = vec3_normalize(vec3_add(L, V));
-            float blinn = pow(fmax(vec3_dot(N, half_angle), 0.0f), 4.0f);
+            float blinn = pow(fmax(vec3_dot(N, half_angle), 0.0f), 512.0f);
             Vec3 specular = vec3_scale(light_color, blinn * attenuation);
             total_specular = vec3_add(total_specular, specular);
         }
