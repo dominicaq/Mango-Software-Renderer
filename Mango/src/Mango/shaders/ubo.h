@@ -17,6 +17,7 @@ typedef enum {
     OPT_VIEW_UV_MAP = 8,
     OPT_VIEW_DEPTH = 16,
     OPT_SDF_ENABLE = 32,
+    OPT_FPS_COUNTER = 64,
 } Options;
 
 typedef struct {

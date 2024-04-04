@@ -9,7 +9,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fPIC")
 set( BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE )
 
 add_subdirectory(Mango)
-add_executable(mango_renderer example/main.c example/models/spider.c example/models/spider.h)
+add_executable(mango_renderer example/main.c)
 if (UNIX)
     target_compile_definitions(mango_renderer PRIVATE MAIN=main)
 else()

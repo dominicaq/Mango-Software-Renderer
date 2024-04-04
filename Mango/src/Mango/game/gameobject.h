@@ -10,15 +10,8 @@
 #include "../math/vec4.h"
 #include "../render/material.h"
 
-#define MAX_VERT_WEIGHTS 8
-
 const extern Vec3 COLLOR_PALLETE[7];
 extern const float DEG2RAD;
-
-typedef struct {
-    int boneIndex;
-    float weight;
-} BoneWeight;
 
 typedef struct {
     int ind_count;
@@ -26,10 +19,9 @@ typedef struct {
     int norm_count;
     int uv_count;
 
-    Vec3 color; // I dont want to edit the spider code. color wont be used.
+    Vec3 color;
     Material *material;
 
-    BoneWeight (*weights)[MAX_VERT_WEIGHTS];
     Vec3 *verts;
     Vec3 *norms;
     Vec2 *uvs;
@@ -62,12 +54,10 @@ typedef struct {
         ATTR_LIGHT,
         ATTR_SDF,
         ATTR_MESH,
-        ATTR_BONE,
     } type;
     union {
         Light light;
         Mesh mesh;
-        Bone bone;
     };
 } GameObjectAttr;
 
@@ -85,16 +75,7 @@ typedef struct GameObject {
     Mat4 world_matrix;
 } GameObject;
 
-/*
- * get_model_matrix - Calculate the model matrix based on a transform
- * @transform: The transform containing the position, scale, and rotation
- *
- * Calculate the model matrix based on a transform, which includes position,
- * scale, and rotation data.
- *
- *
- * Return: The model matrix.
- */
+
 void game_object_update_local_matrix(GameObject *);
 GameObject game_object_default();
 

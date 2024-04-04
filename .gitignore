@@ -6,5 +6,5 @@ node_modules/
 compile_commands.json
 *.DS_Store
 CMakeUserPresets.json
-
-
+.clang-format
+CMakeCache.txt

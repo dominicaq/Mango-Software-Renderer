@@ -5,9 +5,6 @@
 #include <time.h>
 #include <string.h>
 
-// Pre parsed game data
-#include "models/spider.h"
-
 // Window data
 const char *GAME_TITLE = "Mango Renderer";
 const int SCREEN_WIDTH = 800;
@@ -72,7 +69,7 @@ int alloc_objects(Scene *scene) {
 
     // Objects
     int manual_objects = 7;
-    scene->object_count = manual_objects + spider_object_amt;
+    scene->object_count = manual_objects;
     scene->dirty_locals = (bool *)malloc(scene->object_count * sizeof(bool));
     if (scene->dirty_locals == NULL) {
         printf("ERROR: malloc failed dirty_locals\n");
@@ -101,7 +98,7 @@ int alloc_objects(Scene *scene) {
     scene->objects[0].position = (Vec3){{0.0f, 5.0f, -20.0f}};
     scene->objects[0].scale = (Vec3){{20.0f, 20.0f, 20.0f}};
     scene->attributes[0].type = ATTR_MESH;
-    scene->attributes[0].mesh = load_obj_mesh("../models/head.obj");
+    scene->attributes[0].mesh = load_obj_mesh("../example/models/head.obj");
     scene->attributes[0].mesh.color = white;
 
     // Texture
@@ -142,20 +139,6 @@ int alloc_objects(Scene *scene) {
         scene->attributes[i].light.radius = 20.0f;
     }
 
-    // scene->objects[6] = game_object_default();
-    // scene->attributes[6].type = ATTR_LIGHT;
-    // scene->attributes[6].light.type = LIGHT_AMBIENT;
-    // scene->attributes[6].light.color = (Vec3){{0.4f, 0.4f, 0.4f}};
-    // scene->attributes[6].light.intensity = light_intensity;
-
-    // memcpy(scene->objects + manual_objects, spider_game_objects,
-    //        spider_object_amt * sizeof(GameObject));
-    // memcpy(scene->attributes + manual_objects, spider_attrs,
-    //        spider_object_amt * sizeof(GameObjectAttr));
-    // scene->max_depth = MAX(scene->max_depth, spider_max_depth);
-
-    scene->objects[manual_objects].scale = (Vec3){{0.1f, 0.1f, 0.1f}};
-
     return 0;
 }
 
@@ -163,13 +146,12 @@ Mango *mango;
 Vec4 slight_right;
 float attack_cd = 0;
 
+void start() {
+
+}
+
 void update(float dt) {
     static float frames = 0;
-    attack_cd += dt;
-    if (attack_cd > 3000) {
-        mango_play_anim(mango, 7, &spider_Attack_anim);
-        attack_cd = 0;
-    }
 
     // Rotate camera
     // quat_mul(&scene.camera->game_object.quaternion, &slight_right);
@@ -195,11 +177,14 @@ void update(float dt) {
     // Rotate model
     // quat_mul(&scene.objects[0].quaternion, &slight_right);
     // scene.dirty_locals[0] = true;
+
+    if (scene.options & OPT_FPS_COUNTER) {
+        fps_counter();
+    }
     ++frames;
 }
 
 int MAIN(int argc, char *argv[]) {
-    // Start
     printf("Initializing mango renderer...\n");
 
     // Scene data
@@ -212,7 +197,7 @@ int MAIN(int argc, char *argv[]) {
     scene.camera = &camera;
 
     // Debug options
-    scene.options = OPT_USE_RASTERIZE;
+    scene.options = OPT_USE_RASTERIZE | OPT_FPS_COUNTER;
 
     printf("Success.\n");
 
