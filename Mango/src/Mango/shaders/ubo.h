@@ -46,7 +46,7 @@ typedef struct {
     Vec3 u_cam_pos;
     Vec3 u_color;
     Vec3 u_ambient;
-    Material u_mat;
+    Material *u_mat;
 
     // Light data
     GameObject *light_objects[MAX_LIGHTS];

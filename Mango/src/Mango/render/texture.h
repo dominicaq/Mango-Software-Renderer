@@ -10,11 +10,11 @@ struct Texture {
     int height;
     int channels;
     unsigned char *data;
-} typedef *Texture;
+} typedef Texture;
 
-Texture load_texture(const char* path);
-void free_texture(Texture texture);
+Texture *load_texture(const char* path);
+void free_texture(Texture *texture);
 
-Vec3 sample_texture(Vec2 uv, Texture texture);
+Vec3 sample_texture(Vec2 uv, Texture *texture);
 
 #endif

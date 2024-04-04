@@ -3,9 +3,10 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-Texture load_texture(const char* path) {
-    Texture new_texture = malloc(sizeof(Texture));
-    if (!new_texture) {
+Texture *load_texture(const char* path) {
+    Texture* new_texture = malloc(sizeof(Texture));
+    if (new_texture == NULL) {
+        printf("Failed to allocate memory for texture\n");
         return NULL;
     }
 
@@ -18,15 +19,17 @@ Texture load_texture(const char* path) {
     );
 
     if (new_texture->data == NULL) {
+        printf("Failed to load texture: %s\n", path);
         free(new_texture);
         return NULL;
     }
+
     return new_texture;
 }
 
 #include "texture.h"
 
-Vec3 sample_texture(Vec2 uv, Texture texture) {
+Vec3 sample_texture(Vec2 uv, Texture *texture) {
     // Remap UV coordinates to texture space
     int x = uv.x * (texture->width - 1);
     int y = uv.y * (texture->height - 1);
@@ -48,7 +51,7 @@ Vec3 sample_texture(Vec2 uv, Texture texture) {
     return (Vec3){{r / 255.0f, g / 255.0f, b / 255.0f}};
 }
 
-void free_texture(Texture texture) {
+void free_texture(Texture *texture) {
     stbi_image_free(texture->data);
     free(texture);
 }

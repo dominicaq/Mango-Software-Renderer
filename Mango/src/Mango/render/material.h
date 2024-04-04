@@ -6,8 +6,8 @@
 
 struct Material {
     Vec3 color;
-    Texture albedo_map;
-    Texture normal_map;
-} typedef *Material;
+    Texture *albedo_map;
+    Texture *normal_map;
+} typedef Material;
 
 #endif

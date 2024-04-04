@@ -72,7 +72,8 @@ void fragment_shader(UBO *ubo, Vec3 frag_coord) {
     }
 
     // Scale color
-    // Vec3 albedo_color = sample_texture(ubo->f_data.uv, ubo->u_mat->albedo_map);
+    Vec3 albedo_color = sample_texture(ubo->f_data.uv, ubo->u_mat->albedo_map);
+    // ubo->f_data.gl_frag_color = vec3_to_vec4(albedo_color, 255.0f);
 
     Vec3 lighting = vec3_add(total_diffuse, total_specular);
     lighting = vec3_scale(lighting, 255.0f / ubo->num_lights);

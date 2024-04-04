@@ -34,11 +34,6 @@ typedef struct {
 Mesh mesh_empty();
 
 typedef struct {
-    float radius;
-    float length;
-} Bone;
-
-typedef struct {
     enum {
         LIGHT_POINT,
         LIGHT_AMBIENT,

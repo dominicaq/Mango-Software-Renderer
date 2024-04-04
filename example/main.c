@@ -95,24 +95,26 @@ int alloc_objects(Scene *scene) {
     }
 
     scene->objects[0] = game_object_default();
-    scene->objects[0].position = (Vec3){{0.0f, 5.0f, -20.0f}};
+    scene->objects[0].position = (Vec3){{0.0f, 0.0f, -20.0f}};
     scene->objects[0].scale = (Vec3){{20.0f, 20.0f, 20.0f}};
     scene->attributes[0].type = ATTR_MESH;
     scene->attributes[0].mesh = load_obj_mesh("../example/models/head.obj");
     scene->attributes[0].mesh.color = white;
 
     // Texture
-    Material mat0 = malloc(sizeof(Material));
+    Material *mat0 = malloc(sizeof(Material));
     if (mat0 == NULL) {
         printf("ERROR: malloc failed mat0\n");
+        return 1;
     }
 
-    Texture default_texture = load_texture("textures/default.jpg");
+    Texture *default_texture = load_texture("../example/textures/default.jpg");
     if (default_texture == NULL) {
-        printf("ERROR: failed to load texture\n");
+        printf("ERROR: failed to create default texture\n");
+        return 1;
     }
     mat0->albedo_map = default_texture;
-    scene->attributes[0].mesh.material = &mat0;
+    scene->attributes[0].mesh.material = mat0;
 
     // Box
     // scene->objects[1] = game_object_default();
@@ -121,13 +123,6 @@ int alloc_objects(Scene *scene) {
     // scene->attributes[1].type = ATTR_MESH;
     // scene->attributes[1].mesh = load_obj_mesh("../models/light_box.obj");
     // scene->attributes[1].mesh.color = blue;
-
-    // scene->objects[2] = game_object_default();
-    // scene->objects[2].position = (Vec3){{-5.0f, -3.0f, -10.0f}};
-    // scene->objects[2].scale = (Vec3){{6.0f, 6.0f, 6.0f}};
-    // scene->attributes[2].type = ATTR_MESH;
-    // scene->attributes[2].mesh = load_obj_mesh("../models/head.obj");
-    // scene->attributes[2].mesh.color = white;
 
     float light_intensity = 4.0f;
     for (int i = POINT_LIGHTS_BEGIN; i < POINT_LIGHTS_END; ++i) {
@@ -147,7 +142,7 @@ Vec4 slight_right;
 float attack_cd = 0;
 
 void start() {
-
+    slight_right = quat_from_axis(UNIT_Y, 0.001f);
 }
 
 void update(float dt) {
@@ -188,23 +183,19 @@ int MAIN(int argc, char *argv[]) {
     printf("Initializing mango renderer...\n");
 
     // Scene data
-    slight_right = quat_from_axis(UNIT_Y, 0.001f);
     if (alloc_objects(&scene) != 0) {
         return 1;
     }
 
     Camera camera = init_camera(SCREEN_WIDTH, SCREEN_HEIGHT);
     scene.camera = &camera;
-
-    // Debug options
     scene.options = OPT_USE_RASTERIZE | OPT_FPS_COUNTER;
-
+    mango = mango_alloc(&scene, GAME_TITLE, SCREEN_WIDTH, SCREEN_HEIGHT);
     printf("Success.\n");
 
     // Update loop
+    start();
     printf("%s running...\n", GAME_TITLE);
-
-    mango = mango_alloc(&scene, GAME_TITLE, SCREEN_WIDTH, SCREEN_HEIGHT);
     mango->user_update = &update;
     mango_run(mango);
 
