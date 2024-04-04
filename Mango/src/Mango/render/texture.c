@@ -3,7 +3,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-Texture *load_texture(const char* path) {
+Texture* load_texture(const char* path) {
     Texture* new_texture = malloc(sizeof(Texture));
     if (new_texture == NULL) {
         printf("Failed to allocate memory for texture\n");
@@ -15,7 +15,7 @@ Texture *load_texture(const char* path) {
         &new_texture->width,
         &new_texture->height,
         &new_texture->channels,
-        STBI_rgb
+        0
     );
 
     if (new_texture->data == NULL) {
@@ -24,12 +24,31 @@ Texture *load_texture(const char* path) {
         return NULL;
     }
 
+    // Flip the image vertically
+    int width_in_bytes = new_texture->width * 3; // Assuming 3 channels (RGB)
+    unsigned char* temp_row = (unsigned char*)malloc(width_in_bytes);
+    if (temp_row == NULL) {
+        printf("Failed to allocate memory for image flip\n");
+        stbi_image_free(new_texture->data);
+        free(new_texture);
+        return NULL;
+    }
+
+    int half_height = new_texture->height / 2;
+    for (int y = 0; y < half_height; ++y) {
+        unsigned char* top_row = new_texture->data + y * width_in_bytes;
+        unsigned char* bottom_row = new_texture->data + (new_texture->height - y - 1) * width_in_bytes;
+        // Swap rows
+        memcpy(temp_row, top_row, width_in_bytes);
+        memcpy(top_row, bottom_row, width_in_bytes);
+        memcpy(bottom_row, temp_row, width_in_bytes);
+    }
+
+    free(temp_row);
     return new_texture;
 }
 
-#include "texture.h"
-
-Vec3 sample_texture(Vec2 uv, Texture *texture) {
+Vec4 sample_texture(Vec2 uv, Texture *texture) {
     // Remap UV coordinates to texture space
     int x = uv.x * (texture->width - 1);
     int y = uv.y * (texture->height - 1);
@@ -46,9 +65,11 @@ Vec3 sample_texture(Vec2 uv, Texture *texture) {
     unsigned char r = texture->data[index];
     unsigned char g = texture->data[index + 1];
     unsigned char b = texture->data[index + 2];
-
-    // For simplicity, assuming 24-bit RGB texture
-    return (Vec3){{r / 255.0f, g / 255.0f, b / 255.0f}};
+    if (texture->channels > 3) {
+        unsigned char a = texture->data[index + 3];
+        return (Vec4){{r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f}};
+    }
+    return (Vec4){{r / 255.0f, g / 255.0f, b / 255.0f, 1.0f}};
 }
 
 void free_texture(Texture *texture) {

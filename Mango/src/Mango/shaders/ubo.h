@@ -18,6 +18,7 @@ typedef enum {
     OPT_VIEW_DEPTH = 16,
     OPT_SDF_ENABLE = 32,
     OPT_FPS_COUNTER = 64,
+    OPT_TEXTURE_SHADING_MODE = 128,
 } Options;
 
 typedef struct {

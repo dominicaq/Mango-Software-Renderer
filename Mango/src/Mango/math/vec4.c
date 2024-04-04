@@ -33,6 +33,27 @@ Vec3 vec4_homogenize(const Vec4 v) {
     return result;
 }
 
+Vec4 vec4_mul_vec4(Vec4 a, Vec4 b) {
+    Vec4 result;
+    result.x = a.x * b.x;
+    result.y = a.y * b.y;
+    result.z = a.z * b.z;
+    result.w = a.w * b.w;
+
+    // Find the maximum value among x, y, z, and w components
+    float max_val = fmaxf(fmaxf(fmaxf(result.x, result.y), result.z), result.w);
+
+    // Normalize each component by dividing by the maximum value
+    if (max_val > 0.0f) {
+        result.x /= max_val;
+        result.y /= max_val;
+        result.z /= max_val;
+        result.w /= max_val;
+    }
+
+    return result;
+}
+
 Vec3 vec4_to_vec3(const Vec4 v) {
     return (Vec3){{v.elem[0], v.elem[1], v.elem[2]}};
 }

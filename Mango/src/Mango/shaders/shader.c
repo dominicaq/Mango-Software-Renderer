@@ -27,23 +27,29 @@ void fragment_shader(UBO *ubo, Vec3 frag_coord) {
 
     // DEBUG OPTIONS
     if (ubo->options & OPT_VIEW_NORMALS) {
-        N = vec3_scale(N, 255.0f);
-        N = vec3_clamp(N, 0.0f, 255.0f);
-        ubo->f_data.gl_frag_color = vec3_to_vec4(N, 255.0f);
+        N = vec3_scale(N, 0.5f); // Scale for visualization
+        N = vec3_clamp(N, 0.0f, 1.0f); // Ensure values are within [0, 1]
+        ubo->f_data.gl_frag_color = vec3_to_vec4(N, 1.0f); // Convert to vec4 for color
         return;
     } else if (ubo->options & OPT_VIEW_UV_MAP) {
-        Vec3 uv_color = vec2_to_vec3(ubo->f_data.uv, 1.0f);
-        uv_color = vec3_scale(uv_color, 255.0f);
-        uv_color = vec3_clamp(uv_color, 0.0f, 255.0f);
-        ubo->f_data.gl_frag_color = vec3_to_vec4(uv_color, 255.0f);
+        Vec3 uv_color = vec2_to_vec3(ubo->f_data.uv, 1.0f); // Convert UV to color
+        uv_color = vec3_scale(uv_color, 0.5f); // Scale for visualization
+        uv_color = vec3_clamp(uv_color, 0.0f, 1.0f); // Ensure values are within [0, 1]
+        ubo->f_data.gl_frag_color = vec3_to_vec4(uv_color, 1.0f); // Convert to vec4 for color
         return;
     }
 
-    // Multiple lights
-    Vec3 albedo_color = sample_texture(ubo->f_data.uv, ubo->u_mat->albedo_map);
+    // Sample albedo color from texture
+    Vec4 albedo_color = sample_texture(ubo->f_data.uv, ubo->u_mat->albedo_map);
+    if (ubo->options & OPT_TEXTURE_SHADING_MODE) {
+        ubo->f_data.gl_frag_color = albedo_color;
+        return;
+    }
+
+    // Initialize total diffuse and specular components
     Vec3 total_diffuse = VEC3_ZERO;
     Vec3 total_specular = VEC3_ZERO;
-    for (int i = 0; i < ubo->num_lights; i++) {
+    for (int i = 0; i < ubo->num_lights; ++i) {
         if (ubo->lights[i]->type == LIGHT_POINT) {
             Vec3 light_pos = ubo->light_objects[i]->position;
             Vec3 light_color = vec3_scale(ubo->lights[i]->color, ubo->lights[i]->intensity);
@@ -58,23 +64,19 @@ void fragment_shader(UBO *ubo, Vec3 frag_coord) {
 
             // Diffuse
             float angle = fmax(vec3_dot(N, L), 0.0f);
-            Vec3 diffuse = vec3_scale(
-                vec3_add(light_color, albedo_color),
-                angle * attenuation
-            );
+            Vec3 diffuse = vec3_scale(light_color, angle * attenuation);
             total_diffuse = vec3_add(total_diffuse, diffuse);
 
             // Specular
             Vec3 half_angle = vec3_normalize(vec3_add(L, V));
-            float blinn = pow(clamp(vec3_dot(N, half_angle), 0.0f, 1.0f), 512.0f);
+            float blinn = pow(fmax(vec3_dot(N, half_angle), 0.0f), 4.0f);
             Vec3 specular = vec3_scale(light_color, blinn * attenuation);
             total_specular = vec3_add(total_specular, specular);
         }
     }
 
-    // Scale color
+    // Combine lighting components with albedo color
     Vec3 lighting = vec3_add(total_diffuse, total_specular);
-    lighting = vec3_scale(lighting, 255.0f / ubo->num_lights);
-    lighting = vec3_clamp(lighting, 0.0f, 255.0f);
-    ubo->f_data.gl_frag_color = vec3_to_vec4(lighting, 255.0f);
+    Vec4 lighting_rgba = vec3_to_vec4(lighting, 1.0f);
+    ubo->f_data.gl_frag_color = vec4_mul_vec4(albedo_color, lighting_rgba);
 }

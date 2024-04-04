@@ -91,6 +91,8 @@ float vec4_magnitude(Vec4 a);
  */
 Vec4 vec4_normalize(Vec4 a);
 
+Vec4 vec4_mul_vec4(Vec4 a, Vec4 b);
+
 /**
  * Create a quaternion from two 3D vectors representing rotation.
  *

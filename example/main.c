@@ -29,21 +29,20 @@ void fps_counter() {
     ++frames;
 }
 
+// Game
 // -----------------------------------------------------------------------------
-
-// Lights
 const Vec3 COLLOR_PALLETE[7] = {
     {{1.0f, 0.0f, 0.0f}},  // Red
     {{0.0f, 1.0f, 0.0f}},  // Green
-    {{0.0f, 0.0f, 1.0f}},  // Blue
-    {{1.0f, 1.0f, 0.0f}},  // Yellow
+    {{0.3f, 0.3f, 0.8f}},  // Custom color
     {{1.0f, 1.0f, 1.0f}},  // White
+    {{1.0f, 1.0f, 0.0f}},  // Yellow
     {{0.3f, 0.0f, 0.5f}},  // Indigo
     {{0.5f, 0.0f, 0.5f}}   // Violet
 };
 
-int POINT_LIGHTS_BEGIN = 4;
-int POINT_LIGHTS_END = 6;
+int POINT_LIGHTS_BEGIN = 2;
+int POINT_LIGHTS_END = 4;
 
 // Scene data
 Scene scene;
@@ -95,8 +94,8 @@ int alloc_objects(Scene *scene) {
     }
 
     scene->objects[0] = game_object_default();
-    scene->objects[0].position = (Vec3){{0.0f, 0.0f, -20.0f}};
-    scene->objects[0].scale = (Vec3){{20.0f, 20.0f, 20.0f}};
+    scene->objects[0].position = (Vec3){{0.0f, 0.0f, 4.0f}};
+    scene->objects[0].scale = (Vec3){{10.0f, 10.0f, 10.0f}};
     scene->attributes[0].type = ATTR_MESH;
     scene->attributes[0].mesh = load_obj_mesh("../example/models/head.obj");
     scene->attributes[0].mesh.color = white;
@@ -108,7 +107,7 @@ int alloc_objects(Scene *scene) {
         return 1;
     }
 
-    Texture *default_texture = load_texture("../example/textures/default.jpg");
+    Texture *default_texture = load_texture("../example/textures/head.png");
     if (default_texture == NULL) {
         printf("ERROR: failed to create default texture\n");
         return 1;
@@ -116,7 +115,7 @@ int alloc_objects(Scene *scene) {
     mat0->albedo_map = default_texture;
     scene->attributes[0].mesh.material = mat0;
 
-    // Box
+    // Box (an example of adding multiple objects)
     // scene->objects[1] = game_object_default();
     // scene->objects[1].quaternion = quat_from_units(UNIT_X, UNIT_Z);
     // scene->objects[1].position = (Vec3){{0.0f, 6.0f, -10.0f}};
@@ -124,14 +123,13 @@ int alloc_objects(Scene *scene) {
     // scene->attributes[1].mesh = load_obj_mesh("../models/light_box.obj");
     // scene->attributes[1].mesh.color = blue;
 
-    float light_intensity = 4.0f;
     for (int i = POINT_LIGHTS_BEGIN; i < POINT_LIGHTS_END; ++i) {
         scene->objects[i] = game_object_default();
         scene->attributes[i].type = ATTR_LIGHT;
         scene->attributes[i].light.type = LIGHT_POINT;
         scene->attributes[i].light.color = COLLOR_PALLETE[i];
-        scene->attributes[i].light.intensity = light_intensity;
-        scene->attributes[i].light.radius = 20.0f;
+        scene->attributes[i].light.intensity = 10.0f;
+        scene->attributes[i].light.radius = 5.0f;
     }
 
     return 0;
@@ -142,7 +140,7 @@ Vec4 slight_right;
 float attack_cd = 0;
 
 void start() {
-    slight_right = quat_from_axis(UNIT_Y, 0.001f);
+    slight_right = quat_from_axis(UNIT_Y, 0.01f);
 }
 
 void update(float dt) {
@@ -189,7 +187,7 @@ int MAIN(int argc, char *argv[]) {
 
     Camera camera = init_camera(SCREEN_WIDTH, SCREEN_HEIGHT);
     scene.camera = &camera;
-    scene.options = OPT_USE_RASTERIZE | OPT_FPS_COUNTER;
+    scene.options = OPT_USE_RASTERIZE | OPT_FPS_COUNTER;// | OPT_TEXTURE_SHADING_MODE;
     mango = mango_alloc(&scene, GAME_TITLE, SCREEN_WIDTH, SCREEN_HEIGHT);
     printf("Success.\n");
 

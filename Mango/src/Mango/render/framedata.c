@@ -28,6 +28,11 @@ void frame_reset(Frame *frame) {
 void frame_update(Frame *frame) { display_update(frame->display); }
 
 void frame_set_pixel(Frame *frame, int x, int y, Vec4 color) {
+    // Convert color values that should be between 0-1 to 0-255
+    color.x = color.x * 255.0f;
+    color.y = color.y * 255.0f;
+    color.z = color.z * 255.0f;
+    color.w = color.w * 255.0f;
     display_set_pixel(frame->display, x, y, color);
 }
 
