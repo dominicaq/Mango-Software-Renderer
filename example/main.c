@@ -5,8 +5,6 @@
 #include <time.h>
 #include <string.h>
 
-// #include <SDL_stdinc.h>
-
 // Window data
 const char *GAME_TITLE = "Mango Renderer";
 const int SCREEN_WIDTH = 800;
@@ -33,6 +31,11 @@ void fps_counter() {
 
 // Game
 // -----------------------------------------------------------------------------
+Scene scene;
+Vec4 slight_right;
+
+int POINT_LIGHTS_BEGIN = 2;
+int POINT_LIGHTS_END = 3;
 const Vec3 COLLOR_PALLETE[7] = {
     {{1.0f, 0.0f, 0.0f}},  // Red
     {{0.0f, 1.0f, 0.0f}},  // Green
@@ -43,13 +46,6 @@ const Vec3 COLLOR_PALLETE[7] = {
     {{0.5f, 0.0f, 0.5f}}   // Violet
 };
 
-int POINT_LIGHTS_BEGIN = 2;
-int POINT_LIGHTS_END = 4;
-
-// Scene data
-Scene scene;
-Vec4 slight_right;
-
 Camera init_camera(int frame_width, int frame_height) {
     Camera cam;
     cam.game_object = game_object_default();
@@ -57,8 +53,8 @@ Camera init_camera(int frame_width, int frame_height) {
     cam.dirty_local = true;
     cam.fov = 90.0f;
     cam.aspect = (float)(frame_width) / frame_height;
-    cam.z_near = 0.1f;
-    cam.z_far = 100.0f;
+    cam.z_near = 0.01f;
+    cam.z_far = 1000.0f;
     cam.width = frame_width;
     cam.height = frame_height;
     return cam;
@@ -96,10 +92,10 @@ int alloc_objects(Scene *scene) {
 
     // Scene object 1
     scene->objects[0] = game_object_default();
-    scene->objects[0].position = (Vec3){{0.0f, 0.0f, 4.0f}};
-    scene->objects[0].scale = (Vec3){{10.0f, 10.0f, 10.0f}};
+    scene->objects[0].position = (Vec3){{0.0f, 0.0f, 9.0f}};
+    scene->objects[0].scale = (Vec3){{15.0f, 15.0f, 15.0f}};
     scene->attributes[0].type = ATTR_MESH;
-    scene->attributes[0].mesh = load_obj_mesh("../example/models/head.obj");
+    scene->attributes[0].mesh = load_obj_mesh("../example/models/diablo3_pose.obj");
     scene->attributes[0].mesh.color = white;
 
     Material *mat0 = malloc(sizeof(Material));
@@ -108,7 +104,7 @@ int alloc_objects(Scene *scene) {
         return 1;
     }
 
-    Texture *default_texture = load_texture("../example/textures/head.png");
+    Texture *default_texture = load_texture("../example/textures/diablo3_pose_diffuse.tga");
     if (default_texture == NULL) {
         printf("ERROR: failed to create default texture\n");
         return 1;
@@ -188,8 +184,8 @@ void update(float dt) {
     // scene.camera->dirty_local = true;
 
     // Rotate 1st model
-    // quat_mul(&scene.objects[0].quaternion, &slight_right);
-    // scene.dirty_locals[0] = true;
+    quat_mul(&scene.objects[0].quaternion, &slight_right);
+    scene.dirty_locals[0] = true;
 
     // Circling point lights
     float circle_radius = 30.0f;
@@ -219,7 +215,7 @@ int MAIN(int argc, char *argv[]) {
 
     Camera camera = init_camera(SCREEN_WIDTH, SCREEN_HEIGHT);
     scene.camera = &camera;
-    scene.options = OPT_USE_RASTERIZE | OPT_FPS_COUNTER;
+    scene.options = OPT_USE_RASTERIZE | OPT_NO_LIGHTING;
     mango = mango_alloc(&scene, GAME_TITLE, SCREEN_WIDTH, SCREEN_HEIGHT);
     printf("Success.\n");
 

@@ -43,15 +43,6 @@ Mat4 rotate(Vec3 angles) {
     return result;
 }
 
-Mesh mesh_empty() {
-    Mesh mesh = {.ind_count = 0,
-                 .vert_count = 0,
-                 .norm_count = 0,
-                 .uv_count = 0,
-                 .color = {{1.0f, 1.0f, 1.0f}}};
-    return mesh;
-}
-
 void game_object_update_local_matrix(GameObject *go) {
     // go = game object
     float x = go->quaternion.x, y = go->quaternion.y, z = go->quaternion.z,
@@ -109,11 +100,11 @@ GameObject game_object_default() {
     return go;
 }
 
-Mesh init_mesh_data() {
-    Mesh mesh;
-    mesh.vert_count = 0;
-    mesh.norm_count = 0;
-    mesh.uv_count = 0;
-    mesh.ind_count = 0;
+Mesh mesh_empty() {
+    Mesh mesh = {.ind_count = 0,
+                 .vert_count = 0,
+                 .norm_count = 0,
+                 .uv_count = 0,
+                 .color = {{1.0f, 1.0f, 1.0f}}};
     return mesh;
 }

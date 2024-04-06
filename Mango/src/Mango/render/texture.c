@@ -15,7 +15,7 @@ Texture* load_texture(const char* path) {
         &new_texture->width,
         &new_texture->height,
         &new_texture->channels,
-        0
+        STBI_rgb
     );
 
     if (new_texture->data == NULL) {
@@ -24,42 +24,45 @@ Texture* load_texture(const char* path) {
         return NULL;
     }
 
-    // Flip the image vertically
-    int width_in_bytes = new_texture->width * 3; // Assuming 3 channels (RGB)
-    unsigned char* temp_row = (unsigned char*)malloc(width_in_bytes);
-    if (temp_row == NULL) {
-        printf("Failed to allocate memory for image flip\n");
-        stbi_image_free(new_texture->data);
-        free(new_texture);
-        return NULL;
+    // Flip the image vertically (required)
+    if (new_texture->channels < 4){
+        // Handle image with 3 channels
+        int width_in_bytes = new_texture->width * 3;
+        unsigned char* temp_row = (unsigned char*)malloc(width_in_bytes);
+        if (temp_row == NULL) {
+            printf("Failed to allocate memory for image flip\n");
+            stbi_image_free(new_texture->data);
+            free(new_texture);
+            return NULL;
+        }
+
+        int half_height = new_texture->height / 2;
+        for (int y = 0; y < half_height; ++y) {
+            unsigned char* top_row = new_texture->data + y * width_in_bytes;
+            unsigned char* bottom_row = new_texture->data + (new_texture->height - y - 1) * width_in_bytes;
+            // Swap rows
+            memcpy(temp_row, top_row, width_in_bytes);
+            memcpy(top_row, bottom_row, width_in_bytes);
+            memcpy(bottom_row, temp_row, width_in_bytes);
+        }
+        free(temp_row);
     }
 
-    int half_height = new_texture->height / 2;
-    for (int y = 0; y < half_height; ++y) {
-        unsigned char* top_row = new_texture->data + y * width_in_bytes;
-        unsigned char* bottom_row = new_texture->data + (new_texture->height - y - 1) * width_in_bytes;
-        // Swap rows
-        memcpy(temp_row, top_row, width_in_bytes);
-        memcpy(top_row, bottom_row, width_in_bytes);
-        memcpy(bottom_row, temp_row, width_in_bytes);
-    }
-
-    free(temp_row);
     return new_texture;
 }
 
 Vec4 sample_texture(Vec2 uv, Texture *texture) {
-    // Remap UV coordinates to texture space
-    int x = uv.x * (texture->width - 1);
-    int y = uv.y * (texture->height - 1);
-
-    // Handle texture wrap modes
-    // For simplicity, assuming clamp to edge
-    x = clamp(x, 0, texture->width - 1);
-    y = clamp(y, 0, texture->height - 1);
+    // Clamp UV coordinates between 0 and 1
+    uv.x = clamp(uv.x, 0.0f, 1.0f);
+    uv.y = clamp(uv.y, 0.0f, 1.0f);
 
     // Calculate texture index
-    int index = (y * texture->width + x) * texture->channels;
+    int u_index = (int)(uv.x * texture->width);
+    int v_index = (int)(uv.y * texture->height);
+    u_index = clamp(u_index, 0, texture->width - 1);
+    v_index = clamp(v_index, 0, texture->height - 1);
+
+    int index = (u_index + v_index * texture->width) * texture->channels;
 
     // Sample color from texture
     unsigned char r = texture->data[index];

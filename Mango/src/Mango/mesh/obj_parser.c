@@ -21,8 +21,15 @@ Mesh load_obj_mesh(const char *filename) {
     int *vert_inds = (int *)malloc(alloc_amt * sizeof(int));
     int *norm_inds = (int *)malloc(alloc_amt * sizeof(int));
     int *uv_inds = (int *)malloc(alloc_amt * sizeof(int));
+    char group_name[128];
+
     while (fgets(line, sizeof(line), file)) {
-        if (line[0] == 'v' && line[1] == ' ') {
+        if (line[0] == 'g') {
+            // Group definition found
+            sscanf(line, "g %s\n", group_name);
+            // TODO: Not implemented
+            continue;
+        } else if (line[0] == 'v' && line[1] == ' ') {
             Vec3 vertex;
             if (mesh.vert_count && mesh.vert_count % alloc_amt == 0) {
                 verts = realloc(verts,

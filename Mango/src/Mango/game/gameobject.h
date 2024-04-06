@@ -13,6 +13,16 @@
 const extern Vec3 COLLOR_PALLETE[7];
 extern const float DEG2RAD;
 
+/*
+* Mesh
+*/
+typedef struct {
+    Vec3 position;
+    Vec3 normal;
+    Vec4 color;
+    Vec2 uv;
+} Vertex;
+
 typedef struct {
     int ind_count;
     int vert_count;
@@ -33,6 +43,9 @@ typedef struct {
 
 Mesh mesh_empty();
 
+/*
+* Game object
+*/
 typedef struct {
     enum {
         LIGHT_POINT,

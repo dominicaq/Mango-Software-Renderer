@@ -23,13 +23,6 @@ const extern Vec4 WIREFRAME_COLOR;
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
-typedef struct {
-    Vec3 position;
-    Vec3 normal;
-    Vec4 color;
-    Vec2 uv;
-} Vertex;
-
 /*
  * draw_model - Draw a 3D model
  * @frame: The frame to draw the model on
@@ -47,10 +40,10 @@ typedef struct {
     float distance;
 } Plane;
 
-#define NUM_CLIP_PLANES 5
+#define NUM_CLIP_PLANES 6
 
 extern Plane clip_planes[NUM_CLIP_PLANES];
 
-void init_clip_planes();
+void init_clip_planes(Options options, float near_plane, float far_plane);
 
 #endif  // DRAWING_H

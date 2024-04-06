@@ -19,19 +19,27 @@ Vec3 barycentric_coords(Vec3 p, Vec3 a, Vec3 b, Vec3 c) {
     return (Vec3){{u,v,w}};
 }
 
-Vec3 lerp_bc_coords(Vec3 bc_coords, Vec3 points[3]) {
-    // Interpolate the color using barycentric coordinates
-    return (Vec3){{
-        points[0].x * bc_coords.x + points[1].x * bc_coords.y + points[2].x
-                                                              * bc_coords.z,
-        points[0].y * bc_coords.x + points[1].y * bc_coords.y + points[2].y
-                                                              * bc_coords.z,
-        points[0].z * bc_coords.x + points[1].z * bc_coords.y + points[2].z
-                                                              * bc_coords.z,
-    }};
+Vec3 lerp_bc_coords(Vec3 bc_coords, float inverse_w, Vec3 points[3]) {
+    // Interpolate the position using barycentric coordinates
+    Vec3 interpolated_pos;
+    interpolated_pos.x = bc_coords.x * points[0].x
+         + bc_coords.y * points[1].x
+         + bc_coords.z * points[2].x;
+    interpolated_pos.y = bc_coords.x * points[0].y
+        + bc_coords.y * points[1].y
+        + bc_coords.z * points[2].y;
+    interpolated_pos.z = bc_coords.x * points[0].z
+        + bc_coords.y * points[1].z
+        + bc_coords.z * points[2].z;
+
+    // Perspective divide
+    interpolated_pos.x *= inverse_w;
+    interpolated_pos.y *= inverse_w;
+    interpolated_pos.z *= inverse_w;
+    return interpolated_pos;
 }
 
-Vec2 lerp_uv_coords(Vec3 bc_coords, float perps_w[3], Vec2 uv[3]) {
+Vec2 lerp_uv_coords(Vec3 bc_coords, float inverse_w, Vec2 uv[3]) {
     // Extract barycentric coordinates
     float alpha = bc_coords.x;
     float beta = bc_coords.y;
@@ -41,6 +49,10 @@ Vec2 lerp_uv_coords(Vec3 bc_coords, float perps_w[3], Vec2 uv[3]) {
     Vec2 interpolated_uv;
     interpolated_uv.x = alpha * uv[0].x + beta * uv[1].x + gamma * uv[2].x;
     interpolated_uv.y = alpha * uv[0].y + beta * uv[1].y + gamma * uv[2].y;
+
+    // Perspective divide (doesnt work)
+    // interpolated_uv.x *= inverse_w;
+    // interpolated_uv.y *= inverse_w;
 
     return interpolated_uv;
 }

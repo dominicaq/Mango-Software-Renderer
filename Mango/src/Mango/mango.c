@@ -15,15 +15,14 @@ Mango *mango_alloc(Scene *scene, const char *title, int width, int height) {
     }
 
     mango->scene = scene;
+    mango->ubo.options = scene->options;
     mango->frame = frame_alloc(title, width, height);
     if (mango->frame == NULL) {
         printf("mango_alloc frame malloc failed\n");
         return NULL;
     }
 
-    init_clip_planes();
-
-    mango->ubo.options = scene->options;
+    init_clip_planes(scene->options, scene->camera->z_near, scene->camera->z_far);
 
     int num_lights = 0;
     for (int i = 0; i < scene->object_count; ++i) {
