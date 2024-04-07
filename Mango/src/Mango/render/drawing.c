@@ -316,10 +316,10 @@ void transform_triangle(Frame *frame, Vertex *verts, UBO *ubo) {
             current->data[2],
         };
 
-        // bool in_view2 = clip_triangle(draw_target, list, current->plane_index);
-        // if (in_view2 == true) {
+        bool in_view2 = clip_triangle(draw_target, list, current->plane_index + 1);
+        if (in_view2 == true) {
             draw_triangle(frame, draw_target, ubo);
-        // }
+        }
         current = current->next;
     }
 

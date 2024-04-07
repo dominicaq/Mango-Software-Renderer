@@ -92,8 +92,8 @@ int alloc_objects(Scene *scene) {
 
     // Scene object 1
     scene->objects[0] = game_object_default();
-    scene->objects[0].position = (Vec3){{-10.0f, 0.0f, -20.0f}};
-    scene->objects[0].scale = (Vec3){{35.0f, 35.0f, 35.0f}};
+    scene->objects[0].position = (Vec3){{-10.0f, 0.0f, -10.0f}};
+    scene->objects[0].scale = (Vec3){{25.0f, 25.0f, 25.0f}};
     scene->attributes[0].type = ATTR_MESH;
     scene->attributes[0].mesh = load_obj_mesh("../example/models/diablo3_pose.obj");
     scene->attributes[0].mesh.color = white;
@@ -139,7 +139,7 @@ Vec4 slight_right;
 float attack_cd = 0;
 
 void start() {
-    slight_right = quat_from_axis(UNIT_Y, 0.01f);
+    slight_right = quat_from_axis(UNIT_Y, 0.001f);
 }
 
 void free_camera(float dt) {
@@ -215,7 +215,7 @@ int MAIN(int argc, char *argv[]) {
 
     Camera camera = init_camera(SCREEN_WIDTH, SCREEN_HEIGHT);
     scene.camera = &camera;
-    scene.options = OPT_USE_RASTERIZE | OPT_NO_LIGHTING | OPT_FPS_COUNTER;
+    scene.options = OPT_USE_WIREFRAME | OPT_NO_LIGHTING | OPT_FPS_COUNTER | OPT_DEBUG_CLIP_PLANE;
     mango = mango_alloc(&scene, GAME_TITLE, SCREEN_WIDTH, SCREEN_HEIGHT);
     printf("Success.\n");
 

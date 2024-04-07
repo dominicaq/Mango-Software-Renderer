@@ -1,8 +1,8 @@
 #include "linked_list.h"
 #include <stdlib.h>
 
-LinkedList* list_create() {
-    LinkedList* list = (LinkedList*)malloc(sizeof(LinkedList));
+LinkedList *list_create() {
+    LinkedList *list = (LinkedList*)malloc(sizeof(LinkedList));
     if (list == NULL) {
         return NULL;
     }
@@ -12,7 +12,7 @@ LinkedList* list_create() {
     return list;
 }
 
-void list_append(LinkedList* list, Vertex data[3], size_t index) {
+void list_append(LinkedList *list, Vertex data[3], size_t index) {
     Node* newNode = (Node*)malloc(sizeof(Node));
     if (newNode == NULL) {
         return;
@@ -39,14 +39,14 @@ void list_append(LinkedList* list, Vertex data[3], size_t index) {
     list->size++;
 }
 
-void list_destroy(LinkedList* list) {
+void list_destroy(LinkedList *list) {
     if (list == NULL) {
         return;
     }
 
-    Node* current = list->head;
+    Node *current = list->head;
     while (current != NULL) {
-        Node* next = current->next;
+        Node *next = current->next;
         free(current);
         current = next;
     }
