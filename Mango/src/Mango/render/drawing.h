@@ -14,6 +14,7 @@
 #include "../shaders/sdf.h"
 #include "../shaders/shader.h"
 #include "framedata.h"
+#include "linked_list.h"
 
 const extern Vec4 WIREFRAME_COLOR;
 

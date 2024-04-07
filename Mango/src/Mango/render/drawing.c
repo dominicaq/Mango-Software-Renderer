@@ -113,79 +113,72 @@ void init_clip_planes(Options options, float near_plane, float far_plane) {
     }
 }
 
-size_t clip_triangle(Vertex verts[21], size_t tri_index, size_t plane_index) {
-    size_t num_verts = 3;
-    for (size_t i = 0; i < NUM_CLIP_PLANES; ++i) {
+bool clip_triangle(Vertex verts[3], LinkedList *list, size_t start_index) {
+    for (size_t i = start_index; i < NUM_CLIP_PLANES; ++i) {
         // Signed distance between polygon and plane
-        float d0 = signed_distance(clip_planes[i], verts[tri_index].position);
-        float d1 = signed_distance(clip_planes[i], verts[tri_index + 1].position);
-        float d2 = signed_distance(clip_planes[i], verts[tri_index + 2].position);
+        float d0 = signed_distance(clip_planes[i], verts[0].position);
+        float d1 = signed_distance(clip_planes[i], verts[1].position);
+        float d2 = signed_distance(clip_planes[i], verts[2].position);
 
         // Check vertices against clip planes
-        Vertex *A = &verts[tri_index];
-        Vertex *B = &verts[tri_index + 1];
-        Vertex *C = &verts[tri_index + 2];
+        Vertex *A = &verts[0];
+        Vertex *B = &verts[1];
+        Vertex *C = &verts[2];
         if (d0 > 0 && d1 > 0 && d2 > 0) {
             // Triangle fully in clip volume, continue through other planes
             continue;
         } else if (d0 <= 0 && d1 <= 0 && d2 <= 0) {
             // Triangle fully outside clip volume
-            return 0;
+            return false;
         } else if (d0 > 0 && d1 < 0 && d2 < 0) {
             // Only vertex A inside clip volume
             Vertex B_prime = vertex_intersect(*A, *B, clip_planes[i]);
             Vertex C_prime = vertex_intersect(*A, *C, clip_planes[i]);
-            verts[tri_index+ 1] = B_prime;
-            verts[tri_index + 2] = C_prime;
+            verts[1] = B_prime;
+            verts[2] = C_prime;
         } else if (d0 < 0 && d1 > 0 && d2 < 0) {
             // Only vertex B inside clip volume
             Vertex A_prime = vertex_intersect(*B, *A, clip_planes[i]);
             Vertex C_prime = vertex_intersect(*B, *C, clip_planes[i]);
-            verts[tri_index] = A_prime;
-            verts[tri_index + 2] = C_prime;
+            verts[0] = A_prime;
+            verts[2] = C_prime;
         } else if (d0 < 0 && d1 < 0 && d2 > 0) {
             // Only vertex C inside clip volume
             Vertex A_prime = vertex_intersect(*C, *A, clip_planes[i]);
             Vertex B_prime = vertex_intersect(*C, *B, clip_planes[i]);
-            verts[tri_index] = A_prime;
-            verts[tri_index + 1] = B_prime;
+            verts[0] = A_prime;
+            verts[1] = B_prime;
         } else if (d0 < 0 && d1 > 0 && d2 > 0) {
             // Vertex A not in clip volume
             Vertex B_prime = vertex_intersect(*B, *A, clip_planes[i]);
             Vertex C_prime = vertex_intersect(*C, *A, clip_planes[i]);
-            verts[tri_index] = B_prime;
+            verts[0] = B_prime;
 
-            // Add new triangle and clip it
-            verts[num_verts] = B_prime;
-            verts[num_verts + 1] = *C;
-            verts[num_verts + 2] = C_prime;
-            num_verts += 3;
+            // Triangle 2
+            Vertex new_tri[3] = {B_prime, *C, C_prime};
+            list_append(list, new_tri, i);
         } else if (d0 > 0 && d1 < 0 && d2 > 0) {
             // Vertex B not in clip volume
             Vertex A_prime = vertex_intersect(*A, *B, clip_planes[i]);
             Vertex C_prime = vertex_intersect(*C, *B, clip_planes[i]);
-            verts[tri_index + 1] = C_prime;
+            verts[1] = C_prime;
 
-            // Add new triangle and clip it
-            verts[num_verts] = C_prime;
-            verts[num_verts + 1] = *A;
-            verts[num_verts + 2] = A_prime;
-            num_verts += 3;
+            // Triangle 2
+            Vertex new_tri[3] = {C_prime, *A, A_prime};
+            list_append(list, new_tri, i);
         } else if (d0 > 0 && d1 > 0 && d2 < 0) {
             // Vertex C not in clip volume
             Vertex A_prime = vertex_intersect(*A, *C, clip_planes[i]);
             Vertex B_prime = vertex_intersect(*B, *C, clip_planes[i]);
-            verts[tri_index + 2] = A_prime;
+            verts[2] = A_prime;
 
-            // Add new triangle and clip it
-            verts[num_verts] = A_prime;
-            verts[num_verts + 1] = *B;
-            verts[num_verts + 2] = B_prime;
-            num_verts += 3;
+            // Triangle 2
+            Vertex new_tri[3] = {A_prime, *B, B_prime};
+            list_append(list, new_tri, i);
         }
     }
 
-    return num_verts;
+    return true;
 }
 
 /*
@@ -279,7 +272,7 @@ void draw_triangle(Frame *frame, Vertex verts[3], UBO *ubo) {
 }
 
 void transform_triangle(Frame *frame, Vertex *verts, UBO *ubo) {
-    Vertex ndc_verts[21];
+    Vertex ndc_verts[3];
     size_t num_outside = 0;
     for (size_t i = 0; i < 3; ++i) {
         // Passed into shader
@@ -307,17 +300,31 @@ void transform_triangle(Frame *frame, Vertex *verts, UBO *ubo) {
         return;
     }
 
-
-    // Draw the triangle(s)
-    size_t num_verts = clip_triangle(ndc_verts, 0, 0);
-    for (size_t i = 0; i < num_verts; i += 3) {
-        Vertex triangle[3] = {
-            ndc_verts[i],
-            ndc_verts[i + 1],
-            ndc_verts[i + 2]
-        };
-        draw_triangle(frame, triangle, ubo);
+    // First clip pass
+    LinkedList *list = list_create();
+    bool in_view = clip_triangle(ndc_verts, list, 0);
+    if (in_view == false) {
+        return;
     }
+
+    // Finished clipping, draw all tris
+    Node *current = list->head;
+    for (size_t i = 0; i < list->size; ++i) {
+        Vertex draw_target[3] = {
+            current->data[0],
+            current->data[1],
+            current->data[2],
+        };
+
+        // bool in_view2 = clip_triangle(draw_target, list, current->plane_index);
+        // if (in_view2 == true) {
+            draw_triangle(frame, draw_target, ubo);
+        // }
+        current = current->next;
+    }
+
+    draw_triangle(frame, ndc_verts, ubo);
+    list_destroy(list);
 }
 
 void draw_mesh(Frame *frame, Mesh *mesh, UBO *ubo) {
