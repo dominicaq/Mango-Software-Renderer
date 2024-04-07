@@ -54,7 +54,7 @@ Camera init_camera(int frame_width, int frame_height) {
     cam.fov = 90.0f;
     cam.aspect = (float)(frame_width) / frame_height;
     cam.z_near = 0.01f;
-    cam.z_far = 1000.0f;
+    cam.z_far = 100.0f;
     cam.width = frame_width;
     cam.height = frame_height;
     return cam;
@@ -92,10 +92,10 @@ int alloc_objects(Scene *scene) {
 
     // Scene object 1
     scene->objects[0] = game_object_default();
-    scene->objects[0].position = (Vec3){{0.0f, 0.0f, 9.0f}};
+    scene->objects[0].position = (Vec3){{-10.0f, 0.0f, -10.0f}};
     scene->objects[0].scale = (Vec3){{15.0f, 15.0f, 15.0f}};
     scene->attributes[0].type = ATTR_MESH;
-    scene->attributes[0].mesh = load_obj_mesh("../example/models/diablo3_pose.obj");
+    scene->attributes[0].mesh = load_obj_mesh("../example/models/Head.obj");
     scene->attributes[0].mesh.color = white;
 
     Material *mat0 = malloc(sizeof(Material));
@@ -139,7 +139,7 @@ Vec4 slight_right;
 float attack_cd = 0;
 
 void start() {
-    slight_right = quat_from_axis(UNIT_Y, 0.01f);
+    slight_right = quat_from_axis(UNIT_Y, 0.001f);
 }
 
 void free_camera(float dt) {
@@ -215,7 +215,7 @@ int MAIN(int argc, char *argv[]) {
 
     Camera camera = init_camera(SCREEN_WIDTH, SCREEN_HEIGHT);
     scene.camera = &camera;
-    scene.options = OPT_USE_RASTERIZE | OPT_NO_LIGHTING;
+    scene.options = OPT_USE_WIREFRAME | OPT_NO_LIGHTING | OPT_FPS_COUNTER | OPT_DEBUG_CLIP_PLANE;
     mango = mango_alloc(&scene, GAME_TITLE, SCREEN_WIDTH, SCREEN_HEIGHT);
     printf("Success.\n");
 

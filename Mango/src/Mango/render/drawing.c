@@ -113,87 +113,79 @@ void init_clip_planes(Options options, float near_plane, float far_plane) {
     }
 }
 
-void clip_triangle(Vertex ndc_verts[21], size_t *num_verts_ptr) {
+size_t clip_triangle(Vertex verts[21], size_t tri_index, size_t plane_index) {
     size_t num_verts = 3;
-    int num_clips = 0;
     for (size_t i = 0; i < NUM_CLIP_PLANES; ++i) {
         // Signed distance between polygon and plane
-        float d0 = signed_distance(clip_planes[i], ndc_verts[0].position);
-        float d1 = signed_distance(clip_planes[i], ndc_verts[1].position);
-        float d2 = signed_distance(clip_planes[i], ndc_verts[2].position);
+        float d0 = signed_distance(clip_planes[i], verts[tri_index].position);
+        float d1 = signed_distance(clip_planes[i], verts[tri_index + 1].position);
+        float d2 = signed_distance(clip_planes[i], verts[tri_index + 2].position);
 
         // Check vertices against clip planes
-        Vertex *A = &ndc_verts[0];
-        Vertex *B = &ndc_verts[1];
-        Vertex *C = &ndc_verts[2];
+        Vertex *A = &verts[tri_index];
+        Vertex *B = &verts[tri_index + 1];
+        Vertex *C = &verts[tri_index + 2];
         if (d0 > 0 && d1 > 0 && d2 > 0) {
             // Triangle fully in clip volume, continue through other planes
             continue;
         } else if (d0 <= 0 && d1 <= 0 && d2 <= 0) {
             // Triangle fully outside clip volume
-            return;
+            return 0;
         } else if (d0 > 0 && d1 < 0 && d2 < 0) {
             // Only vertex A inside clip volume
             Vertex B_prime = vertex_intersect(*A, *B, clip_planes[i]);
             Vertex C_prime = vertex_intersect(*A, *C, clip_planes[i]);
-            ndc_verts[1] = B_prime;
-            ndc_verts[2] = C_prime;
-            num_clips++;
+            verts[tri_index+ 1] = B_prime;
+            verts[tri_index + 2] = C_prime;
         } else if (d0 < 0 && d1 > 0 && d2 < 0) {
             // Only vertex B inside clip volume
             Vertex A_prime = vertex_intersect(*B, *A, clip_planes[i]);
             Vertex C_prime = vertex_intersect(*B, *C, clip_planes[i]);
-            ndc_verts[0] = A_prime;
-            ndc_verts[2] = C_prime;
-            num_clips++;
+            verts[tri_index] = A_prime;
+            verts[tri_index + 2] = C_prime;
         } else if (d0 < 0 && d1 < 0 && d2 > 0) {
             // Only vertex C inside clip volume
             Vertex A_prime = vertex_intersect(*C, *A, clip_planes[i]);
             Vertex B_prime = vertex_intersect(*C, *B, clip_planes[i]);
-            ndc_verts[0] = A_prime;
-            ndc_verts[1] = B_prime;
-            num_clips++;
+            verts[tri_index] = A_prime;
+            verts[tri_index + 1] = B_prime;
         } else if (d0 < 0 && d1 > 0 && d2 > 0) {
             // Vertex A not in clip volume
             Vertex B_prime = vertex_intersect(*B, *A, clip_planes[i]);
             Vertex C_prime = vertex_intersect(*C, *A, clip_planes[i]);
-            ndc_verts[0] = B_prime;
+            verts[tri_index] = B_prime;
 
             // Add new triangle and clip it
-            ndc_verts[num_verts] = B_prime;
-            ndc_verts[num_verts + 1] = *C;
-            ndc_verts[num_verts + 2] = C_prime;
+            verts[num_verts] = B_prime;
+            verts[num_verts + 1] = *C;
+            verts[num_verts + 2] = C_prime;
             num_verts += 3;
-            num_clips++;
         } else if (d0 > 0 && d1 < 0 && d2 > 0) {
             // Vertex B not in clip volume
             Vertex A_prime = vertex_intersect(*A, *B, clip_planes[i]);
             Vertex C_prime = vertex_intersect(*C, *B, clip_planes[i]);
-            ndc_verts[1] = C_prime;
+            verts[tri_index + 1] = C_prime;
 
             // Add new triangle and clip it
-            ndc_verts[num_verts] = C_prime;
-            ndc_verts[num_verts + 1] = *A;
-            ndc_verts[num_verts + 2] = A_prime;
+            verts[num_verts] = C_prime;
+            verts[num_verts + 1] = *A;
+            verts[num_verts + 2] = A_prime;
             num_verts += 3;
         } else if (d0 > 0 && d1 > 0 && d2 < 0) {
             // Vertex C not in clip volume
             Vertex A_prime = vertex_intersect(*A, *C, clip_planes[i]);
             Vertex B_prime = vertex_intersect(*B, *C, clip_planes[i]);
-            ndc_verts[2] = A_prime;
+            verts[tri_index + 2] = A_prime;
 
             // Add new triangle and clip it
-            ndc_verts[num_verts] = A_prime;
-            ndc_verts[num_verts + 1] = *B;
-            ndc_verts[num_verts + 2] = B_prime;
+            verts[num_verts] = A_prime;
+            verts[num_verts + 1] = *B;
+            verts[num_verts + 2] = B_prime;
             num_verts += 3;
-            num_clips++;
         }
     }
-    if (num_clips > 1) {
-        printf("num_clips%d\n", num_clips);
-    }
-    *num_verts_ptr = num_verts;
+
+    return num_verts;
 }
 
 /*
@@ -315,10 +307,9 @@ void transform_triangle(Frame *frame, Vertex *verts, UBO *ubo) {
         return;
     }
 
-    size_t num_verts = 0;
-    clip_triangle(ndc_verts, &num_verts);
 
     // Draw the triangle(s)
+    size_t num_verts = clip_triangle(ndc_verts, 0, 0);
     for (size_t i = 0; i < num_verts; i += 3) {
         Vertex triangle[3] = {
             ndc_verts[i],
