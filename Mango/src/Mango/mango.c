@@ -22,7 +22,7 @@ Mango *mango_alloc(Scene *scene, const char *title, int width, int height) {
         return NULL;
     }
 
-    init_clip_planes(scene->options, scene->camera->z_near, scene->camera->z_far);
+    init_view_frustum(scene->options, scene->camera);
 
     int num_lights = 0;
     for (int i = 0; i < scene->object_count; ++i) {

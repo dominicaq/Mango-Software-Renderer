@@ -22,6 +22,7 @@ CPU-bound nature. In contrast, modern rendering APIs leverage the GPU for high-p
 - Blinn-Phong shader for realistic lighting
 - Multi-light fragment shader
 - Texture Sampling
+- Clipping
 
 # Options
 - Wireframe

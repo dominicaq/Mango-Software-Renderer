@@ -40,10 +40,11 @@ float vec3_magnitude(Vec3 a) { return sqrt(a.x * a.x + a.y * a.y + a.z * a.z); }
 float vec3_dot(Vec3 a, Vec3 b) { return a.x * b.x + a.y * b.y + a.z * b.z; }
 
 Vec3 vec3_cross(Vec3 a, Vec3 b) {
-    a.x = a.y * b.z - a.z * b.y;
-    a.y = a.z * b.x - a.x * b.z;
-    a.z = a.x * b.y - a.y * b.x;
-    return a;
+    Vec3 result;
+    result.x = a.y * b.z - a.z * b.y;
+    result.y = a.z * b.x - a.x * b.z;
+    result.z = a.x * b.y - a.y * b.x;
+    return result;
 }
 
 Vec3 vec3_normalize(Vec3 a) {

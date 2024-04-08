@@ -49,11 +49,11 @@ const Vec3 COLLOR_PALLETE[7] = {
 Camera init_camera(int frame_width, int frame_height) {
     Camera cam;
     cam.game_object = game_object_default();
-    cam.game_object.position = (Vec3){{0.0f, 1.0f, 25.0f}};
+    cam.game_object.position = (Vec3){{0.0f, 1.0f, 30.0f}};
     cam.dirty_local = true;
-    cam.fov = 90.0f;
+    cam.fov = 70.0f;
     cam.aspect = (float)(frame_width) / frame_height;
-    cam.z_near = 0.01f;
+    cam.z_near = 0.1f;
     cam.z_far = 100.0f;
     cam.width = frame_width;
     cam.height = frame_height;
@@ -92,8 +92,8 @@ int alloc_objects(Scene *scene) {
 
     // Scene object 1
     scene->objects[0] = game_object_default();
-    scene->objects[0].position = (Vec3){{-10.0f, 0.0f, -10.0f}};
-    scene->objects[0].scale = (Vec3){{25.0f, 25.0f, 25.0f}};
+    scene->objects[0].position = (Vec3){{0.0f, 0.0f, -5.0f}};
+    scene->objects[0].scale = (Vec3){{20.0f, 20.0f, 20.0f}};
     scene->attributes[0].type = ATTR_MESH;
     scene->attributes[0].mesh = load_obj_mesh("../example/models/diablo3_pose.obj");
     scene->attributes[0].mesh.color = white;
@@ -215,7 +215,7 @@ int MAIN(int argc, char *argv[]) {
 
     Camera camera = init_camera(SCREEN_WIDTH, SCREEN_HEIGHT);
     scene.camera = &camera;
-    scene.options = OPT_USE_WIREFRAME | OPT_NO_LIGHTING | OPT_FPS_COUNTER | OPT_DEBUG_CLIP_PLANE;
+    scene.options = OPT_USE_RASTERIZE | OPT_NO_LIGHTING | OPT_FPS_COUNTER;
     mango = mango_alloc(&scene, GAME_TITLE, SCREEN_WIDTH, SCREEN_HEIGHT);
     printf("Success.\n");
 

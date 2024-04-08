@@ -57,6 +57,34 @@ void wire_frame(Frame *frame, Vec3 screen_space[3]) {
 /*
 * Triangle clipping
 */
+void init_view_frustum(Options options, Camera *cam) {
+    float d = 0.0f;
+    float z_near = cam->z_near;
+    float z_far = cam->z_far;
+    if (options & OPT_DEBUG_CLIP_PLANE) {
+        d = -0.5f;
+        z_near = 0.5f;
+        z_far = 100.f;
+    }
+
+    // Near
+    clip_planes[0] = (Plane){(Vec3){{0.0f, 0.0f, 1.0f}}, z_near};
+    // Left
+    clip_planes[1] = (Plane){(Vec3){{1.0f / sqrt(2.0f), 0.0f, 1.0f / sqrt(2.0f)}}, d};
+    // Right
+    clip_planes[2] = (Plane){(Vec3){{-1.0f / sqrt(2.0f), 0.0f, 1.0f / sqrt(2.0f)}}, d};
+    // Bottom
+    clip_planes[3] = (Plane){(Vec3){{0.0f, -1.0f / sqrt(2.0f), 1.0f / sqrt(2.0f)}}, d};
+    // Top
+    clip_planes[4] = (Plane){(Vec3){{0.0f, 1.0f / sqrt(2.0f), 1.0f / sqrt(2.0f)}}, d};
+    // Far
+    clip_planes[5] = (Plane){(Vec3){{0.0f, 0.0f, -1.0f}}, z_far};
+}
+
+float signed_distance(Plane plane, Vec3 point) {
+    return vec3_dot(plane.normal, point) + plane.distance;
+}
+
 Vertex vertex_intersect(const Vertex a, const Vertex b, Plane plane) {
     Vec3 line_dir = vec3_sub(b.position, a.position);
     float dot_denominator = vec3_dot(plane.normal, line_dir);
@@ -69,48 +97,15 @@ Vertex vertex_intersect(const Vertex a, const Vertex b, Plane plane) {
 
     float t = -(vec3_dot(a.position, plane.normal) + plane.distance) / dot_denominator;
 
-    // Compute the new vertex intersection point
+    // Compute the new vertex
+    Vec3 normal_dir = vec3_sub(b.normal, a.normal);
+    Vec2 uv_dir = vec2_sub(b.uv, a.uv);
+
     Vertex result;
     result.position = vec3_add(a.position, vec3_scale(line_dir, t));
-    result.normal = vec3_add(a.normal, vec3_scale(vec3_sub(b.normal, a.normal),t));
-    result.uv = vec2_add(a.uv, vec2_scale(vec2_sub(b.uv, a.uv), t));
+    result.normal = vec3_add(a.normal, vec3_scale(normal_dir, t));
+    result.uv = vec2_add(a.uv, vec2_scale(uv_dir, t));
     return result;
-}
-
-float signed_distance(Plane plane, Vec3 point) {
-    return vec3_dot(plane.normal, point) + plane.distance;
-}
-
-void init_clip_planes(Options options, float near_plane, float far_plane) {
-    // Clip planes: Dot of <normal, position> precalculated
-    // Near plane
-    clip_planes[0] = (Plane){(Vec3){{0.0f, 0.0f, 1.0f}}, near_plane};
-    // Left plane
-    clip_planes[1] = (Plane){(Vec3){{1.0f * sqrt(2.0f), 0.0f, 1.0f * sqrt(2.0f)}}, 0.0f};
-    // Right Plane
-    clip_planes[2] = (Plane){(Vec3){{-1.0f * sqrt(2.0f), 0.0f, 1.0f * sqrt(2.0f)}}, 0.0f};
-    // Bottom Plane
-    clip_planes[3] = (Plane){(Vec3){{0.0f, 1.0f * sqrt(2.0f), 1.0f * sqrt(2.0f)}}, 0.0f};
-    // Top Plane
-    clip_planes[4] = (Plane){(Vec3){{0.0f, -1.0f * sqrt(2.0f), 1.0f * sqrt(2.0f)}}, 0.0f};
-    // Far plane
-    clip_planes[5] = (Plane){(Vec3){{0.0f, 0.0f, -1.0f}}, far_plane};
-
-    // Debugging
-    if (options & OPT_DEBUG_CLIP_PLANE) {
-        // Near plane
-        clip_planes[0] = (Plane){(Vec3){{0.0f, 0.0f, 1.0f}}, 0.5f};
-        // Left plane
-        clip_planes[1] = (Plane){(Vec3){{1.0f * q_rsqrt(2.0f), 0.0f, 1.0f * q_rsqrt(2.0f)}}, -0.5f};
-        // Right Plane
-        clip_planes[2] = (Plane){(Vec3){{-1.0f * q_rsqrt(2.0f), 0.0f, 1.0f * q_rsqrt(2.0f)}}, -0.5f};
-        // Bottom Plane
-        clip_planes[3] = (Plane){(Vec3){{0.0f, 1.0f * q_rsqrt(2.0f), 1.0f * q_rsqrt(2.0f)}}, -0.5f};
-        // Top Plane
-        clip_planes[4] = (Plane){(Vec3){{0.0f, -1.0f * q_rsqrt(2.0f), 1.0f * q_rsqrt(2.0f)}}, -0.5f};
-        // Far plane
-        clip_planes[5] = (Plane){(Vec3){{0.0f, 0.0f, -1.0f}}, 100.0f};
-    }
 }
 
 bool clip_triangle(Vertex verts[3], LinkedList *list, size_t start_index) {
@@ -127,7 +122,7 @@ bool clip_triangle(Vertex verts[3], LinkedList *list, size_t start_index) {
         if (d0 > 0 && d1 > 0 && d2 > 0) {
             // Triangle fully in clip volume, continue through other planes
             continue;
-        } else if (d0 <= 0 && d1 <= 0 && d2 <= 0) {
+        } else if (d0 < 0 && d1 < 0 && d2 < 0) {
             // Triangle fully outside clip volume
             return false;
         } else if (d0 > 0 && d1 < 0 && d2 < 0) {
@@ -272,6 +267,7 @@ void draw_triangle(Frame *frame, Vertex verts[3], UBO *ubo) {
 }
 
 void transform_triangle(Frame *frame, Vertex *verts, UBO *ubo) {
+    // Vertex transformation
     Vertex ndc_verts[3];
     size_t num_outside = 0;
     for (size_t i = 0; i < 3; ++i) {
@@ -307,7 +303,7 @@ void transform_triangle(Frame *frame, Vertex *verts, UBO *ubo) {
         return;
     }
 
-    // Finished clipping, draw all tris
+    // Finished clipping, draw all triangles
     Node *current = list->head;
     for (size_t i = 0; i < list->size; ++i) {
         Vertex draw_target[3] = {

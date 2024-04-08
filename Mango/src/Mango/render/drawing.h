@@ -45,6 +45,6 @@ typedef struct {
 
 extern Plane clip_planes[NUM_CLIP_PLANES];
 
-void init_clip_planes(Options options, float near_plane, float far_plane);
+void init_view_frustum(Options options, Camera *cam);
 
 #endif  // DRAWING_H

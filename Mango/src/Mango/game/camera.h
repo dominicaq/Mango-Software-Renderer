@@ -31,4 +31,5 @@ void camera_update_matrix(Camera *cam);
  */
 Mat4 perspective(const Camera *cam);
 
+Mat4 orthographic(const Camera *cam, float left, float right, float bottom, float top);
 #endif

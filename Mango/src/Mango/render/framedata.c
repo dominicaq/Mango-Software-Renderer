@@ -28,6 +28,16 @@ void frame_reset(Frame *frame) {
 void frame_update(Frame *frame) { display_update(frame->display); }
 
 void frame_set_pixel(Frame *frame, int x, int y, Vec4 color) {
+    // Out of bounds
+    if (x < 0 || x > frame->width || y < 0 || y > frame->height) {
+        printf("Attempted to set pixel out of bounds\n");
+        printf("Frame Buffer dimensions\n");
+        printf("Width: %d Height: %d\n", frame->width, frame->height);
+        printf("Attempted pixel:\n");
+        printf("X: %d Y: %d\n", x, y);
+        exit(EXIT_FAILURE);
+    }
+
     // Convert color values that should be between 0-1 to 0-255
     color.x = color.x * 255.0f;
     color.y = color.y * 255.0f;
@@ -64,6 +74,6 @@ Frame *frame_alloc(const char *title, int width, int height) {
 
 void frame_free(Frame *frame) {
     display_stop(frame->display);
-    // free(frame->z_buffer);
-    // free(frame);
+    free(frame->z_buffer);
+    free(frame);
 }
