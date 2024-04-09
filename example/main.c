@@ -7,8 +7,8 @@
 
 // Window data
 const char *GAME_TITLE = "Mango Renderer";
-const int SCREEN_WIDTH = 800;
-const int SCREEN_HEIGHT = 600;
+const int SCREEN_WIDTH = 500;
+const int SCREEN_HEIGHT = 500;
 
 void fps_counter() {
     static int frames = 0;
@@ -93,11 +93,12 @@ int alloc_objects(Scene *scene) {
     // Scene object 1
     scene->objects[0] = game_object_default();
     scene->objects[0].position = (Vec3){{0.0f, 0.0f, -5.0f}};
-    scene->objects[0].scale = (Vec3){{20.0f, 20.0f, 20.0f}};
+    scene->objects[0].scale = (Vec3){{25.0f, 25.0f, 25.0f}};
     scene->attributes[0].type = ATTR_MESH;
     scene->attributes[0].mesh = load_obj_mesh("../example/models/diablo3_pose.obj");
     scene->attributes[0].mesh.color = white;
 
+    // Scene object 1 material
     Material *mat0 = malloc(sizeof(Material));
     if (mat0 == NULL) {
         printf("ERROR: malloc failed mat0\n");
@@ -109,7 +110,16 @@ int alloc_objects(Scene *scene) {
         printf("ERROR: failed to create default texture\n");
         return 1;
     }
+
+    Texture *nm_texture = load_texture("../example/textures/diablo3_pose_nm.tga");
+    if (nm_texture == NULL) {
+        printf("ERROR: failed to create normal map texture\n");
+        return 1;
+    }
+
     mat0->albedo_map = default_texture;
+    mat0->normal_map = nm_texture;
+    mat0->color = white;
     scene->attributes[0].mesh.material = mat0;
 
     // Scene Object 2
@@ -121,7 +131,7 @@ int alloc_objects(Scene *scene) {
     // scene->attributes[1].mesh = load_obj_mesh("../models/light_box.obj");
     // scene->attributes[1].mesh.color = blue;
 
-    // Lights
+    // Scene lights
     for (int i = POINT_LIGHTS_BEGIN; i < POINT_LIGHTS_END; ++i) {
         scene->objects[i] = game_object_default();
         scene->attributes[i].type = ATTR_LIGHT;
@@ -184,11 +194,11 @@ void update(float dt) {
     // scene.camera->dirty_local = true;
 
     // Rotate 1st model
-    quat_mul(&scene.objects[0].quaternion, &slight_right);
-    scene.dirty_locals[0] = true;
+    // quat_mul(&scene.objects[0].quaternion, &slight_right);
+    // scene.dirty_locals[0] = true;
 
     // Circling point lights
-    float circle_radius = 30.0f;
+    float circle_radius = 100.0f;
     int num_lights = POINT_LIGHTS_END - POINT_LIGHTS_BEGIN;
     float angle_increment = 2.0f * M_PI / num_lights;
     for (int i = POINT_LIGHTS_BEGIN; i < POINT_LIGHTS_END; ++i) {
@@ -196,7 +206,7 @@ void update(float dt) {
         float x = circle_radius * cosf(angle);
         float z = circle_radius * sinf(angle);
         scene.dirty_locals[i] = true;
-        scene.objects[i].position = (Vec3){{x, 5.0f, z}};
+        scene.objects[i].position = (Vec3){{x, 10.0f, z}};
     }
 
     if (scene.options & OPT_FPS_COUNTER) {
@@ -215,7 +225,7 @@ int MAIN(int argc, char *argv[]) {
 
     Camera camera = init_camera(SCREEN_WIDTH, SCREEN_HEIGHT);
     scene.camera = &camera;
-    scene.options = OPT_USE_RASTERIZE | OPT_NO_LIGHTING | OPT_FPS_COUNTER;
+    scene.options = OPT_USE_RASTERIZE | OPT_VIEW_NORMALS |OPT_FPS_COUNTER;
     mango = mango_alloc(&scene, GAME_TITLE, SCREEN_WIDTH, SCREEN_HEIGHT);
     printf("Success.\n");
 

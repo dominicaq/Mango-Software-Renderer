@@ -23,6 +23,9 @@ void fragment_shader(UBO *ubo, Vec3 frag_coord) {
     Vec3 frag_pos = ubo->f_data.frag_pos;
     Vec3 view_vec = vec3_sub(ubo->u_cam_pos, frag_pos);
     Vec3 N = vec3_normalize(ubo->f_data.gl_normal);
+    if (ubo->u_mat->normal_map != NULL) {
+        N = vec4_homogenize(sample_texture(ubo->f_data.uv, ubo->u_mat->normal_map));
+    }
     Vec3 V = vec3_normalize(view_vec);
 
     // DEBUG OPTIONS
@@ -84,7 +87,7 @@ void fragment_shader(UBO *ubo, Vec3 frag_coord) {
 
     Vec4 final_color = vec4_mul_vec4(albedo_color, lighting_rgba);
     // Gamma correction
-    float gamma = 0.4f;
+    float gamma = 0.1f;
     final_color.x = powf(final_color.x, gamma);
     final_color.y = powf(final_color.y, gamma);
     final_color.z = powf(final_color.z, gamma);
