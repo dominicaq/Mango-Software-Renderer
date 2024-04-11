@@ -19,7 +19,7 @@ Vec3 barycentric_coords(Vec3 p, Vec3 a, Vec3 b, Vec3 c) {
     return (Vec3){{u,v,w}};
 }
 
-Vec3 lerp_bc_coords(Vec3 bc_coords, float inverse_w, Vec3 points[3]) {
+Vec3 lerp_bc_coords(Vec3 bc_coords, Vec3 points[3]) {
     // Interpolate the position using barycentric coordinates
     Vec3 interpolated_pos;
     interpolated_pos.x = bc_coords.x * points[0].x
@@ -32,10 +32,6 @@ Vec3 lerp_bc_coords(Vec3 bc_coords, float inverse_w, Vec3 points[3]) {
         + bc_coords.y * points[1].z
         + bc_coords.z * points[2].z;
 
-    // Perspective divide
-    interpolated_pos.x *= inverse_w;
-    interpolated_pos.y *= inverse_w;
-    interpolated_pos.z *= inverse_w;
     return interpolated_pos;
 }
 
@@ -49,10 +45,6 @@ Vec2 lerp_uv_coords(Vec3 bc_coords, float inverse_w, Vec2 uv[3]) {
     Vec2 interpolated_uv;
     interpolated_uv.x = alpha * uv[0].x + beta * uv[1].x + gamma * uv[2].x;
     interpolated_uv.y = alpha * uv[0].y + beta * uv[1].y + gamma * uv[2].y;
-
-    // Perspective divide (doesnt work)
-    // interpolated_uv.x *= inverse_w;
-    // interpolated_uv.y *= inverse_w;
 
     return interpolated_uv;
 }

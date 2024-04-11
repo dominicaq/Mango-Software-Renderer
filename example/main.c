@@ -35,7 +35,7 @@ Scene scene;
 Vec4 slight_right;
 
 int POINT_LIGHTS_BEGIN = 2;
-int POINT_LIGHTS_END = 3;
+int POINT_LIGHTS_END = 4;
 const Vec3 COLLOR_PALLETE[7] = {
     {{1.0f, 0.0f, 0.0f}},  // Red
     {{0.0f, 1.0f, 0.0f}},  // Green
@@ -49,11 +49,11 @@ const Vec3 COLLOR_PALLETE[7] = {
 Camera init_camera(int frame_width, int frame_height) {
     Camera cam;
     cam.game_object = game_object_default();
-    cam.game_object.position = (Vec3){{0.0f, 1.0f, 30.0f}};
+    cam.game_object.position = (Vec3){{0.0f, 1.0f, 6.0f}};
     cam.dirty_local = true;
-    cam.fov = 70.0f;
+    cam.fov = 60.0f;
     cam.aspect = (float)(frame_width) / frame_height;
-    cam.z_near = 0.1f;
+    cam.z_near = 0.01f;
     cam.z_far = 100.0f;
     cam.width = frame_width;
     cam.height = frame_height;
@@ -92,8 +92,8 @@ int alloc_objects(Scene *scene) {
 
     // Scene object 1
     scene->objects[0] = game_object_default();
-    scene->objects[0].position = (Vec3){{0.0f, 0.0f, -5.0f}};
-    scene->objects[0].scale = (Vec3){{25.0f, 25.0f, 25.0f}};
+    scene->objects[0].position = (Vec3){{0.0f, 0.0f, -3.0f}};
+    scene->objects[0].scale = (Vec3){{6.0f, 6.0f, 6.0f}};
     scene->attributes[0].type = ATTR_MESH;
     scene->attributes[0].mesh = load_obj_mesh("../example/models/diablo3_pose.obj");
     scene->attributes[0].mesh.color = white;
@@ -137,7 +137,7 @@ int alloc_objects(Scene *scene) {
         scene->attributes[i].type = ATTR_LIGHT;
         scene->attributes[i].light.type = LIGHT_POINT;
         scene->attributes[i].light.color = COLLOR_PALLETE[i];
-        scene->attributes[i].light.intensity = 15.0f;
+        scene->attributes[i].light.intensity = 0.5f;
         scene->attributes[i].light.radius = 10.0f;
     }
 
@@ -152,40 +152,12 @@ void start() {
     slight_right = quat_from_axis(UNIT_Y, 0.001f);
 }
 
-void free_camera(float dt) {
-    // const Uint8 *state = SDL_GetKeyboardState(NULL);
-
-    // float cameraSpeed = 5.0f * dt; // Adjust speed as necessary
-
-    // Vec3 forward = vec3_scale(scene.camera->game_object.forward, cameraSpeed);
-    // Vec3 right = vec3_scale(scene.camera->game_object.right, cameraSpeed);
-
-    // if (state[SDL_SCANCODE_W]) {
-    //     scene.camera->game_object.position = vec3_add(scene.camera->game_object.position, forward);
-    //     scene.camera->dirty_local = true;
-    // }
-    // if (state[SDL_SCANCODE_S]) {
-    //     scene.camera->game_object.position = vec3_sub(scene.camera->game_object.position, forward);
-    //     scene.camera->dirty_local = true;
-    // }
-    // if (state[SDL_SCANCODE_A]) {
-    //     scene.camera->game_object.position = vec3_sub(scene.camera->game_object.position, right);
-    //     scene.camera->dirty_local = true;
-    // }
-    // if (state[SDL_SCANCODE_D]) {
-    //     scene.camera->game_object.position = vec3_add(scene.camera->game_object.position, right);
-    //     scene.camera->dirty_local = true;
-    // }
-}
-
 void update(float dt) {
     static float frames = 0;
 
     // Rotate camera
     // quat_mul(&scene.camera->game_object.quaternion, &slight_right);
     // scene.camera->dirty_local = true;
-
-    free_camera(dt);
 
     // quat_mul(&scene.objects[7].quaternion, &slight_right);
     // scene.dirty_locals[7] = true;
@@ -194,19 +166,19 @@ void update(float dt) {
     // scene.camera->dirty_local = true;
 
     // Rotate 1st model
-    // quat_mul(&scene.objects[0].quaternion, &slight_right);
-    // scene.dirty_locals[0] = true;
+    quat_mul(&scene.objects[0].quaternion, &slight_right);
+    scene.dirty_locals[0] = true;
 
     // Circling point lights
     float circle_radius = 100.0f;
     int num_lights = POINT_LIGHTS_END - POINT_LIGHTS_BEGIN;
     float angle_increment = 2.0f * M_PI / num_lights;
     for (int i = POINT_LIGHTS_BEGIN; i < POINT_LIGHTS_END; ++i) {
-        float angle = angle_increment * (i + (frames / 1000.0f));
+        float angle = angle_increment * (i + (frames / 100.0f));
         float x = circle_radius * cosf(angle);
         float z = circle_radius * sinf(angle);
         scene.dirty_locals[i] = true;
-        scene.objects[i].position = (Vec3){{x, 10.0f, z}};
+        scene.objects[i].position = (Vec3){{x, circle_radius, z}};
     }
 
     if (scene.options & OPT_FPS_COUNTER) {
@@ -225,7 +197,7 @@ int MAIN(int argc, char *argv[]) {
 
     Camera camera = init_camera(SCREEN_WIDTH, SCREEN_HEIGHT);
     scene.camera = &camera;
-    scene.options = OPT_USE_RASTERIZE | OPT_VIEW_NORMALS |OPT_FPS_COUNTER;
+    scene.options = OPT_USE_RASTERIZE | OPT_FPS_COUNTER;
     mango = mango_alloc(&scene, GAME_TITLE, SCREEN_WIDTH, SCREEN_HEIGHT);
     printf("Success.\n");
 

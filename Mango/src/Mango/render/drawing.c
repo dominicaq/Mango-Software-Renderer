@@ -223,8 +223,8 @@ void rasterize(Frame *frame, Vertex verts[3], Vec3 ss[3],
                 frame->z_buffer[buffer_index] = P.z;
 
                 // Interpolate vertex data
-                ubo->f_data.gl_normal = lerp_bc_coords(bc_coords, inverse_w, normals);
-                ubo->f_data.frag_pos = lerp_bc_coords(bc_coords, inverse_w, view_space);
+                ubo->f_data.gl_normal = lerp_bc_coords(bc_coords, normals);
+                ubo->f_data.frag_pos = lerp_bc_coords(bc_coords, view_space);
                 ubo->f_data.uv = lerp_uv_coords(bc_coords, inverse_w, uvs);
 
                 fragment_shader(ubo, P);

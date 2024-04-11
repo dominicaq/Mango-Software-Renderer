@@ -35,7 +35,7 @@ Vec3 barycentric_coords(Vec3 p, Vec3 a, Vec3 b, Vec3 c);
  * @param data An array of data values associated with the vertices.
  * @return The interpolated data value.
  */
-Vec3 lerp_bc_coords(Vec3 bc_coords, float inverse_w, Vec3 data[3]);
+Vec3 lerp_bc_coords(Vec3 bc_coords, Vec3 data[3]);
 
 Vec2 lerp_uv_coords(Vec3 bc_coords, float inverse_w, Vec2 uvs[3]);
 
