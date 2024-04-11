@@ -34,7 +34,7 @@ void fps_counter() {
 Scene scene;
 Vec4 slight_right;
 
-int POINT_LIGHTS_BEGIN = 2;
+int POINT_LIGHTS_BEGIN = 3;
 int POINT_LIGHTS_END = 4;
 const Vec3 COLLOR_PALLETE[7] = {
     {{1.0f, 0.0f, 0.0f}},  // Red
@@ -93,32 +93,42 @@ int alloc_objects(Scene *scene) {
     // Scene object 1
     scene->objects[0] = game_object_default();
     scene->objects[0].position = (Vec3){{0.0f, 0.0f, -3.0f}};
-    scene->objects[0].scale = (Vec3){{6.0f, 6.0f, 6.0f}};
+    scene->objects[0].scale = (Vec3){{4.0f, 4.0f, 4.0f}};
     scene->attributes[0].type = ATTR_MESH;
-    scene->attributes[0].mesh = load_obj_mesh("../example/models/diablo3_pose.obj");
+    scene->attributes[0].mesh = load_obj_mesh("../example/models/head.obj");
     scene->attributes[0].mesh.color = white;
 
     // Scene object 1 material
     Material *mat0 = malloc(sizeof(Material));
     if (mat0 == NULL) {
-        printf("ERROR: malloc failed mat0\n");
+        printf("ERROR: failed to alloc material\n");
         return 1;
     }
+    mat0->albedo_map = NULL;
+    mat0->normal_map = NULL;
+    mat0->tangent_map = NULL;
 
-    Texture *default_texture = load_texture("../example/textures/diablo3_pose_diffuse.tga");
+    Texture *default_texture = load_texture("../example/textures/head_diffuse.png");
     if (default_texture == NULL) {
         printf("ERROR: failed to create default texture\n");
         return 1;
     }
 
-    Texture *nm_texture = load_texture("../example/textures/diablo3_pose_nm.tga");
+    Texture *nm_texture = load_texture("../example/textures/head_nm.tga");
     if (nm_texture == NULL) {
         printf("ERROR: failed to create normal map texture\n");
         return 1;
     }
 
+    Texture *tm_texture = load_texture("../example/textures/head_nm_tangent.tga");
+    if (tm_texture == NULL) {
+        printf("ERROR: failed to create tangent map texture\n");
+        return 1;
+    }
+
     mat0->albedo_map = default_texture;
     mat0->normal_map = nm_texture;
+    mat0->tangent_map = tm_texture;
     mat0->color = white;
     scene->attributes[0].mesh.material = mat0;
 
@@ -137,8 +147,8 @@ int alloc_objects(Scene *scene) {
         scene->attributes[i].type = ATTR_LIGHT;
         scene->attributes[i].light.type = LIGHT_POINT;
         scene->attributes[i].light.color = COLLOR_PALLETE[i];
-        scene->attributes[i].light.intensity = 1.5f;
-        scene->attributes[i].light.radius = 10.0f;
+        scene->attributes[i].light.intensity = 1.25f;
+        scene->attributes[i].light.radius = 7.0f;
     }
 
     return 0;
@@ -170,15 +180,15 @@ void update(float dt) {
     scene.dirty_locals[0] = true;
 
     // Circling point lights
-    float circle_radius = 5.5f;
+    float circle_radius = 10.5f;
     int num_lights = POINT_LIGHTS_END - POINT_LIGHTS_BEGIN;
     float angle_increment = 2.0f * M_PI / num_lights;
     for (int i = POINT_LIGHTS_BEGIN; i < POINT_LIGHTS_END; ++i) {
-        float angle = angle_increment * (i + (frames / 100.0f));
+        float angle = angle_increment * (i + (frames / 1000.0f));
         float x = circle_radius * cosf(angle);
         float z = circle_radius * sinf(angle);
         scene.dirty_locals[i] = true;
-        scene.objects[i].position = (Vec3){{x, circle_radius * 2, z}};
+        scene.objects[i].position = (Vec3){{x + 5, z + 5, 0.0f}};
     }
 
     if (scene.options & OPT_FPS_COUNTER) {

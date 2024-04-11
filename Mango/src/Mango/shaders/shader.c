@@ -47,6 +47,12 @@ void fragment_shader(UBO *ubo, Vec3 frag_coord) {
         return;
     }
 
+    // Specular texture map
+    Vec3 normal_tangent = N;
+    if (ubo->u_mat->tangent_map != NULL) {
+        normal_tangent = vec4_to_vec3(sample_texture(ubo->f_data.uv, ubo->u_mat->tangent_map));
+    }
+
     // No texture
     if (ubo->options & OPT_NO_TEXTURE) {
         albedo_color = vec3_to_vec4(ubo->u_color, 1.0f);
@@ -75,19 +81,24 @@ void fragment_shader(UBO *ubo, Vec3 frag_coord) {
 
             // Specular
             Vec3 half_angle = vec3_normalize(vec3_add(L, V));
-            float blinn = pow(fmax(vec3_dot(N, half_angle), 0.0f), 4.0f);
-            Vec3 specular = vec3_scale(light_color, blinn * attenuation);
+            float specular_angle = pow(fmax(vec3_dot(normal_tangent, half_angle), 0.0), 8.0f);
+            Vec3 specular = vec3_scale(light_color, ubo->lights[i]->intensity * specular_angle * attenuation);
             total_specular = vec3_add(total_specular, specular);
         }
     }
 
+    // Apply kd and ks (sum of coefficients should be = 1)
+    total_diffuse = vec3_scale(total_diffuse, 0.5f);
+    total_specular = vec3_scale(total_specular, 0.5f);
+
     // Combine lighting components with albedo color
-    Vec3 lighting = vec3_add(total_diffuse, total_specular);
-    Vec4 lighting_rgba = vec3_to_vec4(lighting, 1.0f);
+    Vec3 lighting_rgb = vec3_add(total_diffuse, total_specular);
+    Vec4 lighting_rgba = vec3_to_vec4(lighting_rgb, 1.0f);
 
     Vec4 final_color = vec4_mul_vec4(albedo_color, lighting_rgba);
+
     // Gamma correction
-    float gamma = 0.75f;
+    float gamma = 0.5f;
     final_color.x = powf(final_color.x, gamma);
     final_color.y = powf(final_color.y, gamma);
     final_color.z = powf(final_color.z, gamma);
