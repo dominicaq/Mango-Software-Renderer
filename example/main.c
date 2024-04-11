@@ -137,7 +137,7 @@ int alloc_objects(Scene *scene) {
         scene->attributes[i].type = ATTR_LIGHT;
         scene->attributes[i].light.type = LIGHT_POINT;
         scene->attributes[i].light.color = COLLOR_PALLETE[i];
-        scene->attributes[i].light.intensity = 0.5f;
+        scene->attributes[i].light.intensity = 1.5f;
         scene->attributes[i].light.radius = 10.0f;
     }
 
@@ -170,7 +170,7 @@ void update(float dt) {
     scene.dirty_locals[0] = true;
 
     // Circling point lights
-    float circle_radius = 100.0f;
+    float circle_radius = 5.5f;
     int num_lights = POINT_LIGHTS_END - POINT_LIGHTS_BEGIN;
     float angle_increment = 2.0f * M_PI / num_lights;
     for (int i = POINT_LIGHTS_BEGIN; i < POINT_LIGHTS_END; ++i) {
@@ -178,7 +178,7 @@ void update(float dt) {
         float x = circle_radius * cosf(angle);
         float z = circle_radius * sinf(angle);
         scene.dirty_locals[i] = true;
-        scene.objects[i].position = (Vec3){{x, circle_radius, z}};
+        scene.objects[i].position = (Vec3){{x, circle_radius * 2, z}};
     }
 
     if (scene.options & OPT_FPS_COUNTER) {
