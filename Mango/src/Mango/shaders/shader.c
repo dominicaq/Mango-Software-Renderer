@@ -1,5 +1,7 @@
 #include "shader.h"
 
+// TODO:
+// https://learnopengl.com/PBR/Theory
 const bool FLAT_SHADING = true;
 const bool SMOOTH_SHADING = false;
 const bool PHONG_SHADING = false;
@@ -53,9 +55,9 @@ void fragment_shader(UBO *ubo, Vec3 frag_coord) {
         normal_tangent = vec4_to_vec3(sample_texture(ubo->f_data.uv, ubo->u_mat->tangent_map));
     }
 
-    // No texture
+    // No texture (set model color to white)
     if (ubo->options & OPT_NO_TEXTURE) {
-        albedo_color = vec3_to_vec4(ubo->u_color, 1.0f);
+        albedo_color = vec3_to_vec4((Vec3){{1.0f,1.01,1.0f}}, 1.0f);
     }
 
     // Initialize total diffuse and specular components

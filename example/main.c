@@ -92,42 +92,34 @@ int alloc_objects(Scene *scene) {
 
     // Scene object 1
     scene->objects[0] = game_object_default();
-    scene->objects[0].position = (Vec3){{0.0f, 0.0f, -3.0f}};
-    scene->objects[0].scale = (Vec3){{4.0f, 4.0f, 4.0f}};
+    scene->objects[0].position = (Vec3){{0.0f, 0.0f, -5.0f}};
+    scene->objects[0].scale = (Vec3){{0.75f, 0.75f, 0.75f}};
     scene->attributes[0].type = ATTR_MESH;
-    scene->attributes[0].mesh = load_obj_mesh("../example/models/head.obj");
-    scene->attributes[0].mesh.color = white;
+    scene->attributes[0].mesh = load_obj("../example/assets/atlas_model/Atlas.obj");
 
     // Scene object 1 material
-    Material *mat0 = malloc(sizeof(Material));
-    if (mat0 == NULL) {
-        printf("ERROR: failed to alloc material\n");
-        return 1;
-    }
-    mat0->albedo_map = NULL;
-    mat0->normal_map = NULL;
-    mat0->tangent_map = NULL;
+    Material *mat0 = default_material();
 
-    Texture *default_texture = load_texture("../example/textures/head_diffuse.png");
+    Texture *default_texture = load_texture("../example/assets/atlas_model/ballbot_shell.png");
     if (default_texture == NULL) {
         printf("ERROR: failed to create default texture\n");
         return 1;
     }
 
-    Texture *nm_texture = load_texture("../example/textures/head_nm.tga");
-    if (nm_texture == NULL) {
-        printf("ERROR: failed to create normal map texture\n");
-        return 1;
-    }
+    // Texture *nm_texture = load_texture("../example/textures/ballbot");
+    // if (nm_texture == NULL) {
+    //     printf("ERROR: failed to create normal map texture\n");
+    //     return 1;
+    // }
 
-    Texture *tm_texture = load_texture("../example/textures/head_nm_tangent.tga");
+    Texture *tm_texture = load_texture("../example/assets/atlas_model/ballbot_shell_s.png");
     if (tm_texture == NULL) {
         printf("ERROR: failed to create tangent map texture\n");
         return 1;
     }
 
     mat0->albedo_map = default_texture;
-    mat0->normal_map = nm_texture;
+    mat0->normal_map = NULL;
     mat0->tangent_map = tm_texture;
     mat0->color = white;
     scene->attributes[0].mesh.material = mat0;
@@ -138,7 +130,7 @@ int alloc_objects(Scene *scene) {
     // scene->objects[1].quaternion = quat_from_units(UNIT_X, UNIT_Z);
     // scene->objects[1].position = (Vec3){{0.0f, 6.0f, -10.0f}};
     // scene->attributes[1].type = ATTR_MESH;
-    // scene->attributes[1].mesh = load_obj_mesh("../models/light_box.obj");
+    // scene->attributes[1].mesh = load_obj("../models/light_box.obj");
     // scene->attributes[1].mesh.color = blue;
 
     // Scene lights

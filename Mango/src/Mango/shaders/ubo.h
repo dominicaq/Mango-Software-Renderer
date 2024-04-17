@@ -47,8 +47,6 @@ typedef struct {
     Mat4 u_vp_inv;
     Mat4 u_model_view;
     Vec3 u_cam_pos;
-    Vec3 u_color;
-    Vec3 u_ambient;
     Material *u_mat;
 
     // Light data

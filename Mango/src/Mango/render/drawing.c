@@ -219,7 +219,7 @@ void rasterize(Frame *frame, Vertex verts[3], Vec3 ss[3],
                     + bc_coords.y * perspective_w[1]
                     + bc_coords.z * perspective_w[2]);
 
-                // Update depth
+                // Update depth buffer
                 frame->z_buffer[buffer_index] = P.z;
 
                 // Interpolate vertex data
@@ -333,9 +333,9 @@ void draw_mesh(Frame *frame, Mesh *mesh, UBO *ubo) {
         Vertex verts[3];
         for (int j = 0; j < 3; ++j) {
             int index = i + j;
-            verts[j].position = mesh->verts[mesh->vert_inds[index]];
-            verts[j].normal = mesh->norms[mesh->norm_inds[index]];
-            verts[j].uv = mesh->uvs[mesh->uv_inds[index]];
+            verts[j].position = mesh->verts[mesh->vert_indices[index]];
+            verts[j].normal   = mesh->norms[mesh->norm_indices[index]];
+            verts[j].uv       = mesh->uvs[mesh->uv_indices[index]];
         }
         transform_triangle(frame, verts, ubo);
     }

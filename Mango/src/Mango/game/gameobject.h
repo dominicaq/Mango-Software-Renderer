@@ -19,26 +19,28 @@ extern const float DEG2RAD;
 typedef struct {
     Vec3 position;
     Vec3 normal;
-    Vec4 color;
     Vec2 uv;
 } Vertex;
 
 typedef struct {
-    int ind_count;
+    // Triangle data
     int vert_count;
     int norm_count;
     int uv_count;
-
-    Vec3 color;
-    Material *material;
 
     Vec3 *verts;
     Vec3 *norms;
     Vec2 *uvs;
 
-    int *vert_inds;
-    int *norm_inds;
-    int *uv_inds;
+    int ind_count;
+    int *vert_indices;
+    int *norm_indices;
+    int *uv_indices;
+
+    // Material data
+    Material *material;
+    int *material_indices;
+    int material_count;
 } Mesh;
 
 Mesh mesh_empty();

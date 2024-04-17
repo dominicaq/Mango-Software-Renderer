@@ -2,6 +2,7 @@
 #define OBJ_PARSER_H
 #include "../game/gameobject.h"
 
-Mesh load_obj_mesh(const char *filename);
+Mesh load_obj(const char *filename);
+Material *parse_mtl(const char *filename);
 
 #endif

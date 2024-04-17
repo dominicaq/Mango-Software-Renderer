@@ -6,15 +6,15 @@
 typedef struct Node {
     Vertex data[3];
     size_t plane_index;
-    struct Node* next;
+    struct Node *next;
 } Node;
 
 typedef struct {
-    Node* head;
+    Node *head;
     int size;
 } LinkedList;
 
-LinkedList* list_create();
+LinkedList *list_create();
 void list_append(LinkedList* list, Vertex data[3], size_t plane_index);
 void list_destroy(LinkedList* list);
 

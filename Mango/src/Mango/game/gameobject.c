@@ -105,6 +105,6 @@ Mesh mesh_empty() {
                  .vert_count = 0,
                  .norm_count = 0,
                  .uv_count = 0,
-                 .color = {{1.0f, 1.0f, 1.0f}}};
+                 .material_count = 0};
     return mesh;
 }

@@ -13,20 +13,20 @@ LinkedList *list_create() {
 }
 
 void list_append(LinkedList *list, Vertex data[3], size_t index) {
-    Node* newNode = (Node*)malloc(sizeof(Node));
-    if (newNode == NULL) {
+    Node* new_node = (Node*)malloc(sizeof(Node));
+    if (new_node == NULL) {
         return;
     }
 
     for (int i = 0; i < 3; ++i) {
-        newNode->data[i] = data[i];
+        new_node->data[i] = data[i];
     }
-    newNode->next = NULL;
-    newNode->plane_index = index;
+    new_node->next = NULL;
+    new_node->plane_index = index;
 
     // If list is empty, new node becomes head
     if (list->head == NULL) {
-        list->head = newNode;
+        list->head = new_node;
     } else {
         // Traverse to the end of the list
         Node* current = list->head;
@@ -34,9 +34,9 @@ void list_append(LinkedList *list, Vertex data[3], size_t index) {
             current = current->next;
         }
         // Append the new node to the end
-        current->next = newNode;
+        current->next = new_node;
     }
-    list->size++;
+    ++(list->size);
 }
 
 void list_destroy(LinkedList *list) {
