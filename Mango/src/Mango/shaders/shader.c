@@ -43,7 +43,11 @@ void fragment_shader(UBO *ubo, Vec3 frag_coord) {
     }
 
     // Sample albedo color from texture
-    Vec4 albedo_color = sample_texture(ubo->f_data.uv, ubo->u_mat->albedo_map);
+    Vec4 albedo_color = (Vec4){{1.0f,1.0f,1.0f,1.0f}};
+    if (ubo->u_mat->albedo_map != NULL) {
+        albedo_color = sample_texture(ubo->f_data.uv, ubo->u_mat->albedo_map);
+    }
+
     if (ubo->options & OPT_NO_LIGHTING) {
         ubo->f_data.gl_frag_color = albedo_color;
         return;

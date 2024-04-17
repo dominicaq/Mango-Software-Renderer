@@ -336,6 +336,8 @@ void draw_mesh(Frame *frame, Mesh *mesh, UBO *ubo) {
             verts[j].position = mesh->verts[mesh->vert_indices[index]];
             verts[j].normal   = mesh->norms[mesh->norm_indices[index]];
             verts[j].uv       = mesh->uvs[mesh->uv_indices[index]];
+
+            ubo->u_mat        = mesh->materials[mesh->material_indices[index]];
         }
         transform_triangle(frame, verts, ubo);
     }

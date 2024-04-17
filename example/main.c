@@ -61,8 +61,6 @@ Camera init_camera(int frame_width, int frame_height) {
 }
 
 int alloc_objects(Scene *scene) {
-    Vec3 white = (Vec3){{1.0f, 1.0f, 1.0f}};
-
     // Objects
     int manual_objects = 7;
     scene->object_count = manual_objects;
@@ -92,7 +90,7 @@ int alloc_objects(Scene *scene) {
 
     // Scene object 1
     scene->objects[0] = game_object_default();
-    scene->objects[0].position = (Vec3){{0.0f, 0.0f, -5.0f}};
+    scene->objects[0].position = (Vec3){{0.0f, 0.0f, -10.0f}};
     scene->objects[0].scale = (Vec3){{0.75f, 0.75f, 0.75f}};
     scene->attributes[0].type = ATTR_MESH;
     scene->attributes[0].mesh = load_obj("../example/assets/atlas_model", "Atlas.obj");
@@ -112,7 +110,7 @@ int alloc_objects(Scene *scene) {
         scene->attributes[i].type = ATTR_LIGHT;
         scene->attributes[i].light.type = LIGHT_POINT;
         scene->attributes[i].light.color = COLLOR_PALLETE[i];
-        scene->attributes[i].light.intensity = 1.25f;
+        scene->attributes[i].light.intensity = 5.0f;
         scene->attributes[i].light.radius = 7.0f;
     }
 
@@ -172,7 +170,7 @@ int MAIN(int argc, char *argv[]) {
 
     Camera camera = init_camera(SCREEN_WIDTH, SCREEN_HEIGHT);
     scene.camera = &camera;
-    scene.options = OPT_USE_RASTERIZE | OPT_VIEW_NORMALS | OPT_FPS_COUNTER;
+    scene.options = OPT_USE_RASTERIZE | OPT_FPS_COUNTER;
     mango = mango_alloc(&scene, GAME_TITLE, SCREEN_WIDTH, SCREEN_HEIGHT);
     printf("Success.\n");
 
