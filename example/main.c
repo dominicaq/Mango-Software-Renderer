@@ -90,10 +90,25 @@ int alloc_objects(Scene *scene) {
 
     // Scene object 1
     scene->objects[0] = game_object_default();
-    scene->objects[0].position = (Vec3){{0.0f, 0.0f, -10.0f}};
+    scene->objects[0].position = (Vec3){{0.0f, 0.0f, -20.0f}};
     scene->objects[0].scale = (Vec3){{0.75f, 0.75f, 0.75f}};
     scene->attributes[0].type = ATTR_MESH;
     scene->attributes[0].mesh = load_obj("../example/assets/atlas_model", "Atlas.obj");
+
+
+    Texture *shell_s = load_texture("../example/assets/atlas_model/ballbot_shell_s.png");
+    if (shell_s == NULL) {
+        printf("ERROR: Failed to load shell_s texture\n");
+        return 1;
+    }
+    scene->attributes[0].mesh.materials[0]->tangent_map = shell_s;
+
+    Texture *frame_s = load_texture("../example/assets/atlas_model/ballbot_frame_s.png");
+    if (frame_s == NULL) {
+        printf("ERROR: Failed to load frame_s texture\n");
+        return 1;
+    }
+    scene->attributes[0].mesh.materials[1]->tangent_map = frame_s;
 
     // Scene Object 2
     // Box (an example of adding multiple objects)
@@ -143,7 +158,7 @@ void update(float dt) {
     scene.dirty_locals[0] = true;
 
     // Circling point lights
-    float circle_radius = 10.5f;
+    float circle_radius = 5.5f;
     int num_lights = POINT_LIGHTS_END - POINT_LIGHTS_BEGIN;
     float angle_increment = 2.0f * M_PI / num_lights;
     for (int i = POINT_LIGHTS_BEGIN; i < POINT_LIGHTS_END; ++i) {

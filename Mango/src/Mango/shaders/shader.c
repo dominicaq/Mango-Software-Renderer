@@ -56,7 +56,12 @@ void fragment_shader(UBO *ubo, Vec3 frag_coord) {
     // Specular texture map
     Vec3 normal_tangent = N;
     if (ubo->u_mat->tangent_map != NULL) {
-        normal_tangent = vec4_to_vec3(sample_texture(ubo->f_data.uv, ubo->u_mat->tangent_map));
+        Vec4 tangent_map = sample_texture(ubo->f_data.uv, ubo->u_mat->tangent_map);
+        if (ubo->options & OPT_VIEW_TANGENT_MAP) {
+            ubo->f_data.gl_frag_color = tangent_map;
+            return;
+        }
+        normal_tangent = vec4_to_vec3(tangent_map);
     }
 
     // No texture (set model color to white)
@@ -87,7 +92,7 @@ void fragment_shader(UBO *ubo, Vec3 frag_coord) {
 
             // Specular
             Vec3 half_angle = vec3_normalize(vec3_add(L, V));
-            float specular_angle = pow(fmax(vec3_dot(normal_tangent, half_angle), 0.0), 8.0f);
+            float specular_angle = pow(fmax(vec3_dot(normal_tangent, half_angle), 0.0), 4.0f);
             Vec3 specular = vec3_scale(light_color, ubo->lights[i]->intensity * specular_angle * attenuation);
             total_specular = vec3_add(total_specular, specular);
         }

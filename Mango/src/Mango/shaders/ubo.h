@@ -20,7 +20,8 @@ typedef enum {
     OPT_FPS_COUNTER = 64,
     OPT_NO_LIGHTING = 128,
     OPT_NO_TEXTURE = 256,
-    OPT_DEBUG_CLIP_PLANE = 512
+    OPT_DEBUG_CLIP_PLANE = 512,
+    OPT_VIEW_TANGENT_MAP = 1024
 } Options;
 
 typedef struct {
