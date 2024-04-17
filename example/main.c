@@ -66,7 +66,7 @@ int alloc_objects(Scene *scene) {
     // Objects
     int manual_objects = 7;
     scene->object_count = manual_objects;
-    scene->dirty_locals = (bool *)malloc(scene->object_count * sizeof(bool));
+    scene->dirty_locals = (bool*)malloc(scene->object_count * sizeof(bool));
     if (scene->dirty_locals == NULL) {
         printf("ERROR: malloc failed dirty_locals\n");
         return 1;
@@ -77,14 +77,14 @@ int alloc_objects(Scene *scene) {
     }
 
     scene->attributes =
-        (GameObjectAttr *)malloc(scene->object_count * sizeof(GameObjectAttr));
+        (GameObjectAttr*)malloc(scene->object_count * sizeof(GameObjectAttr));
     if (scene->attributes == NULL) {
         printf("ERROR: malloc failed attributes\n");
         return 1;
     }
 
     scene->objects =
-        (GameObject *)malloc(scene->object_count * sizeof(GameObject));
+        (GameObject*)malloc(scene->object_count * sizeof(GameObject));
     if (scene->objects == NULL) {
         printf("ERROR: malloc failed objects\n");
         return 1;
@@ -95,34 +95,7 @@ int alloc_objects(Scene *scene) {
     scene->objects[0].position = (Vec3){{0.0f, 0.0f, -5.0f}};
     scene->objects[0].scale = (Vec3){{0.75f, 0.75f, 0.75f}};
     scene->attributes[0].type = ATTR_MESH;
-    scene->attributes[0].mesh = load_obj("../example/assets/atlas_model/Atlas.obj");
-
-    // Scene object 1 material
-    Material *mat0 = default_material();
-
-    Texture *default_texture = load_texture("../example/assets/atlas_model/ballbot_shell.png");
-    if (default_texture == NULL) {
-        printf("ERROR: failed to create default texture\n");
-        return 1;
-    }
-
-    // Texture *nm_texture = load_texture("../example/textures/ballbot");
-    // if (nm_texture == NULL) {
-    //     printf("ERROR: failed to create normal map texture\n");
-    //     return 1;
-    // }
-
-    Texture *tm_texture = load_texture("../example/assets/atlas_model/ballbot_shell_s.png");
-    if (tm_texture == NULL) {
-        printf("ERROR: failed to create tangent map texture\n");
-        return 1;
-    }
-
-    mat0->albedo_map = default_texture;
-    mat0->normal_map = NULL;
-    mat0->tangent_map = tm_texture;
-    mat0->color = white;
-    scene->attributes[0].mesh.material = mat0;
+    scene->attributes[0].mesh = load_obj("../example/assets/atlas_model", "Atlas.obj");
 
     // Scene Object 2
     // Box (an example of adding multiple objects)
@@ -199,7 +172,7 @@ int MAIN(int argc, char *argv[]) {
 
     Camera camera = init_camera(SCREEN_WIDTH, SCREEN_HEIGHT);
     scene.camera = &camera;
-    scene.options = OPT_USE_RASTERIZE | OPT_FPS_COUNTER;
+    scene.options = OPT_USE_RASTERIZE | OPT_VIEW_NORMALS | OPT_FPS_COUNTER;
     mango = mango_alloc(&scene, GAME_TITLE, SCREEN_WIDTH, SCREEN_HEIGHT);
     printf("Success.\n");
 

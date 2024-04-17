@@ -38,7 +38,7 @@ typedef struct {
     int *uv_indices;
 
     // Material data
-    Material *material;
+    Material **materials;
     int *material_indices;
     int material_count;
 } Mesh;

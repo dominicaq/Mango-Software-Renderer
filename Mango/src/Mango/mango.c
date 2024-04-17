@@ -72,8 +72,9 @@ float mango_update(Mango *mango, float last_time) {
         mango->ubo.u_mvp = mvp;
         mango->ubo.u_vp_inv = mat4_inverse(vp);
         mango->ubo.u_model_view = model_view_matrix;
-        mango->ubo.u_mat = target_mesh->material;
 
+        // TODO: Update this based on material index
+        mango->ubo.u_mat = target_mesh->materials[0];
         draw_mesh(mango->frame, target_mesh, &mango->ubo);
     }
 
