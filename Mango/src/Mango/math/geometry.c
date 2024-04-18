@@ -35,7 +35,7 @@ Vec3 lerp_bc_coords(Vec3 bc_coords, Vec3 points[3]) {
     return interpolated_pos;
 }
 
-Vec2 lerp_uv_coords(Vec3 bc_coords, float inverse_w, Vec2 uv[3]) {
+Vec2 lerp_uv_coords(Vec3 bc_coords, Vec2 uv[3]) {
     // Extract barycentric coordinates
     float alpha = bc_coords.x;
     float beta = bc_coords.y;

@@ -179,9 +179,8 @@ bool clip_triangle(Vertex verts[3], LinkedList *list, size_t start_index) {
 /*
 * Render Pipeline
 */
-void rasterize(Frame *frame, Vertex verts[3], Vec3 ss[3],
-               float perspective_w[3], UBO *ubo) {
-    // Bounding box around triangle (in screen space) (ss = screen space)
+void rasterize(Frame *frame, Vertex verts[3], Vec3 ss[3], UBO *ubo) {
+    // Bounding box around triangle in screen space (ss = screen space)
     int x_min = MAX(0, MIN(MIN(ss[0].x, ss[1].x), ss[2].x));
     int y_min = MAX(0, MIN(MIN(ss[0].y, ss[1].y), ss[2].y));
     int x_max = MIN(frame->width - 1, MAX(MAX(ss[0].x, ss[1].x), ss[2].x));
@@ -215,17 +214,13 @@ void rasterize(Frame *frame, Vertex verts[3], Vec3 ss[3],
             // Determine if triangle is on top
             int buffer_index = x + y * frame->width;
             if (P.z < frame->z_buffer[buffer_index]) {
-                float inverse_w = 1.0f / (bc_coords.x * perspective_w[0]
-                    + bc_coords.y * perspective_w[1]
-                    + bc_coords.z * perspective_w[2]);
-
                 // Update depth buffer
                 frame->z_buffer[buffer_index] = P.z;
 
                 // Interpolate vertex data
                 ubo->f_data.gl_normal = lerp_bc_coords(bc_coords, normals);
                 ubo->f_data.frag_pos = lerp_bc_coords(bc_coords, view_space);
-                ubo->f_data.uv = lerp_uv_coords(bc_coords, inverse_w, uvs);
+                ubo->f_data.uv = lerp_uv_coords(bc_coords, uvs);
 
                 fragment_shader(ubo, P);
 
@@ -244,7 +239,6 @@ void draw_triangle(Frame *frame, Vertex verts[3], UBO *ubo) {
 
     // Get coordinate spaces
     Vec3 screen_space[3];
-    float perspective_w[3];
     Vertex *view_verts = verts;
     for (int i = 0; i < 3; ++i) {
         Vec3 ndc = verts[i].position;
@@ -252,13 +246,15 @@ void draw_triangle(Frame *frame, Vertex verts[3], UBO *ubo) {
         screen_space[i] = ndc_to_screen(frame->width, frame->height, ndc);
         Vec4 view_space = mat_mul_vec4(ubo->u_vp_inv, vec3_to_vec4(ndc, 1.0f));
 
+        // No perspective divide
+        // view_verts[i].position = vec4_to_vec3(view_space);
+
         // Perspective divide
         view_verts[i].position = vec4_homogenize(view_space);
-        perspective_w[i] = view_space.z;
     }
 
     if (ubo->options & OPT_USE_RASTERIZE) {
-        rasterize(frame, view_verts, screen_space, perspective_w, ubo);
+        rasterize(frame, view_verts, screen_space, ubo);
     }
 
     if (ubo->options & OPT_USE_WIREFRAME) {

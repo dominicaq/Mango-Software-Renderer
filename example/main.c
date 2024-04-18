@@ -90,11 +90,10 @@ int alloc_objects(Scene *scene) {
 
     // Scene object 1
     scene->objects[0] = game_object_default();
-    scene->objects[0].position = (Vec3){{0.0f, 0.0f, -20.0f}};
-    scene->objects[0].scale = (Vec3){{0.75f, 0.75f, 0.75f}};
+    scene->objects[0].position = (Vec3){{0.0f, 0.0f, -15.0f}};
+    scene->objects[0].scale = (Vec3){{1.0f, 1.0f, 1.0f}};
     scene->attributes[0].type = ATTR_MESH;
     scene->attributes[0].mesh = load_obj("../example/assets/atlas_model", "Atlas.obj");
-
 
     Texture *shell_s = load_texture("../example/assets/atlas_model/ballbot_shell_s.png");
     if (shell_s == NULL) {
