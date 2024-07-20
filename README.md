@@ -17,12 +17,11 @@ CPU-bound nature. In contrast, modern rendering APIs leverage the GPU for high-p
 - Rendering of 3D GameObjects
 - Loading triangulated OBJ files
 - Vertex / Fragment Shader pipeline
-- View frustum clipping (on near plane)
+- View frustum clipping
 - Model View Perspective transformations (MVP)
 - Blinn-Phong shader for realistic lighting
 - Multi-light fragment shader
 - Texture Sampling
-- Clipping
 
 # Options
 - Wireframe
