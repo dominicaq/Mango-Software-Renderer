@@ -6,6 +6,12 @@ const bool FLAT_SHADING = true;
 const bool SMOOTH_SHADING = false;
 const bool PHONG_SHADING = false;
 
+static const float SPECULAR_EXPONENT = 24.0f;
+static const float RIM_POWER = 3.0f;
+static const float RIM_INTENSITY = 0.35f;
+static const Vec3 RIM_COLOR = {{0.65f, 0.78f, 0.92f}};
+static const Vec3 AMBIENT_COLOR = {{0.06f, 0.07f, 0.09f}};
+
 void vertex_shader(UBO *ubo, Vec4 a_position) {
     // If you you ever want non-uniform scaling, use this:
     // vec3 normalMatrix = transpose(inverse(mat3(modelMatrix)));
@@ -85,14 +91,18 @@ void fragment_shader(UBO *ubo, Vec3 frag_coord) {
             float attenuation = 1.0f / (1.0f + distance / light_radius + distance2 / light_radius2);
             Vec3 L = vec3_normalize(light_vec);
 
-            // Diffuse
-            float angle = fmax(vec3_dot(N, L), 0.0f) *  ubo->lights[i]->intensity;
+            // Half-Lambert diffuse
+            float ndotl = vec3_dot(N, L);
+            float half_lambert = ndotl * 0.5f + 0.5f;
+            half_lambert *= half_lambert;
+            float angle = half_lambert * ubo->lights[i]->intensity;
             Vec3 diffuse = vec3_scale(light_color, angle * attenuation);
             total_diffuse = vec3_add(total_diffuse, diffuse);
 
-            // Specular
+            // Specular - tightened exponent for a crisper, more "polished
+            // plastic/metal" highlight than a broad Phong glow.
             Vec3 half_angle = vec3_normalize(vec3_add(L, V));
-            float specular_angle = pow(fmax(vec3_dot(normal_tangent, half_angle), 0.0), 4.0f);
+            float specular_angle = powf(fmaxf(vec3_dot(normal_tangent, half_angle), 0.0f), SPECULAR_EXPONENT);
             Vec3 specular = vec3_scale(light_color, ubo->lights[i]->intensity * specular_angle * attenuation);
             total_specular = vec3_add(total_specular, specular);
         }
@@ -102,8 +112,13 @@ void fragment_shader(UBO *ubo, Vec3 frag_coord) {
     total_diffuse = vec3_scale(total_diffuse, 0.5f);
     total_specular = vec3_scale(total_specular, 0.5f);
 
+    // Rim / fresnel light
+    float rim_amount = 1.0f - fmaxf(vec3_dot(N, V), 0.0f);
+    rim_amount = powf(rim_amount, RIM_POWER);
+    Vec3 rim_light = vec3_scale(RIM_COLOR, rim_amount * RIM_INTENSITY);
+
     // Combine lighting components with albedo color
-    Vec3 lighting_rgb = vec3_add(total_diffuse, total_specular);
+    Vec3 lighting_rgb = vec3_add(vec3_add(vec3_add(total_diffuse, total_specular), rim_light), AMBIENT_COLOR);
     Vec4 lighting_rgba = vec3_to_vec4(lighting_rgb, 1.0f);
 
     Vec4 final_color = vec4_mul_vec4(albedo_color, lighting_rgba);

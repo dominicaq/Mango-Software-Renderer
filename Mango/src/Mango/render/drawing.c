@@ -12,11 +12,11 @@ void swap_ints(int *a, int *b) {
     *a = *a ^ *b;
 }
 
-void line(Frame *frame, Vec3 v0, Vec3 v1) {
-    int x0 = (int)v0.x;
-    int x1 = (int)v1.x;
-    int y0 = (int)v0.y;
-    int y1 = (int)v1.y;
+void line(Frame *frame, const Vec3 *v0, const Vec3 *v1) {
+    int x0 = (int)v0->x;
+    int x1 = (int)v1->x;
+    int y0 = (int)v0->y;
+    int y1 = (int)v1->y;
 
     int steep = 0;
     if (abs(x0 - x1) < abs(y0 - y1)) {
@@ -49,9 +49,9 @@ void line(Frame *frame, Vec3 v0, Vec3 v1) {
 }
 
 void wire_frame(Frame *frame, Vec3 screen_space[3]) {
-    line(frame, screen_space[0], screen_space[1]);
-    line(frame, screen_space[1], screen_space[2]);
-    line(frame, screen_space[2], screen_space[0]);
+    line(frame, &screen_space[0], &screen_space[1]);
+    line(frame, &screen_space[1], &screen_space[2]);
+    line(frame, &screen_space[2], &screen_space[0]);
 }
 
 /*
@@ -81,39 +81,38 @@ void init_view_frustum(Options options, Camera *cam) {
     clip_planes[5] = (Plane){(Vec3){{0.0f, 0.0f, -1.0f}}, z_far};
 }
 
-float signed_distance(Plane plane, Vec3 point) {
-    return vec3_dot(plane.normal, point) + plane.distance;
+float signed_distance(const Plane *plane, const Vec3 *point) {
+    return vec3_dot(plane->normal, *point) + plane->distance;
 }
 
-Vertex vertex_intersect(const Vertex a, const Vertex b, Plane plane) {
-    Vec3 line_dir = vec3_sub(b.position, a.position);
-    float dot_denominator = vec3_dot(plane.normal, line_dir);
+void vertex_intersect(const Vertex *a, const Vertex *b, const Plane *plane, Vertex *result) {
+    Vec3 line_dir = vec3_sub(b->position, a->position);
+    float dot_denominator = vec3_dot(plane->normal, line_dir);
 
     // Ensure we're not dividing by zero
     // No intersection or parallel
     if (fabs(dot_denominator) < EPSILON) {
-        return a;
+        *result = *a;
+        return;
     }
 
-    float t = -(vec3_dot(a.position, plane.normal) + plane.distance) / dot_denominator;
+    float t = -(vec3_dot(a->position, plane->normal) + plane->distance) / dot_denominator;
 
     // Compute the new vertex
-    Vec3 normal_dir = vec3_sub(b.normal, a.normal);
-    Vec2 uv_dir = vec2_sub(b.uv, a.uv);
+    Vec3 normal_dir = vec3_sub(b->normal, a->normal);
+    Vec2 uv_dir = vec2_sub(b->uv, a->uv);
 
-    Vertex result;
-    result.position = vec3_add(a.position, vec3_scale(line_dir, t));
-    result.normal = vec3_add(a.normal, vec3_scale(normal_dir, t));
-    result.uv = vec2_add(a.uv, vec2_scale(uv_dir, t));
-    return result;
+    result->position = vec3_add(a->position, vec3_scale(line_dir, t));
+    result->normal = vec3_add(a->normal, vec3_scale(normal_dir, t));
+    result->uv = vec2_add(a->uv, vec2_scale(uv_dir, t));
 }
 
 bool clip_triangle(Vertex verts[3], LinkedList *list, size_t start_index) {
     for (size_t i = start_index; i < NUM_CLIP_PLANES; ++i) {
         // Signed distance between polygon and plane
-        float d0 = signed_distance(clip_planes[i], verts[0].position);
-        float d1 = signed_distance(clip_planes[i], verts[1].position);
-        float d2 = signed_distance(clip_planes[i], verts[2].position);
+        float d0 = signed_distance(&clip_planes[i], &verts[0].position);
+        float d1 = signed_distance(&clip_planes[i], &verts[1].position);
+        float d2 = signed_distance(&clip_planes[i], &verts[2].position);
 
         // Check vertices against clip planes
         Vertex *A = &verts[0];
@@ -127,26 +126,30 @@ bool clip_triangle(Vertex verts[3], LinkedList *list, size_t start_index) {
             return false;
         } else if (d0 > 0 && d1 < 0 && d2 < 0) {
             // Only vertex A inside clip volume
-            Vertex B_prime = vertex_intersect(*A, *B, clip_planes[i]);
-            Vertex C_prime = vertex_intersect(*A, *C, clip_planes[i]);
+            Vertex B_prime, C_prime;
+            vertex_intersect(A, B, &clip_planes[i], &B_prime);
+            vertex_intersect(A, C, &clip_planes[i], &C_prime);
             verts[1] = B_prime;
             verts[2] = C_prime;
         } else if (d0 < 0 && d1 > 0 && d2 < 0) {
             // Only vertex B inside clip volume
-            Vertex A_prime = vertex_intersect(*B, *A, clip_planes[i]);
-            Vertex C_prime = vertex_intersect(*B, *C, clip_planes[i]);
+            Vertex A_prime, C_prime;
+            vertex_intersect(B, A, &clip_planes[i], &A_prime);
+            vertex_intersect(B, C, &clip_planes[i], &C_prime);
             verts[0] = A_prime;
             verts[2] = C_prime;
         } else if (d0 < 0 && d1 < 0 && d2 > 0) {
             // Only vertex C inside clip volume
-            Vertex A_prime = vertex_intersect(*C, *A, clip_planes[i]);
-            Vertex B_prime = vertex_intersect(*C, *B, clip_planes[i]);
+            Vertex A_prime, B_prime;
+            vertex_intersect(C, A, &clip_planes[i], &A_prime);
+            vertex_intersect(C, B, &clip_planes[i], &B_prime);
             verts[0] = A_prime;
             verts[1] = B_prime;
         } else if (d0 < 0 && d1 > 0 && d2 > 0) {
             // Vertex A not in clip volume
-            Vertex B_prime = vertex_intersect(*B, *A, clip_planes[i]);
-            Vertex C_prime = vertex_intersect(*C, *A, clip_planes[i]);
+            Vertex B_prime, C_prime;
+            vertex_intersect(B, A, &clip_planes[i], &B_prime);
+            vertex_intersect(C, A, &clip_planes[i], &C_prime);
             verts[0] = B_prime;
 
             // Triangle 2
@@ -154,8 +157,9 @@ bool clip_triangle(Vertex verts[3], LinkedList *list, size_t start_index) {
             list_append(list, new_tri, i);
         } else if (d0 > 0 && d1 < 0 && d2 > 0) {
             // Vertex B not in clip volume
-            Vertex A_prime = vertex_intersect(*A, *B, clip_planes[i]);
-            Vertex C_prime = vertex_intersect(*C, *B, clip_planes[i]);
+            Vertex A_prime, C_prime;
+            vertex_intersect(A, B, &clip_planes[i], &A_prime);
+            vertex_intersect(C, B, &clip_planes[i], &C_prime);
             verts[1] = C_prime;
 
             // Triangle 2
@@ -163,8 +167,9 @@ bool clip_triangle(Vertex verts[3], LinkedList *list, size_t start_index) {
             list_append(list, new_tri, i);
         } else if (d0 > 0 && d1 > 0 && d2 < 0) {
             // Vertex C not in clip volume
-            Vertex A_prime = vertex_intersect(*A, *C, clip_planes[i]);
-            Vertex B_prime = vertex_intersect(*B, *C, clip_planes[i]);
+            Vertex A_prime, B_prime;
+            vertex_intersect(A, C, &clip_planes[i], &A_prime);
+            vertex_intersect(B, C, &clip_planes[i], &B_prime);
             verts[2] = A_prime;
 
             // Triangle 2
@@ -241,10 +246,8 @@ void draw_triangle(Frame *frame, Vertex verts[3], UBO *ubo) {
     Vec3 screen_space[3];
     Vertex *view_verts = verts;
     for (int i = 0; i < 3; ++i) {
-        Vec3 ndc = verts[i].position;
-
-        screen_space[i] = ndc_to_screen(frame->width, frame->height, ndc);
-        Vec4 view_space = mat_mul_vec4(ubo->u_vp_inv, vec3_to_vec4(ndc, 1.0f));
+        screen_space[i] = ndc_to_screen(frame->width, frame->height, verts[i].position);
+        Vec4 view_space = mat_mul_vec4(ubo->u_vp_inv, vec3_to_vec4(verts[i].position, 1.0f));
 
         // No perspective divide
         // view_verts[i].position = vec4_to_vec3(view_space);
@@ -302,11 +305,7 @@ void transform_triangle(Frame *frame, Vertex *verts, UBO *ubo) {
     // Finished clipping, draw all triangles
     Node *current = list->head;
     for (size_t i = 0; i < list->size; ++i) {
-        Vertex draw_target[3] = {
-            current->data[0],
-            current->data[1],
-            current->data[2],
-        };
+        Vertex *draw_target = current->data;
 
         bool in_view2 = clip_triangle(draw_target, list, current->plane_index + 1);
         if (in_view2 == true) {

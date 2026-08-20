@@ -7,8 +7,8 @@
 
 // Window data
 const char *GAME_TITLE = "Mango Renderer";
-const int SCREEN_WIDTH = 500;
-const int SCREEN_HEIGHT = 500;
+const int SCREEN_WIDTH = 800;
+const int SCREEN_HEIGHT = 600;
 
 void fps_counter() {
     static int frames = 0;
@@ -34,16 +34,16 @@ void fps_counter() {
 Scene scene;
 Vec4 slight_right;
 
-int POINT_LIGHTS_BEGIN = 3;
-int POINT_LIGHTS_END = 4;
+int POINT_LIGHTS_BEGIN = 5;
+int POINT_LIGHTS_END = 6;
 const Vec3 COLLOR_PALLETE[7] = {
-    {{1.0f, 0.0f, 0.0f}},  // Red
-    {{0.0f, 1.0f, 0.0f}},  // Green
-    {{0.3f, 0.3f, 0.8f}},  // Custom color
-    {{1.0f, 1.0f, 1.0f}},  // White
-    {{1.0f, 1.0f, 0.0f}},  // Yellow
-    {{0.3f, 0.0f, 0.5f}},  // Indigo
-    {{0.5f, 0.0f, 0.5f}}   // Violet
+    {{0.00f, 0.40f, 1.00f}},  // Portal Blue (ATLAS primary)
+    {{1.00f, 0.36f, 0.00f}},  // Portal Orange (Chell's single-player portal)
+    {{0.45f, 0.00f, 0.85f}},  // Portal Violet (ATLAS secondary)
+    {{0.94f, 0.93f, 0.90f}},  // Aperture White (chassis)
+    {{1.00f, 0.90f, 0.10f}},  // Portal Yellow (P-body primary)
+    {{0.08f, 0.08f, 0.09f}},  // Aperture Graphite (dark chassis/joints)
+    {{0.85f, 0.08f, 0.05f}}   // Portal Red (P-body secondary)
 };
 
 Camera init_camera(int frame_width, int frame_height) {
@@ -90,7 +90,7 @@ int alloc_objects(Scene *scene) {
 
     // Scene object 1
     scene->objects[0] = game_object_default();
-    scene->objects[0].position = (Vec3){{0.0f, 0.0f, -15.0f}};
+    scene->objects[0].position = (Vec3){{0.0f, 0.0f, -20.0f}};
     scene->objects[0].scale = (Vec3){{1.0f, 1.0f, 1.0f}};
     scene->attributes[0].type = ATTR_MESH;
     scene->attributes[0].mesh = load_obj("../example/assets/atlas_model", "Atlas.obj");
@@ -124,8 +124,8 @@ int alloc_objects(Scene *scene) {
         scene->attributes[i].type = ATTR_LIGHT;
         scene->attributes[i].light.type = LIGHT_POINT;
         scene->attributes[i].light.color = COLLOR_PALLETE[i];
-        scene->attributes[i].light.intensity = 5.0f;
-        scene->attributes[i].light.radius = 7.0f;
+        scene->attributes[i].light.intensity = 20.0f;
+        scene->attributes[i].light.radius = 100.0f;
     }
 
     return 0;
@@ -165,7 +165,7 @@ void update(float dt) {
         float x = circle_radius * cosf(angle);
         float z = circle_radius * sinf(angle);
         scene.dirty_locals[i] = true;
-        scene.objects[i].position = (Vec3){{x + 5, z + 5, 0.0f}};
+        scene.objects[i].position = (Vec3){{x + 10, z + 10, 0.0f}};
     }
 
     if (scene.options & OPT_FPS_COUNTER) {
